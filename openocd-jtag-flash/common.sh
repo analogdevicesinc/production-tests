@@ -23,6 +23,10 @@ check_system_requirements() {
 		echo_red "You need to have OpenOCD installed on your system"
 		exit 1
 	}
+	type dfu-util &> /dev/null || {
+		echo_red "You need to install 'dfu-util' on your system"
+		exit 1
+	}
 	type expect &> /dev/null || {
 		echo_red "You need to have the 'expect' utility installed on your system"
 		exit 1
