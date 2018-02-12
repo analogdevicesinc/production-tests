@@ -78,10 +78,12 @@ flash_board () {
 		break
 	done
 
-	echo_green "4. Power cycling the board"
-	openocd -f "$CABLE_CFG" -c power_cycle || {
-		echo_blue "Warning: powercycle command failed"
-	}
+	echo_green "4. Done ; you can now powercycle the board"
+	# Note: powercycling does not work yet on Pluto
+	#echo_green "4. Power cycling the board"
+	#openocd -f "$CABLE_CFG" -c power_cycle || {
+	#	echo_blue "Warning: powercycle command failed"
+	#}
 
 	return 0
 }
