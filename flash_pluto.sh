@@ -19,4 +19,4 @@ RELEASE_DIR="$(readlink -f $RELEASE_DIR)"
 	exit 1
 }
 
-./common.sh "$RELEASE_DIR" "pluto.dfu"
+./common_flash.sh "$RELEASE_DIR" "pluto.dfu"
