@@ -4,7 +4,7 @@
 # Global definitions section       #
 #----------------------------------#
 
-RELEASE_FILES="boot.dfu u-boot.elf uboot-env.dfu ps7_init.tcl"
+source config.sh
 
 #----------------------------------#
 # Functions section                #
@@ -127,14 +127,12 @@ FIRMWARE_DFU_FILE="${BOARD}.dfu"
 echo "Note: using release dir '$RELEASE_DIR'"
 
 # Sanity check that we have all release files, before going forward
-for file in $FIRMWARE_DFU_FILE $RELEASE_FILES ; do
+for file in $FIRMWARE_DFU_FILE $COMMON_RELEASE_FILES ; do
 	[ -f "$RELEASE_DIR/$file" ] || {
 		echo_red "File not found: '$RELEASE_DIR/$file'"
 		exit 1
 	}
 done
-
-source config.sh
 
 if [ `id -u` != "0" ]
 then
