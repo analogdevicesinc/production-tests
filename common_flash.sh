@@ -107,12 +107,7 @@ flash_board () {
 # Main section                     #
 #----------------------------------#
 
-# Prefer dir from CLI arg ; we could be getting this as an env var
-[ -z "$1" ] || RELEASE_DIR="$1"
-
-# If empty use default/current script path
-[ -n "$RELEASE_DIR" ] || \
-	RELEASE_DIR="$(pwd)/release"
+RELEASE_DIR="$1"
 
 # make sure the path is absolute
 RELEASE_DIR="$(readlink -f $RELEASE_DIR)"
