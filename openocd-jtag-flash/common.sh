@@ -14,6 +14,16 @@ echo_red()   { printf "\033[1;31m$*\033[m\n"; }
 echo_green() { printf "\033[1;32m$*\033[m\n"; }
 echo_blue()  { printf "\033[1;34m$*\033[m\n"; }
 
+enforce_openocd_version() {
+	local ver="$(openocd --version 2>&1 | head -1 | cut -d' ' -f4)"
+	local min_ver="$(echo $ver | cut -d. -f2)"
+	local maj_ver="$(echo $ver | cut -d. -f1)"
+	if [ "$maj_ver" -le "0" ] && [ "$min_ver" -lt "10" ] ; then
+		echo_red "You need at least version 0.10.0 for OpenOCD"
+		exit 1
+	fi
+}
+
 check_system_requirements() {
 	type lsusb &> /dev/null || {
 		echo_red "You need 'lsusb' on your system ; please install libusb and/or usb-utils"
@@ -23,6 +33,7 @@ check_system_requirements() {
 		echo_red "You need to have OpenOCD installed on your system"
 		exit 1
 	}
+	enforce_openocd_version
 	type dfu-util &> /dev/null || {
 		echo_red "You need to install 'dfu-util' on your system"
 		exit 1
