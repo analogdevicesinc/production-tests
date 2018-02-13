@@ -4,4 +4,4 @@
 # Main section                     #
 #----------------------------------#
 
-./common_flash.sh "$(pwd)/release/pluto" "pluto.dfu"
+./common_flash.sh "pluto"

@@ -4,7 +4,7 @@
 # Global definitions section       #
 #----------------------------------#
 
-RELEASE_FILES="boot.dfu u-boot.elf uboot-env.dfu"
+RELEASE_FILES="boot.dfu u-boot.elf uboot-env.dfu ps7_init.tcl"
 
 #----------------------------------#
 # Functions section                #
@@ -46,12 +46,13 @@ check_system_requirements() {
 }
 
 get_config() {
+	local board="$1"
 	lsusb -v -d 0456:f001 &> /dev/null && {
-		echo "config/cable_ftdi4232.cfg"
+		echo "config/${board}_ftdi4232.cfg"
 		return
 	}
 	lsusb -v -d 0403:6014 &> /dev/null && {
-		echo "config/cable_digilent.cfg"
+		echo "config/${board}_digilent.cfg"
 		return
 	}
 }
@@ -107,22 +108,21 @@ flash_board () {
 # Main section                     #
 #----------------------------------#
 
-RELEASE_DIR="$1"
+BOARD="$1"
 
-# make sure the path is absolute
-RELEASE_DIR="$(readlink -f $RELEASE_DIR)"
+[ -n "$BOARD" ] || {
+	echo_red "No board-name provided"
+	exit 1
+}
+
+RELEASE_DIR="$(readlink -f "release/$BOARD")"
 
 [ -d "$RELEASE_DIR" ] || {
 	echo_red "No valid release dir provided"
 	exit 1
 }
 
-FIRMWARE_DFU_FILE="$2"
-
-[ -n "$FIRMWARE_DFU_FILE" ] || {
-	echo_red "No firmware DFU filename provided"
-	exit 1
-}
+FIRMWARE_DFU_FILE="${BOARD}.dfu"
 
 echo "Note: using release dir '$RELEASE_DIR'"
 
@@ -146,11 +146,15 @@ check_system_requirements
 
 while true ;
 do
-	CABLE_CFG="$(get_config)"
+	CABLE_CFG="$(get_config "$BOARD")"
 	[ -n "$CABLE_CFG" ] || {
 		echo_red "Could not find a supported JTAG cable on your system"
 		sleep 4
 		continue
+	}
+	[ -f "$CABLE_CFG" ] || {
+		echo_red "Cable config file '$CABLE_CFG' does not exist"
+		exit 1
 	}
 	break
 done
