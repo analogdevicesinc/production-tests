@@ -80,8 +80,8 @@ flash_board () {
 		break
 	done
 
-	echo_green "2. Waiting 10 seconds for board to settle"
-	sleep 10
+	echo_green "2. Waiting 5 seconds for board to settle"
+	sleep 5
 	echo_green "3. Running DFU utils step"
 
 	while true ; do
