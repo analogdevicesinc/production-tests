@@ -1,0 +1,92 @@
+#!/usr/bin/expect
+
+
+set ttyUSB [lindex $argv 0]
+set releaseDir [lindex $argv 1]
+set firmwareDfuFile [lindex $argv 2]
+
+set timeout 20
+spawn bash
+send "sudo dfu-util -D $releaseDir/boot.dfu -a boot.dfu\r"
+
+while 1 {
+    expect {
+        "Done!" {
+            break
+        }
+        timeout {
+            send_error "dfu DL failed at boot.dfu\n"
+            exit 1
+        }
+    }
+}
+
+if {0} {
+    ### use u-boot default env
+    send "sudo dfu-util -D $releaseDir/uboot-env.dfu -a uboot-env.dfu\r"
+    while 1 {
+        expect {
+            "Done!" {
+                break
+            }
+            timeout {
+                exit 1
+            }
+        }
+    }
+}
+
+after 5000
+
+set timeout 180
+
+send "sudo dfu-util -D $releaseDir/$firmwareDfuFile -a firmware.dfu\r"
+
+while 1 {
+    expect {
+        "Done!" {
+            break
+        }
+        timeout {
+            send_error "dfu DL failed at firmware.dfu\n"
+            exit 1
+        }
+    }
+}
+
+after 5000
+
+send "sudo dfu-util -e -a firmware.dfu\r"
+while 1 {
+    expect {
+        "Device returned transfer size 4096" {
+            break
+        }
+        timeout {
+            send_error "dfu detach failed\n"
+            exit 1
+        }
+    }
+}
+
+if { 0 } {
+send "screen /dev/$ttyUSB 115200\r"
+while 1 {
+    expect {
+        "Pluto> " {
+            break
+        }
+        "M2k> " {
+            break
+        }
+        timeout {
+            send_error "Failed to check u-boot env save done\n"
+            exit 1
+        }
+    }
+}
+
+send "\01d"
+}
+send "quit\r"
+exit 0
