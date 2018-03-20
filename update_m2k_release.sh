@@ -15,6 +15,13 @@ VERSION_TO_UPDATE="$1"
 
 RELEASE_DIR="$(pwd)/release/m2k"
 
+[ -d "$RELEASE_DIR" ] || {
+	if ! mkdir -p "$RELEASE_DIR" ; then
+		echo_red "Could not create $RELEASE_DIR"
+		exit 1
+	fi
+}
+
 FW_URL="https://github.com/analogdevicesinc/m2k-fw/releases/download/v${VERSION_TO_UPDATE}/m2k-fw-v${VERSION_TO_UPDATE}.zip"
 FW_BOOTSTRAP_URL="https://github.com/analogdevicesinc/m2k-fw/releases/download/v${VERSION_TO_UPDATE}/m2k-jtag-bootstrap-v${VERSION_TO_UPDATE}.zip"
 

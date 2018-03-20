@@ -15,6 +15,13 @@ VERSION_TO_UPDATE="$1"
 
 RELEASE_DIR="$(pwd)/release/pluto"
 
+[ -d "$RELEASE_DIR" ] || {
+	if ! mkdir -p "$RELEASE_DIR" ; then
+		echo_red "Could not create $RELEASE_DIR"
+		exit 1
+	fi
+}
+
 FW_URL="https://github.com/analogdevicesinc/plutosdr-fw/releases/download/v${VERSION_TO_UPDATE}/plutosdr-fw-v${VERSION_TO_UPDATE}.zip"
 FW_BOOTSTRAP_URL="https://github.com/analogdevicesinc/plutosdr-fw/releases/download/v${VERSION_TO_UPDATE}/plutosdr-jtag-bootstrap-v${VERSION_TO_UPDATE}.zip"
 
