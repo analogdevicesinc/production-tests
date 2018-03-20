@@ -42,36 +42,17 @@ check_udev_on_system() {
 
 # sync udev rules file
 sync_udev_rules_file() {
-	local hash1 hash2 tmp
-
-	[ -f "/etc/udev/rules.d/$UDEV_RULES_FILE" ] || {
-		echo "$UDEV_SECTION" > "/etc/udev/rules.d/$UDEV_RULES_FILE"
+	sudo -s <<-EOF
+		echo -n "$UDEV_SECTION" > "/etc/udev/rules.d/$UDEV_RULES_FILE"
 		udevadm control --reload-rules
 		udevadm trigger
-		return
-	}
-
-	hash1="$(echo "$UDEV_SECTION" | sha256sum | cut -d' ' -f1)"
-	hash2="$(sha256sum "/etc/udev/rules.d/$UDEV_RULES_FILE" | cut -d' ' -f1)"
-	[ "$hash1" == "$hash2" ] || {
-		echo "$UDEV_SECTION" > "/etc/udev/rules.d/$UDEV_RULES_FILE"
-		udevadm control --reload-rules
-		udevadm trigger
-		return
-	}
-
-	return 0
-
+	EOF
+	return $?
 }
 
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
-
-[ "$(whoami)" == "root" ] || {
-	echo "You need to run this script as root or with sudo"
-	exit 1
-}
 
 check_open_ocd_on_system
 
