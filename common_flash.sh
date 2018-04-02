@@ -45,9 +45,13 @@ check_system_requirements() {
 	return 0
 }
 
+is_ft4232h() {
+	lsusb -v -d 0456:f001 &> /dev/null
+}
+
 get_config() {
 	local board="$1"
-	lsusb -v -d 0456:f001 &> /dev/null && {
+	is_ft4232h && {
 		echo "config/${board}_ftdi4232.cfg"
 		return
 	}
@@ -94,12 +98,14 @@ flash_board () {
 		break
 	done
 
-	echo_green "4. Done ; you can now powercycle the board"
-	# Note: powercycling does not work yet on Pluto
-	#echo_green "4. Power cycling the board"
-	#openocd -f "$CABLE_CFG" -c power_cycle || {
-	#	echo_blue "Warning: powercycle command failed"
-	#}
+	if is_ft4232h ; then
+		echo_green "4. Done ; powercycling the board"
+		./work/ft4232h_pin_ctrl --channel A # will set all pins to low
+		sleep 1
+		./work/ft4232h_pin_ctrl --channel A pin5 pin6
+	else
+		echo_green "4. Done ; you can now powercycle the board"
+	fi
 
 	return 0
 }
