@@ -50,9 +50,24 @@ sync_udev_rules_file() {
 	return $?
 }
 
+
+build_ft4232h_tool() {
+	local tool="ft4232h_pin_ctrl"
+	local tool_c="${tool}.c"
+	local cflags=""
+	local ldflags="-lftdi"
+
+	[ -d "work" ] || mkdir -p work
+
+	cp -f "src/$tool_c" "work/$tool_c"
+	gcc "work/$tool_c" -o "work/$tool" $cflags $ldflags
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
+
+build_ft4232h_tool
 
 check_open_ocd_on_system
 
