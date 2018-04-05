@@ -8,11 +8,11 @@ set -e
 UDEV_RULES_FILE="50-ftdi-test.rules"
 
 UDEV_SECTION='
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0456", ATTRS{idProduct}=="f001", MODE="660", ATTRS{serial}=="Test-Slot-A", SYMLINK+="ttyTest-A%n"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0456", ATTRS{idProduct}=="f001", MODE="660", ATTRS{serial}=="Test-Slot-B", SYMLINK+="ttyTest-B%n"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0456", ATTRS{idProduct}=="f001", MODE="660", ATTRS{serial}=="Test-Slot-C", SYMLINK+="ttyTest-C%n"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0456", ATTRS{idProduct}=="f001", MODE="660", ATTRS{serial}=="Test-Slot-D", SYMLINK+="ttyTest-D%n"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0456", ATTRS{idProduct}=="f001", MODE="660", GROUP="plugdev"
+SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", ATTRS{serial}==\"Test-Slot-A\", SYMLINK+=\"ttyTest-A%n\"
+SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", ATTRS{serial}==\"Test-Slot-B\", SYMLINK+=\"ttyTest-B%n\"
+SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", ATTRS{serial}==\"Test-Slot-C\", SYMLINK+=\"ttyTest-C%n\"
+SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", ATTRS{serial}==\"Test-Slot-D\", SYMLINK+=\"ttyTest-D%n\"
+SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", GROUP=\"plugdev\"
 '
 
 #----------------------------------#
