@@ -98,6 +98,9 @@ flash_board () {
 		break
 	done
 
+	# wait until env is saved by uboot
+	sleep 2
+
 	if is_ft4232h ; then
 		echo_green "4. Done ; powercycling the board"
 		./work/ft4232h_pin_ctrl --channel A # will set all pins to low
