@@ -96,4 +96,10 @@ for url in $FW_URL $FW_BOOTSTRAP_URL ; do
 	download_and_unzip_to "$url" "$RELEASE_DIR"
 done
 
+# Patch ps7_init.tcl
+sed -i -e "s/variable PCW_SILICON_VER_1_0/set PCW_SILICON_VER_1_0 \"0x0\"/g" \
+	-e "s/variable PCW_SILICON_VER_2_0/set PCW_SILICON_VER_2_0 \"0x1\"/g" \
+	-e "s/variable PCW_SILICON_VER_3_0/set PCW_SILICON_VER_3_0 \"0x2\"/g" \
+	-e "s/variable APU_FREQ/set APU_FREQ 666666666/g" $RELEASE_DIR/ps7_init.tcl
+
 exit 0
