@@ -15,6 +15,10 @@ get_latest_release() {
 VERSION_TO_UPDATE="$1"
 
 [ -n "$VERSION_TO_UPDATE" ] || {
+	type curl &> /dev/null || {
+		echo_red "You need to install 'curl' on your system"
+		exit 1
+	}
 	VERSION_TO_UPDATE=$(get_latest_release analogdevicesinc/m2k-fw)
 	echo_red "No version provided for m2k release getting latest $VERSION_TO_UPDATE"
 }
