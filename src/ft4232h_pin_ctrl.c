@@ -59,17 +59,17 @@ static int open_device(struct ftdi_context *ctx, int channel)
 	int ret;
 
 	if (ftdi_init(ctx)) {
-		printf("Failed to init ftdi context\n");
+		fprintf(stderr, "Failed to init ftdi context\n");
 		return -1;
 	}
 
 	if (ftdi_set_interface(ctx, channel)) {
-		printf("Failed to set channel %d", channel);
+		fprintf(stderr, "Failed to set channel %d", channel);
 		return -1;
 	}
 
 	if (ftdi_usb_open_desc_index(ctx, GNICE_VID, GNICE_PID, NULL, "Test-Slot-A", 0)) {
-		printf("Failed to open device\n");
+		fprintf(stderr, "Failed to open device\n");
 		return -1;
 	}
 
@@ -108,7 +108,7 @@ static int open_device(struct ftdi_context *ctx, int channel)
 	}
 
 	if (ftdi_set_bitmode(ctx, 0xF0, BITMODE_BITBANG)) {
-		printf("Failed to set bitbang mode\n");
+		fprintf(stderr, "Failed to set bitbang mode\n");
 		return -1;
 	}
 
