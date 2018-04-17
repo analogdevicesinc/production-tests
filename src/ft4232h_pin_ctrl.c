@@ -73,40 +73,6 @@ static int open_device(struct ftdi_context *ctx, int channel)
 		return -1;
 	}
 
-	if(ftdi_usb_reset(ctx))
-		fprintf(stderr,"%s\n",ftdi_get_error_string(ctx));
-
-	if(ftdi_usb_purge_buffers(ctx)) //clean buffers
-		fprintf(stderr,"%s\n",ftdi_get_error_string(ctx));
-
-	if(ftdi_write_data_set_chunksize(ctx,65536)) //64k transfer size
-		fprintf(stderr,"%s\n",ftdi_get_error_string(ctx));
-
-	if(ftdi_read_data_set_chunksize(ctx,4096)) //64k transfer size
-		fprintf(stderr,"%s\n",ftdi_get_error_string(ctx));
-
-	if(ftdi_set_event_char(ctx,0,0)) //disable event chars
-		fprintf(stderr,"%s\n",ftdi_get_error_string(ctx));
-
-	if(ftdi_set_error_char(ctx,0,0)) //disable error chars
-		fprintf(stderr,"%s\n",ftdi_get_error_string(ctx));
-
-	if(ftdi_set_latency_timer(ctx,2)) //Set the latency timer to 1mS (default is 16mS)
-		fprintf(stderr,"%s\n",ftdi_get_error_string(ctx));
-
-	if(ftdi_set_baudrate(ctx,921600)) 
-		fprintf(stderr,"%s\n",ftdi_get_error_string(ctx));
-
-	if(ftdi_setflowctrl(ctx,SIO_RTS_CTS_HS)) //set flow control
-		fprintf(stderr,"%s\n",ftdi_get_error_string(ctx));
-
-	if ((ret = ftdi_set_bitmode( ctx, 0x00, BITMODE_RESET )) < 0 )
-	{
-		fprintf(stderr, "can't set bitmode to %x: %d (%s)\n", BITMODE_RESET, ret, ftdi_get_error_string(ctx));
-		fprintf( stderr, "RESET\n" );
-		return EXIT_FAILURE;
-	}
-
 	if (ftdi_set_bitmode(ctx, 0xF0, BITMODE_BITBANG)) {
 		fprintf(stderr, "Failed to set bitbang mode\n");
 		return -1;
