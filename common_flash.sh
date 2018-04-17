@@ -84,9 +84,7 @@ flash_board () {
 		break
 	done
 
-	echo_green "2. Waiting 5 seconds for board to settle"
-	sleep 5
-	echo_green "3. Running DFU utils step"
+	echo_green "2. Running DFU utils step"
 
 	while true ; do
 		expect cmd.exp "$ttyUSB" "$releaseDir" "$firmwareDfuFile" || {
@@ -102,12 +100,12 @@ flash_board () {
 	sleep 2
 
 	if is_ft4232h ; then
-		echo_green "4. Done ; powercycling the board"
+		echo_green "3. Done ; powercycling the board"
 		./work/ft4232h_pin_ctrl --channel A # will set all pins to low
 		sleep 1
 		./work/ft4232h_pin_ctrl --channel A pin5 pin6
 	else
-		echo_green "4. Done ; you can now powercycle the board"
+		echo_green "3. Done ; you can now powercycle the board"
 	fi
 
 	return 0
