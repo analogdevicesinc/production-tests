@@ -79,27 +79,19 @@ flash_board () {
 
 	echo_green "1. Loading uboot '$UBOOT_ELF_FILE'"
 
-	while true ; do
-		openocd -f "$CABLE_CFG" -c "load_uboot $UBOOT_ELF_FILE" || {
-			echo_blue "OpenOCD command failed ; retrying"
-			force_terminate_programs
-			sleep 3
-			continue
-		}
-		break
-	done
+	openocd -f "$CABLE_CFG" -c "load_uboot $UBOOT_ELF_FILE" || {
+		echo_blue "OpenOCD command failed"
+		force_terminate_programs
+		exit 1
+	}
 
 	echo_green "2. Running DFU utils step"
 
-	while true ; do
-		expect cmd.exp "$ttyUSB" "$releaseDir" "$firmwareDfuFile" || {
-			echo_blue "expect command failed ; retrying"
-			force_terminate_programs
-			sleep 3
-			continue
-		}
-		break
-	done
+	expect cmd.exp "$ttyUSB" "$releaseDir" "$firmwareDfuFile" || {
+		echo_blue "expect command failed"
+		force_terminate_programs
+		exit 1
+	}
 
 	# wait until env is saved by uboot
 	sleep 2
