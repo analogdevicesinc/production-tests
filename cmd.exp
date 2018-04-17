@@ -36,7 +36,7 @@ if {0} {
     }
 }
 
-after 5000
+after 1000
 
 set timeout 180
 
@@ -54,7 +54,7 @@ while 1 {
     }
 }
 
-after 5000
+after 1000
 
 send "sudo dfu-util -e -a firmware.dfu\r"
 while 1 {
