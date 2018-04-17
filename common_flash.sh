@@ -98,9 +98,9 @@ flash_board () {
 
 	if is_ft4232h ; then
 		echo_green "3. Done ; powercycling the board"
-		./work/ft4232h_pin_ctrl --channel A # will set all pins to low
+		./work/ft4232h_pin_ctrl --serial "Test-Slot-A" --channel A # will set all pins to low
 		sleep 1
-		./work/ft4232h_pin_ctrl --channel A pin5 pin6
+		./work/ft4232h_pin_ctrl --serial "Test-Slot-A" --channel A pin5 pin6
 	else
 		echo_green "3. Done ; you can now powercycle the board"
 	fi

@@ -14,6 +14,7 @@
 
 static const struct option options[] = {
 	{"channel", required_argument, 0, 'C'},
+	{"serial",  required_argument, 0, 'S'},
 	{ 0, 0, 0, 0 },
 };
 
@@ -54,7 +55,7 @@ static int get_int_from_map(const struct map *map, int map_len, const char *arg)
 	return -1;
 }
 
-static int open_device(struct ftdi_context *ctx, int channel)
+static int open_device(struct ftdi_context *ctx, const char *serial, int channel)
 {
 	int ret;
 
@@ -68,7 +69,7 @@ static int open_device(struct ftdi_context *ctx, int channel)
 		return -1;
 	}
 
-	if (ftdi_usb_open_desc_index(ctx, GNICE_VID, GNICE_PID, NULL, "Test-Slot-A", 0)) {
+	if (ftdi_usb_open_desc_index(ctx, GNICE_VID, GNICE_PID, NULL, serial, 0)) {
 		fprintf(stderr, "Failed to open device\n");
 		return -1;
 	}
@@ -93,13 +94,14 @@ static void close_device(struct ftdi_context *ctx)
 }
 
 
-static int set_pin_values(int channel, char **argv, int from, int to)
+static int set_pin_values(const char *serial, int channel, char **argv,
+			  int from, int to)
 {
 	struct ftdi_context ftdi = {};
 	char buf[2];
 	int i;
 
-	if (open_device(&ftdi, channel)) {
+	if (open_device(&ftdi, serial, channel)) {
 		fprintf(stderr, "Coud not open device\n");
 		return -1;
 	}
@@ -140,18 +142,27 @@ int main(int argc, char **argv)
 {
 	struct mpsse_context *io = NULL;
 	int c, option_index = 0;
+	const char *serial = NULL;
 	int channel = -1;
 	int gval;
 
 	optind = 0;
 
-	while ((c = getopt_long(argc, argv, "+C:G:",
+	while ((c = getopt_long(argc, argv, "+C:S:",
 					options, &option_index)) != -1) {
 		switch (c) {
 			case 'C':
 				channel = parse_channel(optarg);
 				break;
+			case 'S':
+				serial = optarg;
+				break;
 		}
+	}
+
+	if (!serial) {
+		fprintf(stderr, "No serial provided for device\n");
+		return EXIT_FAILURE;
 	}
 
 	if (channel < 0) {
@@ -159,7 +170,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	if (set_pin_values(channel, argv, optind, argc) < 0) {
+	if (set_pin_values(serial, channel, argv, optind, argc) < 0) {
 		fprintf(stderr, "Error when trying to set GPIO value\n");
 		return EXIT_FAILURE;
 	}
