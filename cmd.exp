@@ -11,10 +11,28 @@ proc send_screen_quit_cmd {} {
     send ":quit\r"
 }
 
+proc wait_for_line_on_serial {ttyUSB line} {
+    send "screen /dev/$ttyUSB 115200\r"
+    while 1 {
+        expect {
+            "$line" {
+                break
+            }
+            timeout {
+                send_error "Failed to check u-boot env save done\n"
+                exit 1
+            }
+        }
+    }
+}
+
 proc wait_for_device_prompt {ttyUSB} {
     send "screen /dev/$ttyUSB 115200\r"
     while 1 {
         expect {
+            "Entering DFU SF mode ..." {
+                break
+            }
             "Pluto> " {
                 break
             }
@@ -31,6 +49,12 @@ proc wait_for_device_prompt {ttyUSB} {
 
 set timeout 20
 spawn bash
+
+wait_for_line_on_serial $ttyUSB "Entering DFU SF mode ..."
+send_screen_quit_cmd
+
+after 1000
+
 send "sudo dfu-util -D $releaseDir/boot.dfu -a boot.dfu\r"
 
 while 1 {
