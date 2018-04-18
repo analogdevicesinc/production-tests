@@ -34,6 +34,16 @@ static const struct map pins[] = {
 	{ "PIN7", 7 },
 };
 
+static inline void copy_to_buf_upper(char *buf, const char *s, int len)
+{
+	int i;
+
+	strncpy(buf, s, len);
+	for (i = 0; i < strlen(buf); i++) {
+		buf[i] = toupper(buf[i]);
+	}
+}
+
 static int get_int_from_map(const struct map *map, int map_len, const char *arg)
 {
 	int i;
@@ -42,10 +52,7 @@ static int get_int_from_map(const struct map *map, int map_len, const char *arg)
 	if (!arg || !map)
 		return -1;
 
-	strncpy(buf, arg, sizeof(buf));
-	for (i = 0; i < strlen(buf); i++) {
-		buf[i] = toupper(buf[i]);
-	}
+	copy_to_buf_upper(buf, arg, sizeof(buf));
 
 	for (i = 0; i < map_len; i++) {
 		if (!strcmp(map[i].s, buf))
