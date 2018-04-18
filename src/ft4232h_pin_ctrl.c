@@ -57,8 +57,6 @@ static int get_int_from_map(const struct map *map, int map_len, const char *arg)
 
 static int open_device(struct ftdi_context *ctx, const char *serial, int channel)
 {
-	int ret;
-
 	if (ftdi_init(ctx)) {
 		fprintf(stderr, "Failed to init ftdi context\n");
 		return -1;
@@ -98,7 +96,7 @@ static int set_pin_values(const char *serial, int channel, char **argv,
 			  int from, int to)
 {
 	struct ftdi_context ftdi = {};
-	char buf[2];
+	unsigned char buf[2];
 	int i;
 
 	if (open_device(&ftdi, serial, channel)) {
@@ -140,11 +138,9 @@ static int parse_channel(const char *arg)
 
 int main(int argc, char **argv)
 {
-	struct mpsse_context *io = NULL;
 	int c, option_index = 0;
 	const char *serial = NULL;
 	int channel = -1;
-	int gval;
 
 	optind = 0;
 
