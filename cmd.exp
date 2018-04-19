@@ -12,6 +12,11 @@ proc send_screen_quit_cmd {} {
 }
 
 proc wait_for_line_on_serial {ttyUSB line} {
+    if { "$ttyUSB" == "SKIP_TTYUSB" } {
+        puts "Skipping serial device check ; waiting 5 seconds"
+        after 5000
+        return false
+    }
     send "screen /dev/$ttyUSB 115200\r"
     while 1 {
         expect {
@@ -24,9 +29,15 @@ proc wait_for_line_on_serial {ttyUSB line} {
             }
         }
     }
+    return true
 }
 
 proc wait_for_device_prompt {ttyUSB} {
+    if { "$ttyUSB" == "SKIP_TTYUSB" } {
+        puts "Skipping serial device check ; waiting 5 seconds"
+        after 5000
+        return false
+    }
     send "screen /dev/$ttyUSB 115200\r"
     while 1 {
         expect {
@@ -45,15 +56,16 @@ proc wait_for_device_prompt {ttyUSB} {
             }
         }
     }
+    return true
 }
 
 set timeout 20
 spawn bash
 
-wait_for_line_on_serial $ttyUSB "Entering DFU SF mode ..."
-send_screen_quit_cmd
-
-after 1000
+if [ wait_for_line_on_serial $ttyUSB "Entering DFU SF mode ..." ] {
+    send_screen_quit_cmd
+    after 1000
+}
 
 send "sudo dfu-util -D $releaseDir/boot.dfu -a boot.dfu\r"
 

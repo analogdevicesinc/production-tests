@@ -77,6 +77,16 @@ flash_board () {
 	local releaseDir="$2"
 	local firmwareDfuFile="$3"
 
+	if [ ! -e "/dev/$ttyUSB" ] ; then
+		for board in pluto m2k ; do
+			if [ "$BOARD" == "$board" ] ; then
+				echo_red "'/dev/$ttyUSB' does not exist ; board '$BOARD' requires it"
+				exit 1
+			fi
+		done
+		ttyUSB="SKIP_TTYUSB"
+	fi
+
 	echo_green "1. Loading uboot '$UBOOT_ELF_FILE'"
 
 	openocd -f "$CABLE_CFG" -c "load_uboot $UBOOT_ELF_FILE" || {
