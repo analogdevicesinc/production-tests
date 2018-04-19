@@ -41,9 +41,6 @@ proc wait_for_device_prompt {ttyUSB} {
     send "screen /dev/$ttyUSB 115200\r"
     while 1 {
         expect {
-            "Entering DFU SF mode ..." {
-                break
-            }
             "Pluto> " {
                 break
             }
