@@ -16,6 +16,8 @@
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(*(x)))
 #endif
 
+#define ALL_CHANNELS	0xffff
+
 enum {
 	CONVST_PIN = GPIOL0,
 	RESET_PIN  = GPIOL1,
@@ -69,6 +71,12 @@ static const struct map vchannel_masks[] = {
 	{ "V5B", 5 << 4 },
 	{ "V6B", 6 << 4 },
 	{ "V7B", 7 << 4 },
+
+	{ "ALL", ALL_CHANNELS },
+};
+
+struct spi_read_args {
+	int vchannel_idx;
 };
 
 static ad7616_range va_ranges[8] = {
@@ -312,7 +320,49 @@ static int handle_single_conversion(ad7616_dev *dev, int vchannel_idx)
 	return 0;
 }
 
-static int handle_mpsse_spi(const char *serial, int channel, int vchannel_idx)
+static int handle_burst_conversion(ad7616_dev *dev)
+{
+	uint8_t buf[4 * 8] = {}; /* (2 bytes VA, 2 bytes VB) x 8 */
+	uint16_t burst_en = AD7616_BURSTEN | AD7616_SEQEN;
+	int i;
+	int64_t voltages[16] = {};
+
+	/* We setup the sequencer ; it can a pair of VA & VB at the same time */
+	for (i = 0; i < 7; i++)
+		ad7616_write(dev, AD7616_REG_SEQUENCER_STACK(i), i | (i << 4));
+	/* Last register needs SSREN bit set */
+	ad7616_write(dev, AD7616_REG_SEQUENCER_STACK(7), 7 | (7 << 4) | AD7616_SSREN);
+
+	if (ad7616_write_mask(dev, AD7616_REG_CONFIG, burst_en, burst_en) < 0) {
+		fprintf(stderr, "Unable to enable burst mode\n");
+		return -1;
+	}
+
+	if (start_conversion(dev) < 0)
+		return -1;
+
+	/* Read directly from SPI, bypassing ad7616_spi_read()  */
+	if (spi_read(&dev->spi_dev, buf, sizeof(buf)) < 0) {
+		fprintf(stderr, "Error when reading data from SPI \n");
+		return -1;
+	}
+
+	for (i = 0; i < 8; i++) {
+		voltages[i] = voltage_from_buf(&buf[i * 4]);		/* VA voltages */
+		voltages[i + 8] = voltage_from_buf(&buf[i * 4 + 2]);	/* VB voltages */
+	}
+
+	for (i = 0; i < ARRAY_SIZE(voltages); i++) {
+		voltages[i] = adc_transfer_function(voltages[i], i);
+		printf("%d ", (int32_t)voltages[i]);
+	}
+
+	printf("\n");
+	return 0;
+}
+
+static int handle_mpsse_spi(const char *serial, int channel,
+			    const struct spi_read_args *sargs)
 {
 	ad7616_dev *dev = NULL;
 	struct ftdi_context ftdi = {};
@@ -325,6 +375,7 @@ static int handle_mpsse_spi(const char *serial, int channel, int vchannel_idx)
 		.endianess = 0x00,	/* MSB = 0x00, LSB = 0x08 */
 	};
 	int ret = EXIT_FAILURE;
+	uint16_t vchannel_mask = vchannel_masks[sargs->vchannel_idx].i;
 
 	if (open_device(&ftdi, serial, channel)) {
 		fprintf(stderr, "Coud not open device\n");
@@ -346,7 +397,13 @@ static int handle_mpsse_spi(const char *serial, int channel, int vchannel_idx)
 		return -1;
 	}
 
-	if (handle_single_conversion(dev, vchannel_idx) < 0)
+	if (vchannel_mask == ALL_CHANNELS) {
+		if (handle_burst_conversion(dev) == 0)
+			ret = EXIT_SUCCESS;
+		goto out;
+	}
+
+	if (handle_single_conversion(dev, sargs->vchannel_idx) < 0)
 		goto out;
 
 	ret = EXIT_SUCCESS;
@@ -392,6 +449,9 @@ int main(int argc, char **argv)
 	int channel = -1;
 	int vchannel_idx = 0;
 	int mode = BITMODE_BITBANG;
+	struct spi_read_args sargs = {
+		.vchannel_idx = 0,
+	};
 
 	optind = 0;
 
@@ -433,8 +493,10 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	if (mode == BITMODE_MPSSE)
-		return handle_mpsse_spi(serial, channel, vchannel_idx);
+	if (mode == BITMODE_MPSSE) {
+		sargs.vchannel_idx = vchannel_idx;
+		return handle_mpsse_spi(serial, channel, &sargs);
+	}
 
 	/* bitbang mode here */
 	if (set_pin_values(serial, channel, argv, optind, argc) < 0) {
