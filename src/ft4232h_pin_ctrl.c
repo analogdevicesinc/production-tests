@@ -79,11 +79,6 @@ static int open_device(struct ftdi_context *ctx, const char *serial, int channel
 		return -1;
 	}
 
-	if (ftdi_set_bitmode(ctx, 0xFF, BITMODE_BITBANG) < 0) {
-		fprintf(stderr, "Failed to set bitbang mode\n");
-		return -1;
-	}
-
 	return 0;
 }
 
@@ -108,6 +103,11 @@ static int set_pin_values(const char *serial, int channel, char **argv,
 
 	if (open_device(&ftdi, serial, channel)) {
 		fprintf(stderr, "Coud not open device\n");
+		return -1;
+	}
+
+	if (ftdi_set_bitmode(&ftdi, 0xFF, BITMODE_BITBANG) < 0) {
+		fprintf(stderr, "Failed to set bitbang mode\n");
 		return -1;
 	}
 
