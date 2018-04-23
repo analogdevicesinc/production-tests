@@ -70,7 +70,7 @@ static int open_device(struct ftdi_context *ctx, const char *serial, int channel
 	}
 
 	if (ftdi_set_interface(ctx, channel) < 0) {
-		fprintf(stderr, "Failed to set channel %d", channel);
+		fprintf(stderr, "Failed to set channel %d\n", channel);
 		return -1;
 	}
 
