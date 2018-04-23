@@ -64,17 +64,17 @@ static int get_int_from_map(const struct map *map, int map_len, const char *arg)
 
 static int open_device(struct ftdi_context *ctx, const char *serial, int channel)
 {
-	if (ftdi_init(ctx)) {
+	if (ftdi_init(ctx) < 0) {
 		fprintf(stderr, "Failed to init ftdi context\n");
 		return -1;
 	}
 
-	if (ftdi_set_interface(ctx, channel)) {
+	if (ftdi_set_interface(ctx, channel) < 0) {
 		fprintf(stderr, "Failed to set channel %d", channel);
 		return -1;
 	}
 
-	if (ftdi_usb_open_desc_index(ctx, GNICE_VID, GNICE_PID, NULL, serial, 0)) {
+	if (ftdi_usb_open_desc_index(ctx, GNICE_VID, GNICE_PID, NULL, serial, 0) < 0) {
 		fprintf(stderr, "Failed to open device\n");
 		return -1;
 	}
@@ -114,6 +114,10 @@ static int set_pin_values(const char *serial, int channel, char **argv,
 	buf[0] = SET_BITS_LOW;
 	for (i = from; i < to; i++) {
 		int pin = get_int_from_map(pins, ARRAY_SIZE(pins), argv[i]);
+		if (pin < 0) {
+			fprintf(stderr, "Invalid pin name '%s'\n", argv[i]);
+			return -1;
+		}
 		buf[1] |= 1 << pin;
 	}
 
