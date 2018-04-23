@@ -79,7 +79,7 @@ static int open_device(struct ftdi_context *ctx, const char *serial, int channel
 		return -1;
 	}
 
-	if (ftdi_set_bitmode(ctx, 0xF0, BITMODE_BITBANG)) {
+	if (ftdi_set_bitmode(ctx, 0xFF, BITMODE_BITBANG) < 0) {
 		fprintf(stderr, "Failed to set bitbang mode\n");
 		return -1;
 	}
