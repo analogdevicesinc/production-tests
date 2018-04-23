@@ -442,6 +442,19 @@ static int parse_vchannel_idx(const char *arg)
 	return get_idx_from_map(vchannel_masks, ARRAY_SIZE(vchannel_masks), arg);
 }
 
+static void usage()
+{
+	fprintf(stderr, "ft4232h_pin_ctrl --serial <Test-Slot-X> --channel <Y> --mode <spi|bitbang> [--vchannel <VNZ>]\n"
+			"\tWhere: X is A-to-B, the name of the serial device for testing\n"
+			"\t       Y is A-to-B, the channel on the FTDI device\n"
+			"\t       N is 0-to-7\n"
+			"\t       Z is A or B\n\n"
+			"\tFor mode Bitbang, specify pins that should be high (pin0 to pin7),\n"
+			"\tall other unspecified pins will be set low.\n\n"
+			"\tFor SPI, '--vchannel must be specified with values V0A to V7A or V0B to V7B\n"
+			"\tto read a single channel. Or '--vchannel all' will read all voltages in one go.\n");
+}
+
 int main(int argc, char **argv)
 {
 	int c, option_index = 0;
@@ -475,21 +488,25 @@ int main(int argc, char **argv)
 
 	if (!serial) {
 		fprintf(stderr, "No serial provided for device\n");
+		usage();
 		return EXIT_FAILURE;
 	}
 
 	if (mode < 0) {
 		fprintf(stderr, "Invalid mode set; valid are 'bitbang' or 'spi'\n");
+		usage();
 		return EXIT_FAILURE;
 	}
 
 	if (vchannel_idx < 0) {
 		fprintf(stderr, "Invalid voltage channel name/selection\n");
+		usage();
 		return EXIT_FAILURE;
 	}
 
 	if (channel < 0) {
 		fprintf(stderr, "Invalid or no channel provided\n");
+		usage();
 		return EXIT_FAILURE;
 	}
 
