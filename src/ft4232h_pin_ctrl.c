@@ -29,6 +29,7 @@ static const struct option options[] = {
 	{"serial",  required_argument, 0, 'S'},
 	{"mode",    required_argument, 0, 'M'},
 	{"vchannel", required_argument, 0, 'V'},
+	{"refinout", required_argument, 0, 'R'},
 	{ 0, 0, 0, 0 },
 };
 
@@ -77,6 +78,8 @@ static const struct map vchannel_masks[] = {
 
 struct spi_read_args {
 	int vchannel_idx;
+	int refinout;
+	int refinout_div;
 };
 
 static ad7616_range va_ranges[8] = {
@@ -249,13 +252,13 @@ static inline int64_t voltage_from_buf(uint8_t *buf)
 	return (int64_t) ((int16_t) ntohs(data));
 }
 
-static int32_t adc_transfer_function(int64_t voltage, int ch)
+static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_read_args *sargs)
 {
 	int volt_range_enum_val;
 	int64_t volt_range = 10;
 	int64_t volt_range_div = 1;
-	int64_t refinout = 25;
-	int64_t refinout_div = 10;
+	int64_t refinout = sargs->refinout;
+	int64_t refinout_div = sargs->refinout_div;
 
 	if (ch > 7)
 		volt_range_enum_val = vb_ranges[ch - 8];
@@ -288,8 +291,9 @@ static int32_t adc_transfer_function(int64_t voltage, int ch)
 	return voltage;
 }
 
-static int handle_single_conversion(ad7616_dev *dev, int vchannel_idx)
+static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args *sargs)
 {
+	int vchannel_idx = sargs->vchannel_idx;
 	uint16_t vchannel_mask = vchannel_masks[vchannel_idx].i;
 	uint8_t buf[4] = {}; /* 2 bytes VA, 2 bytes VB */
 	int64_t voltage;
@@ -314,13 +318,13 @@ static int handle_single_conversion(ad7616_dev *dev, int vchannel_idx)
 	else
 		voltage = voltage_from_buf(&buf[0]);
 
-	voltage = adc_transfer_function(voltage, vchannel_idx);
+	voltage = adc_transfer_function(voltage, vchannel_idx, sargs);
 
 	printf("%d\n", (int32_t)voltage);
 	return 0;
 }
 
-static int handle_burst_conversion(ad7616_dev *dev)
+static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *sargs)
 {
 	uint8_t buf[4 * 8] = {}; /* (2 bytes VA, 2 bytes VB) x 8 */
 	uint16_t burst_en = AD7616_BURSTEN | AD7616_SEQEN;
@@ -353,7 +357,7 @@ static int handle_burst_conversion(ad7616_dev *dev)
 	}
 
 	for (i = 0; i < ARRAY_SIZE(voltages); i++) {
-		voltages[i] = adc_transfer_function(voltages[i], i);
+		voltages[i] = adc_transfer_function(voltages[i], i, sargs);
 		printf("%d ", (int32_t)voltages[i]);
 	}
 
@@ -398,12 +402,12 @@ static int handle_mpsse_spi(const char *serial, int channel,
 	}
 
 	if (vchannel_mask == ALL_CHANNELS) {
-		if (handle_burst_conversion(dev) == 0)
+		if (handle_burst_conversion(dev, sargs) == 0)
 			ret = EXIT_SUCCESS;
 		goto out;
 	}
 
-	if (handle_single_conversion(dev, sargs->vchannel_idx) < 0)
+	if (handle_single_conversion(dev, sargs) < 0)
 		goto out;
 
 	ret = EXIT_SUCCESS;
@@ -442,9 +446,44 @@ static int parse_vchannel_idx(const char *arg)
 	return get_idx_from_map(vchannel_masks, ARRAY_SIZE(vchannel_masks), arg);
 }
 
+static int parse_voltage_arg(const char *arg, int *volt, int *div)
+{
+	const char *dot = strchr(arg, '.');
+	char buf[32];
+	int dot_pos, digi_cnt;
+	int i, len, sign;
+
+	if (!arg)
+		return -1;
+
+	*div = 1;
+	dot = strchr(arg, '.');
+	if (!dot) {
+		*volt = atoi(optarg);
+		return 0;
+	}
+
+	len = strlen(arg);
+	strncpy(buf, arg, sizeof(buf));
+	dot_pos = (dot - arg);
+
+	buf[dot_pos] = '\0';
+	sign = (buf[0] == '-') ? 1 : 0;
+
+	digi_cnt = (len - 1 - dot_pos);
+	for (i = 0; i < digi_cnt; i++)
+		*div *= 10;
+	*volt = atoi(&buf[sign]) * (*div) + atoi(&buf[dot_pos+1]);
+	if (sign)
+		*volt = -*volt;
+
+	return 0;
+}
+
 static void usage()
 {
-	fprintf(stderr, "ft4232h_pin_ctrl --serial <Test-Slot-X> --channel <Y> --mode <spi|bitbang> [--vchannel <VNZ>]\n"
+	fprintf(stderr, "ft4232h_pin_ctrl --serial <Test-Slot-X> --channel <Y> --mode <spi|bitbang>\n"
+			"    [--refinout <V>]  [--vchannel <VNZ>]\n"
 			"\tWhere: X is A-to-B, the name of the serial device for testing\n"
 			"\t       Y is A-to-B, the channel on the FTDI device\n"
 			"\t       N is 0-to-7\n"
@@ -452,7 +491,8 @@ static void usage()
 			"\tFor mode Bitbang, specify pins that should be high (pin0 to pin7),\n"
 			"\tall other unspecified pins will be set low.\n\n"
 			"\tFor SPI, '--vchannel must be specified with values V0A to V7A or V0B to V7B\n"
-			"\tto read a single channel. Or '--vchannel all' will read all voltages in one go.\n");
+			"\tto read a single channel. Or '--vchannel all' will read all voltages in one go.\n\n"
+			"\t`--refinout` has a defaul value of 2.5V ; can be specified between 2.495 - 2.505 V\n");
 }
 
 int main(int argc, char **argv)
@@ -464,11 +504,13 @@ int main(int argc, char **argv)
 	int mode = BITMODE_BITBANG;
 	struct spi_read_args sargs = {
 		.vchannel_idx = 0,
+		.refinout = 25,
+		.refinout_div = 10,
 	};
 
 	optind = 0;
 
-	while ((c = getopt_long(argc, argv, "+C:S:V:",
+	while ((c = getopt_long(argc, argv, "+C:S:V:R:",
 					options, &option_index)) != -1) {
 		switch (c) {
 			case 'C':
@@ -476,6 +518,12 @@ int main(int argc, char **argv)
 				break;
 			case 'M':
 				mode = parse_mode(optarg);
+				break;
+			case 'R':
+				if (parse_voltage_arg(optarg, &sargs.refinout, &sargs.refinout_div) < 0) {
+					fprintf(stderr, "Could not parse refinout\n");
+					return EXIT_FAILURE;
+				}
 				break;
 			case 'S':
 				serial = optarg;
