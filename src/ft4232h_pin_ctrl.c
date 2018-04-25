@@ -18,6 +18,9 @@
 
 #define ALL_CHANNELS	0xffff
 
+#define PRECISION_MULT		10000	/* 0.1 mV or 100 uV */
+#define PRECISION_FMT		"%04d"	/* correlate this with PRECISION_MULT */
+
 enum {
 	CONVST_PIN = GPIOL0,
 	RESET_PIN  = GPIOL1,
@@ -280,7 +283,7 @@ static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_r
 	/* Apply transfer function (page 24 of datasheet):
 	     - multiply with 1000 to get mili-Volts
 	*/
-	voltage = (1000 *
+	voltage = (PRECISION_MULT *
 	          voltage * volt_range * /* volt range value is either 2.5, 5 or 10V, depending on how channel was set */
 	          refinout * 10) /* 10 is part of 2.5V ==> 25/10 */
 	          / (32768 * /* same as in the docs */
@@ -296,7 +299,7 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 	int vchannel_idx = sargs->vchannel_idx;
 	uint16_t vchannel_mask = vchannel_masks[vchannel_idx].i;
 	uint8_t buf[4] = {}; /* 2 bytes VA, 2 bytes VB */
-	int64_t voltage;
+	int64_t voltage, voltage_abs;
 
 	/* Select channel to read from */
 	if (ad7616_write_mask(dev, AD7616_REG_CHANNEL, 0x0f, vchannel_mask) < 0) {
@@ -319,8 +322,11 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 		voltage = voltage_from_buf(&buf[0]);
 
 	voltage = adc_transfer_function(voltage, vchannel_idx, sargs);
+	voltage_abs = voltage < 0 ? -voltage : voltage;
 
-	printf("%d\n", (int32_t)voltage);
+	printf("%s%d."PRECISION_FMT"\n", voltage < 0 ? "-" : "",
+		(int32_t)(voltage_abs / PRECISION_MULT),
+		(int32_t)(voltage_abs % PRECISION_MULT));
 	return 0;
 }
 
@@ -330,6 +336,7 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 	uint16_t burst_en = AD7616_BURSTEN | AD7616_SEQEN;
 	int i;
 	int64_t voltages[16] = {};
+	int64_t voltage_abs;
 
 	/* We setup the sequencer ; it can a pair of VA & VB at the same time */
 	for (i = 0; i < 7; i++)
@@ -358,7 +365,11 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 
 	for (i = 0; i < ARRAY_SIZE(voltages); i++) {
 		voltages[i] = adc_transfer_function(voltages[i], i, sargs);
-		printf("%d ", (int32_t)voltages[i]);
+		voltage_abs = voltages[i] < 0 ? -voltages[i] : voltages[i];
+		printf("%s%d."PRECISION_FMT" ",
+			voltages[i] < 0 ? "-" : "",
+			(int32_t)(voltage_abs / PRECISION_MULT),
+			(int32_t)(voltage_abs % PRECISION_MULT));
 	}
 
 	printf("\n");
