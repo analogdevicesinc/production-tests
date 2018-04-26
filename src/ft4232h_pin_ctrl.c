@@ -35,6 +35,7 @@ static const struct option options[] = {
 	{"refinout", required_argument, 0, 'R'},
 	{"vrange-each", required_argument, 0, 'E'},
 	{"vrange-all", required_argument, 0, 'A'},
+	{"no-samples", required_argument, 0, 'N'},
 	{ 0, 0, 0, 0 },
 };
 
@@ -85,6 +86,7 @@ struct spi_read_args {
 	int vchannel_idx;
 	int refinout;
 	int refinout_div;
+	int samples;
 };
 
 static ad7616_range va_ranges[8] = {
@@ -302,6 +304,7 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 	uint16_t vchannel_mask = vchannel_masks[vchannel_idx].i;
 	uint8_t buf[4] = {}; /* 2 bytes VA, 2 bytes VB */
 	int64_t voltage, voltage_abs;
+	int i;
 
 	/* Select channel to read from */
 	if (ad7616_write_mask(dev, AD7616_REG_CHANNEL, 0x0f, vchannel_mask) < 0) {
@@ -309,20 +312,23 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 		return -1;
 	}
 
-	if (start_conversion(dev) < 0)
-		return -1;
+	voltage = 0;
+	for (i = 0; i < sargs->samples; i++) {
+		if (start_conversion(dev) < 0)
+			return -1;
 
-	/* Read directly from SPI, bypassing ad7616_spi_read()  */
-	if (spi_read(&dev->spi_dev, buf, sizeof(buf)) < 0) {
-		fprintf(stderr, "Error when reading data from SPI \n");
-		return -1;
+		/* Read directly from SPI, bypassing ad7616_spi_read()  */
+		if (spi_read(&dev->spi_dev, buf, sizeof(buf)) < 0) {
+			fprintf(stderr, "Error when reading data from SPI \n");
+			return -1;
+		}
+
+		if (vchannel_idx > 7)
+			voltage += voltage_from_buf(&buf[2]);
+		else
+			voltage += voltage_from_buf(&buf[0]);
 	}
-
-	if (vchannel_idx > 7)
-		voltage = voltage_from_buf(&buf[2]);
-	else
-		voltage = voltage_from_buf(&buf[0]);
-
+	voltage = voltage / (int64_t)sargs->samples;
 	voltage = adc_transfer_function(voltage, vchannel_idx, sargs);
 	voltage_abs = voltage < 0 ? -voltage : voltage;
 
@@ -336,7 +342,7 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 {
 	uint8_t buf[4 * 8] = {}; /* (2 bytes VA, 2 bytes VB) x 8 */
 	uint16_t burst_en = AD7616_BURSTEN | AD7616_SEQEN;
-	int i;
+	int i, j;
 	int64_t voltages[16] = {};
 	int64_t voltage_abs;
 
@@ -351,21 +357,24 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 		return -1;
 	}
 
-	if (start_conversion(dev) < 0)
-		return -1;
+	/* Collect samples of voltages */
+	for (i = 0; i < sargs->samples; i++) {
+		if (start_conversion(dev) < 0)
+			return -1;
 
-	/* Read directly from SPI, bypassing ad7616_spi_read()  */
-	if (spi_read(&dev->spi_dev, buf, sizeof(buf)) < 0) {
-		fprintf(stderr, "Error when reading data from SPI \n");
-		return -1;
-	}
-
-	for (i = 0; i < 8; i++) {
-		voltages[i] = voltage_from_buf(&buf[i * 4]);		/* VA voltages */
-		voltages[i + 8] = voltage_from_buf(&buf[i * 4 + 2]);	/* VB voltages */
+		/* Read directly from SPI, bypassing ad7616_spi_read()  */
+		if (spi_read(&dev->spi_dev, buf, 4 * 8) < 0) {
+			fprintf(stderr, "Error when reading data from SPI \n");
+			return -1;
+		}
+		for (j = 0; j < 8; j++) {
+			voltages[j] += voltage_from_buf(&buf[j * 4]);		/* VA voltages */
+			voltages[j + 8] += voltage_from_buf(&buf[j * 4 + 2]);	/* VB voltages */
+		}
 	}
 
 	for (i = 0; i < ARRAY_SIZE(voltages); i++) {
+		voltages[i] = voltages[i] / (int64_t)sargs->samples;
 		voltages[i] = adc_transfer_function(voltages[i], i, sargs);
 		voltage_abs = voltages[i] < 0 ? -voltages[i] : voltages[i];
 		printf("%s%d."PRECISION_FMT" ",
@@ -593,6 +602,7 @@ int main(int argc, char **argv)
 		.vchannel_idx = 0,
 		.refinout = 25,
 		.refinout_div = 10,
+		.samples = 128,
 	};
 
 	optind = 0;
@@ -613,6 +623,9 @@ int main(int argc, char **argv)
 				break;
 			case 'M':
 				mode = parse_mode(optarg);
+				break;
+			case 'N':
+				sargs.samples = atoi(optarg);
 				break;
 			case 'R':
 				if (parse_voltage_arg(optarg, &sargs.refinout, &sargs.refinout_div) < 0) {
@@ -637,6 +650,12 @@ int main(int argc, char **argv)
 
 	if (mode < 0) {
 		fprintf(stderr, "Invalid mode set; valid are 'bitbang' or 'spi'\n");
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	if (sargs.samples < 0) {
+		fprintf(stderr, "Invalid value for samples provided\n");
 		usage();
 		return EXIT_FAILURE;
 	}
