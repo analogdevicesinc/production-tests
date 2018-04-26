@@ -33,6 +33,8 @@ static const struct option options[] = {
 	{"mode",    required_argument, 0, 'M'},
 	{"vchannel", required_argument, 0, 'V'},
 	{"refinout", required_argument, 0, 'R'},
+	{"vrange-each", required_argument, 0, 'E'},
+	{"vrange-all", required_argument, 0, 'A'},
 	{ 0, 0, 0, 0 },
 };
 
@@ -491,10 +493,79 @@ static int parse_voltage_arg(const char *arg, int *volt, int *div)
 	return 0;
 }
 
+static int convert_str_to_volt_range_enum(const char *arg)
+{
+	char buf[8];
+
+	copy_to_buf_upper(buf, arg, sizeof(buf));
+
+	if (0 == strcmp("2.5V", arg))
+		return AD7616_2V5;
+	else if (0 == strcmp("5V", arg))
+		return AD7616_5V;
+	else if (0 == strcmp("10V", arg))
+		return AD7616_10V;
+
+	fprintf(stderr, "Invalid volt range; supported values are 2.5V, 5V or 10V\n");
+	return -EINVAL;
+}
+
+static int parse_ranges_all(const char *arg)
+{
+	int i, volt_range;
+	if (!arg)
+		return -1;
+
+	volt_range = convert_str_to_volt_range_enum(arg);
+	if (volt_range < 0)
+		return -1;
+
+	for (i = 0; i < ARRAY_SIZE(va_ranges); i++) {
+		va_ranges[i] = volt_range;
+		vb_ranges[i] = volt_range;
+	}
+
+	return 0;
+}
+
+static int parse_ranges_each(const char *arg)
+{
+	char *s, *p;
+	int i, volt_range;
+
+	if (!arg)
+		return -1;
+
+	s = strdup(arg);
+	if (!s)
+		return -1;
+	i = 0;
+	p = strtok(s, ",");
+	while (p != NULL) {
+		volt_range = convert_str_to_volt_range_enum(p);
+		if (volt_range < 0)
+			return -1;
+		if (i > 7)
+			vb_ranges[i - 8] = volt_range;
+		else
+			va_ranges[i] = volt_range;
+		p = strtok(NULL, ",");
+		i++;
+	}
+	free(s);
+
+	if (i != 16) {
+		fprintf(stderr, "Insuficient volt ranges provided; 16 are required\n");
+		return -1;
+	}
+
+	return 0;
+}
+
 static void usage()
 {
 	fprintf(stderr, "ft4232h_pin_ctrl --serial <Test-Slot-X> --channel <Y> --mode <spi|bitbang>\n"
-			"    [--refinout <V>]  [--vchannel <VNZ>]\n"
+			"    [--refinout <V>]  [--vchannel <VNZ>] [--vrange-all <V>] [--vrange-each <V1,..,V16>]>\n"
 			"\tWhere: X is A-to-B, the name of the serial device for testing\n"
 			"\t       Y is A-to-B, the channel on the FTDI device\n"
 			"\t       N is 0-to-7\n"
@@ -503,7 +574,12 @@ static void usage()
 			"\tall other unspecified pins will be set low.\n\n"
 			"\tFor SPI, '--vchannel must be specified with values V0A to V7A or V0B to V7B\n"
 			"\tto read a single channel. Or '--vchannel all' will read all voltages in one go.\n\n"
-			"\t`--refinout` has a defaul value of 2.5V ; can be specified between 2.495 - 2.505 V\n");
+			"\t`--refinout` has a defaul value of 2.5V ; can be specified between 2.495 - 2.505 V\n\n"
+			"\tVoltage ranges for channels can be updated either all at once via `--vrange-all <V>`\n"
+			"\tor for each channel indididually via `--vrange-each <V1,V2,..V16>` where V1 coresponds\n"
+			"\tto V0A, V2 to V1A, V8 to V0B and so on\n"
+			"\tSupport voltage range values are '2.5V','5V' or '10V'\n"
+		);
 }
 
 int main(int argc, char **argv)
@@ -521,11 +597,19 @@ int main(int argc, char **argv)
 
 	optind = 0;
 
-	while ((c = getopt_long(argc, argv, "+C:S:V:R:",
+	while ((c = getopt_long(argc, argv, "+C:S:V:R:A:E:",
 					options, &option_index)) != -1) {
 		switch (c) {
+			case 'A':
+				if (parse_ranges_all(optarg) < 0)
+					return EXIT_FAILURE;
+				break;
 			case 'C':
 				channel = parse_channel(optarg);
+				break;
+			case 'E':
+				if (parse_ranges_each(optarg) < 0)
+					return EXIT_FAILURE;
 				break;
 			case 'M':
 				mode = parse_mode(optarg);
