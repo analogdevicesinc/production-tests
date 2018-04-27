@@ -302,9 +302,10 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 {
 	int vchannel_idx = sargs->vchannel_idx;
 	uint16_t vchannel_mask = vchannel_masks[vchannel_idx].i;
-	uint8_t buf[4] = {}; /* 2 bytes VA, 2 bytes VB */
+	uint8_t buf[8] = {}; /* 2 bytes VA, 2 bytes VB */
 	int64_t voltage, voltage_abs;
 	int i;
+	int samples = sargs->samples;
 
 	/* Select channel to read from */
 	if (ad7616_write_mask(dev, AD7616_REG_CHANNEL, 0x0f, vchannel_mask) < 0) {
@@ -313,7 +314,7 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 	}
 
 	voltage = 0;
-	for (i = 0; i < sargs->samples; i++) {
+	for (i = 0; i < samples; i++) {
 		if (start_conversion(dev) < 0)
 			return -1;
 
@@ -323,9 +324,15 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 			return -1;
 		}
 
-		if (vchannel_idx > 7)
-			voltage += voltage_from_buf(&buf[2]);
-		else
+		if (vchannel_idx > 7 && i == 1) {
+			samples++;
+			continue;
+		}
+
+		if (vchannel_idx > 7) {
+			int b_idx = (i == 0) ? 2 : 4;
+			voltage += voltage_from_buf(&buf[b_idx]);
+		} else
 			voltage += voltage_from_buf(&buf[0]);
 	}
 	voltage = voltage / (int64_t)sargs->samples;
@@ -340,11 +347,12 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 
 static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *sargs)
 {
-	uint8_t buf[4 * 8] = {}; /* (2 bytes VA, 2 bytes VB) x 8 */
+	uint8_t buf[8 * 8] = {}; /* (2 bytes VA, 2 bytes VB) x 8 */
 	uint16_t burst_en = AD7616_BURSTEN | AD7616_SEQEN;
 	int i, j;
 	int64_t voltages[16] = {};
 	int64_t voltage_abs;
+	int samples = sargs->samples;
 
 	/* We setup the sequencer ; it can a pair of VA & VB at the same time */
 	for (i = 0; i < 7; i++)
@@ -358,18 +366,25 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 	}
 
 	/* Collect samples of voltages */
-	for (i = 0; i < sargs->samples; i++) {
+	for (i = 0; i < samples; i++) {
 		if (start_conversion(dev) < 0)
 			return -1;
 
 		/* Read directly from SPI, bypassing ad7616_spi_read()  */
-		if (spi_read(&dev->spi_dev, buf, 4 * 8) < 0) {
+		if (spi_read(&dev->spi_dev, buf, sizeof(buf)) < 0) {
 			fprintf(stderr, "Error when reading data from SPI \n");
 			return -1;
 		}
+
+		if (i == 1) {
+			samples++;
+			continue;
+		}
+
 		for (j = 0; j < 8; j++) {
+			int b_idx = (j * 4) + ((i == 0) ? 2 : 4);
 			voltages[j] += voltage_from_buf(&buf[j * 4]);		/* VA voltages */
-			voltages[j + 8] += voltage_from_buf(&buf[j * 4 + 2]);	/* VB voltages */
+			voltages[j + 8] += voltage_from_buf(&buf[b_idx]);	/* VB voltages */
 		}
 	}
 
