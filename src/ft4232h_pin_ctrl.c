@@ -36,6 +36,7 @@ static const struct option options[] = {
 	{"vrange-each", required_argument, 0, 'E'},
 	{"vrange-all", required_argument, 0, 'A'},
 	{"no-samples", required_argument, 0, 'N'},
+	{"voffset",   required_argument, 0, 'O'},
 	{ 0, 0, 0, 0 },
 };
 
@@ -87,6 +88,8 @@ struct spi_read_args {
 	int refinout;
 	int refinout_div;
 	int samples;
+	int voffset;
+	int voffset_div;
 };
 
 static ad7616_range va_ranges[8] = {
@@ -294,6 +297,9 @@ static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_r
 	          refinout_div * /* divisor for refinout ; if REFINOUT is 2.495V, refinout is 2495 and refinout_div is 1000 */
 	          volt_range_div * /* voltage range div */
 	          25); /* 10 is part of 2.5V ==> 25/10 ; we need to divide with 2.5V */
+
+	/* Apply offset */
+	voltage += (sargs->voffset * PRECISION_MULT) / sargs->voffset_div;
 
 	return voltage;
 }
@@ -618,6 +624,7 @@ int main(int argc, char **argv)
 		.refinout = 25,
 		.refinout_div = 10,
 		.samples = 128,
+		.voffset_div = 1,
 	};
 
 	optind = 0;
@@ -641,6 +648,12 @@ int main(int argc, char **argv)
 				break;
 			case 'N':
 				sargs.samples = atoi(optarg);
+				break;
+			case 'O':
+				if (parse_voltage_arg(optarg, &sargs.voffset, &sargs.voffset_div) < 0) {
+					fprintf(stderr, "Could not parse refinout\n");
+					return EXIT_FAILURE;
+				}
 				break;
 			case 'R':
 				if (parse_voltage_arg(optarg, &sargs.refinout, &sargs.refinout_div) < 0) {
