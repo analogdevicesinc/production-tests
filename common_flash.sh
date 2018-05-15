@@ -72,6 +72,19 @@ force_terminate_programs() {
 	return 0
 }
 
+load_uboot() {
+	if [ "$MODE" == "DFU_ONLY" ] ; then
+		echo_green "  Skipping JTAG u-boot load"
+		return 0
+	fi
+
+	openocd -f "$CABLE_CFG" -c "load_uboot $UBOOT_ELF_FILE" || {
+		echo_blue "OpenOCD command failed"
+		force_terminate_programs
+		exit 1
+	}
+}
+
 flash_board () {
 	local ttyUSB="$1"
 	local releaseDir="$2"
@@ -88,12 +101,7 @@ flash_board () {
 	fi
 
 	echo_green "1. Loading uboot '$UBOOT_ELF_FILE'"
-
-	openocd -f "$CABLE_CFG" -c "load_uboot $UBOOT_ELF_FILE" || {
-		echo_blue "OpenOCD command failed"
-		force_terminate_programs
-		exit 1
-	}
+	load_uboot
 
 	echo_green "2. Running DFU utils step"
 
@@ -123,6 +131,7 @@ flash_board () {
 #----------------------------------#
 
 BOARD="$1"
+MODE="$2"
 
 [ -n "$BOARD" ] || {
 	echo_red "No board-name provided"
