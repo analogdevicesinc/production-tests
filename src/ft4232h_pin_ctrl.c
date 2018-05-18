@@ -267,6 +267,7 @@ static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_r
 	int volt_range_enum_val;
 	int64_t volt_range = 10;
 	int64_t volt_range_div = 1;
+	int64_t voffset_div = sargs->voffset_div;
 	int64_t refinout = sargs->refinout;
 	int64_t refinout_div = sargs->refinout_div;
 
@@ -287,6 +288,11 @@ static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_r
 		break;
 	}
 
+	if (refinout_div == 0)
+		refinout_div = 1;
+	if (voffset_div == 0)
+		voffset_div = 1;
+
 	/* Apply transfer function (page 24 of datasheet):
 	     - multiply with 1000 to get mili-Volts
 	*/
@@ -299,7 +305,7 @@ static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_r
 	          25); /* 10 is part of 2.5V ==> 25/10 ; we need to divide with 2.5V */
 
 	/* Apply offset */
-	voltage += (sargs->voffset * PRECISION_MULT) / sargs->voffset_div;
+	voltage += (sargs->voffset * PRECISION_MULT) / voffset_div;
 
 	return voltage;
 }
