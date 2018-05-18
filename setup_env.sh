@@ -54,13 +54,18 @@ sync_udev_rules_file() {
 build_ft4232h_tool() {
 	local tool="ft4232h_pin_ctrl"
 	local tool_c="${tool}.c"
-	local cflags="-Werror -Wall"
+	local tool_c="${tool}.c ad7616.c platform_drivers.c"
+	local c_files
+	local cflags="-I./src -Werror -Wall"
 	local ldflags="-lftdi"
 
 	[ -d "work" ] || mkdir -p work
 
-	cp -f "src/$tool_c" "work/$tool_c"
-	gcc "work/$tool_c" -o "work/$tool" $cflags $ldflags
+	for c_file in $tool_c ; do
+		cp -f "src/$c_file" "work/$c_file"
+		c_files="$c_files work/$c_file"
+	done
+	gcc $c_files -o "work/$tool" $cflags $ldflags
 }
 
 #----------------------------------#
