@@ -609,7 +609,8 @@ static int parse_ranges_each(const char *arg)
 static void usage()
 {
 	fprintf(stderr, "ft4232h_pin_ctrl --serial <Test-Slot-X> --channel <Y> --mode <spi|bitbang>\n"
-			"    [--refinout <V>]  [--vchannel <VNZ>] [--vrange-all <V>] [--vrange-each <V1,..,V16>]>\n"
+			"    [--refinout <V>]  [--vchannel <VNZ>] [--vrange-all <V>]\n"
+			"    [--voffset <V>] [--gain <G>] [--vrange-each <V1,..,V16>]>\n"
 			"\tWhere: X is A-to-B, the name of the serial device for testing\n"
 			"\t       Y is A-to-B, the channel on the FTDI device\n"
 			"\t       N is 0-to-7\n"
@@ -623,6 +624,9 @@ static void usage()
 			"\tor for each channel indididually via `--vrange-each <V1,V2,..V16>` where V1 coresponds\n"
 			"\tto V0A, V2 to V1A, V8 to V0B and so on\n"
 			"\tSupport voltage range values are '2.5V','5V' or '10V'\n"
+			"\t\n\t"
+			"\tThe tool supports applying an offset and gain to the measured voltage.\n"
+			"\tThe formula is 'V = (V + VOFFSET) * GAIN'\n"
 		);
 }
 
