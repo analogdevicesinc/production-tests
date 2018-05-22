@@ -41,10 +41,6 @@ check_system_requirements() {
 	return 0
 }
 
-is_ft4232h() {
-	lsusb -v -d 0456:f001 &> /dev/null
-}
-
 get_config() {
 	local board="$1"
 	is_ft4232h && {
