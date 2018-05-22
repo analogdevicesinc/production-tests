@@ -37,6 +37,7 @@ static const struct option options[] = {
 	{"vrange-all", required_argument, 0, 'A'},
 	{"no-samples", required_argument, 0, 'N'},
 	{"voffset",   required_argument, 0, 'O'},
+	{"gain",      required_argument, 0, 'G'},
 	{ 0, 0, 0, 0 },
 };
 
@@ -90,6 +91,8 @@ struct spi_read_args {
 	int samples;
 	int voffset;
 	int voffset_div;
+	int gain;
+	int gain_div;
 };
 
 static ad7616_range va_ranges[8] = {
@@ -270,6 +273,8 @@ static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_r
 	int64_t voffset_div = sargs->voffset_div;
 	int64_t refinout = sargs->refinout;
 	int64_t refinout_div = sargs->refinout_div;
+	int64_t gain = sargs->gain;
+	int64_t gain_div = sargs->gain_div;
 
 	if (ch > 7)
 		volt_range_enum_val = vb_ranges[ch - 8];
@@ -292,6 +297,8 @@ static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_r
 		refinout_div = 1;
 	if (voffset_div == 0)
 		voffset_div = 1;
+	if (gain_div == 0)
+		gain_div = 1;
 
 	/* Apply transfer function (page 24 of datasheet):
 	     - multiply with 1000 to get mili-Volts
@@ -306,6 +313,7 @@ static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_r
 
 	/* Apply offset */
 	voltage += (sargs->voffset * PRECISION_MULT) / voffset_div;
+	voltage = (voltage * gain) / gain_div;
 
 	return voltage;
 }
@@ -631,6 +639,8 @@ int main(int argc, char **argv)
 		.refinout_div = 10,
 		.samples = 128,
 		.voffset_div = 1,
+		.gain = 1,
+		.gain_div = 1,
 	};
 
 	optind = 0;
@@ -654,6 +664,12 @@ int main(int argc, char **argv)
 				break;
 			case 'N':
 				sargs.samples = atoi(optarg);
+				break;
+			case 'G':
+				if (parse_voltage_arg(optarg, &sargs.gain, &sargs.gain_div) < 0) {
+					fprintf(stderr, "Could not parse gain\n");
+					return EXIT_FAILURE;
+				}
 				break;
 			case 'O':
 				if (parse_voltage_arg(optarg, &sargs.voffset, &sargs.voffset_div) < 0) {
