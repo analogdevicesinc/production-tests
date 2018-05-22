@@ -10,10 +10,6 @@ source config.sh
 # Functions section                #
 #----------------------------------#
 
-echo_red()   { printf "\033[1;31m$*\033[m\n"; }
-echo_green() { printf "\033[1;32m$*\033[m\n"; }
-echo_blue()  { printf "\033[1;34m$*\033[m\n"; }
-
 enforce_openocd_version() {
 	local ver="$(openocd --version 2>&1 | head -1 | cut -d' ' -f4)"
 	local min_ver="$(echo $ver | cut -d. -f2)"
