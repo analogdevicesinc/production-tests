@@ -16,6 +16,15 @@ TTYUSB=ttyUSB0
 
 FT4232H_SERIAL="Test-Slot-A"
 
+# This can be increased to a higher value, and then multiple measurements
+# will be made and averaged
+NUM_SAMPLES=1
+
+# These need to be tuned per board
+REFINOUT=2.4989
+VOLTAGE_OFFSET=0
+VOLTAGE_GAIN=1
+
 #----------------------------------#
 # Functions section                #
 #----------------------------------#
@@ -44,3 +53,10 @@ enable_usb_port_2() {
 	./work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" --channel A pin6
 }
 
+measure_voltage() {
+	local channel="${1:-all}"
+	./work/ft4232h_pin_ctrl --mode spi --serial "$FT4232H_SERIAL" \
+		--channel B --refinout "$REFINOUT" --no-samples "$NUM_SAMPLES" \
+		--voffset "$VOLTAGE_OFFSET" --gain "$VOLTAGE_GAIN" \
+		--vchannel "$channel"
+}
