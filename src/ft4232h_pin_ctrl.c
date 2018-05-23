@@ -440,7 +440,7 @@ static int handle_mpsse_spi(const char *serial, int channel,
 
 	if (open_device(&ftdi, serial, channel)) {
 		fprintf(stderr, "Coud not open device\n");
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	memcpy(init.va, va_ranges, sizeof(init.va));
@@ -455,7 +455,7 @@ static int handle_mpsse_spi(const char *serial, int channel,
 
 	if (gpio_set_direction(&dev->gpio_dev, BUSY_PIN, GPIO_IN) < 0) {
 		fprintf(stderr, "Error setting BUSY pin direction\n");
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	if (vchannel_mask == ALL_CHANNELS) {
