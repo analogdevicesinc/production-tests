@@ -67,3 +67,53 @@ measure_voltage() {
 		--voffset "$VOLTAGE_OFFSET" --gain "$VOLTAGE_GAIN" \
 		--vchannel "$channel"
 }
+
+is_valid_number() {
+	local re='^-?[0-9]+([.][0-9]+)?$'
+	[ -n "$1" ] || return 1
+	[[ $1 =~ $re ]]	# note: this is bash-ism
+}
+
+valid_numbers() {
+	local cnt="$1"
+	shift
+	while [ "$cnt" -gt 0 ] ; do
+		is_valid_number "$1" || return 1
+		shift
+		let cnt='cnt - 1'
+	done
+	return 0
+}
+
+get_item_from_list() {
+	local idx=$1
+	shift
+	while [ "$idx" -gt 0 ] ; do
+		let idx='idx - 1'
+		shift
+	done
+	echo $1
+}
+
+value_in_range() {
+	local val="$1"
+	local min="$2"
+	local max="$3"
+
+	is_valid_number "$val" || {
+		echo_red "Compare value '$val' is not a valid number"
+		return 1
+	}
+
+	is_valid_number "$min" || {
+		echo_red "Min value '$min' is not a valid number"
+		return 1
+	}
+
+	is_valid_number "$val" || {
+		echo_red "Max value '$max' is not a valid number"
+		return 1
+	}
+
+	[ "$(echo "$min <= $val && $val <= $max" | bc -l)" == "1" ]
+}
