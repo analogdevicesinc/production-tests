@@ -109,7 +109,7 @@ flash_board () {
 	if is_ft4232h ; then
 		echo_green "3. Done ; powercycling the board"
 		disable_all_usb_ports
-		sleep 1
+		power_cycle_sleep
 		enable_all_usb_ports
 	else
 		echo_green "3. Done ; you can now powercycle the board"
