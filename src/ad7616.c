@@ -276,19 +276,37 @@ int32_t ad7616_setup(ad7616_dev **device, ad7616_init_param *init_param)
 	dev->spi_dev.mpsse.frequency = init_param->frequency;
 	dev->spi_dev.mpsse.ftdi = init_param->ftdi;
 
-	ret |= spi_init(&dev->spi_dev);
+	ret = spi_init(&dev->spi_dev);
+	if (ret < 0) {
+		fprintf(stderr, "%s: Error initializing SPI: %d\n", __func__, ret);
+		goto out;
+	}
 
 	dev->gpio_dev.device_id = init_param->gpio_device_id;
 	dev->gpio_dev.spi_dev = &dev->spi_dev; /* using same device with MPSSE */
-	ret |= gpio_init(&dev->gpio_dev);
+	ret = gpio_init(&dev->gpio_dev);
+	if (ret < 0) {
+		fprintf(stderr, "%s: Error initializing GPIO: %d\n", __func__, ret);
+		goto out;
+	}
 
 	dev->gpio_reset = init_param->gpio_reset;
 	if (dev->gpio_reset >= 0) {
-		ret |= gpio_set_direction(&dev->gpio_dev,
+		ret = gpio_set_direction(&dev->gpio_dev,
 						dev->gpio_reset, GPIO_OUT);
-		ret |= gpio_set_value(&dev->gpio_dev,
+		if (ret < 0) {
+			fprintf(stderr, "%s: Error setting the reset GPIO direction: %d\n",
+				__func__, ret);
+			goto out;
+		}
+		ret = gpio_set_value(&dev->gpio_dev,
 						dev->gpio_reset,
 						GPIO_HIGH);
+		if (ret < 0) {
+			fprintf(stderr, "%s: Error setting the reset GPIO value: %d\n",
+				__func__, ret);
+			goto out;
+		}
 	}
 
 	dev->mode = init_param->mode;
@@ -296,12 +314,22 @@ int32_t ad7616_setup(ad7616_dev **device, ad7616_init_param *init_param)
 		dev->va[i] = init_param->va[i];
 		dev->vb[i] = init_param->vb[i];
 	}
-	ret |= ad7616_set_mode(dev, dev->mode);
+	ret = ad7616_set_mode(dev, dev->mode);
+	if (ret < 0) {
+		fprintf(stderr, "%s: Error when setting mode: %d\n", __func__, ret);
+		goto out;
+	}
 
 	dev->osr = init_param->osr;
-	ret |= ad7616_set_oversampling_ratio(dev, dev->osr);
+	ret = ad7616_set_oversampling_ratio(dev, dev->osr);
+	if (ret < 0) {
+		fprintf(stderr, "%s: Error when setting over-sampling ratio: %d\n", __func__, ret);
+		goto out;
+	}
 
 	*device = dev;
-
+out:
+	if (ret)
+		free(dev);
 	return ret;
 }

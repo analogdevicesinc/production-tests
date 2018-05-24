@@ -155,17 +155,17 @@ static int get_idx_from_map(const struct map *map, int map_len, const char *arg)
 static int open_device(struct ftdi_context *ctx, const char *serial, int channel)
 {
 	if (ftdi_init(ctx) < 0) {
-		fprintf(stderr, "Failed to init ftdi context\n");
+		fprintf(stderr, "Failed to init ftdi context: %s\n", ftdi_get_error_string(ctx));
 		return -1;
 	}
 
 	if (ftdi_set_interface(ctx, channel) < 0) {
-		fprintf(stderr, "Failed to set channel %d\n", channel);
+		fprintf(stderr, "Failed to set channel %d: %s\n", channel, ftdi_get_error_string(ctx));
 		return -1;
 	}
 
 	if (ftdi_usb_open_desc_index(ctx, GNICE_VID, GNICE_PID, NULL, serial, 0) < 0) {
-		fprintf(stderr, "Failed to open device\n");
+		fprintf(stderr, "Failed to open device: %s\n",ftdi_get_error_string(ctx));
 		return -1;
 	}
 
@@ -191,13 +191,11 @@ static int set_pin_values(const char *serial, int channel, char **argv,
 	unsigned char buf[2];
 	int i;
 
-	if (open_device(&ftdi, serial, channel)) {
-		fprintf(stderr, "Coud not open device\n");
+	if (open_device(&ftdi, serial, channel))
 		return -1;
-	}
 
 	if (ftdi_set_bitmode(&ftdi, 0xFF, BITMODE_BITBANG) < 0) {
-		fprintf(stderr, "Failed to set bitbang mode\n");
+		fprintf(stderr, "Failed to set bitbang mode: %s\n", ftdi_get_error_string(&ftdi));
 		return -1;
 	}
 
@@ -212,7 +210,7 @@ static int set_pin_values(const char *serial, int channel, char **argv,
 	}
 
 	if (ftdi_write_data(&ftdi, buf, sizeof(buf)) != sizeof(buf)) {
-		fprintf(stderr, "Could not set pins\n");
+		fprintf(stderr, "Could not set pins: %s\n", ftdi_get_error_string(&ftdi));
 		return -1;
 	}
 
@@ -502,10 +500,8 @@ static int handle_mpsse_spi(const char *serial, int channel,
 	int ret = EXIT_FAILURE;
 	uint16_t vchannel_mask = vchannel_masks[sargs->vchannel_idx].i;
 
-	if (open_device(&ftdi, serial, channel)) {
-		fprintf(stderr, "Coud not open device\n");
+	if (open_device(&ftdi, serial, channel))
 		return EXIT_FAILURE;
-	}
 
 	memcpy(init.va, va_ranges, sizeof(init.va));
 	memcpy(init.vb, vb_ranges, sizeof(init.vb));
