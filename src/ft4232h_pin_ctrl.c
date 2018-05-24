@@ -38,6 +38,7 @@ static const struct option options[] = {
 	{"no-samples", required_argument, 0, 'N'},
 	{"voffset",   required_argument, 0, 'O'},
 	{"gain",      required_argument, 0, 'G'},
+	{"self-test", no_argument, 0, 'T'},
 	{ 0, 0, 0, 0 },
 };
 
@@ -93,6 +94,7 @@ struct spi_read_args {
 	int voffset_div;
 	int gain;
 	int gain_div;
+	int self_test;
 };
 
 static ad7616_range va_ranges[8] = {
@@ -428,6 +430,62 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 	return 0;
 }
 
+static int handle_self_test(ad7616_dev *dev)
+{
+	static uint8_t channel_a[] = { 0xaa, 0xaa };
+	static uint8_t channel_b[] = { 0x55, 0x55 };
+	uint8_t buf[4] = {}; /* 2 bytes VA, 2 bytes VB */
+	int ret = 0, i;
+	uint16_t data, diag_chan = (0xb << 4) | 0xb;
+
+	/* Write diagnostic value for communication test */
+	if (ad7616_write_mask(dev, AD7616_REG_CHANNEL, 0xff, diag_chan) < 0) {
+		fprintf(stderr, "Unable to set diagnostics value on channel reg\n");
+		return -1;
+	}
+
+	if (ad7616_read(dev, AD7616_REG_CHANNEL, &data)) {
+		fprintf(stderr, "Unable to read channel reg\n");
+		return -1;
+	}
+
+	if (data != diag_chan) {
+		fprintf(stderr, "Invalid channel set; expected '%04x' got '%04x'\n",
+			diag_chan, data);
+		ret = -1;
+	}
+
+	if (start_conversion(dev) < 0)
+		return -1;
+
+	/* Read directly from SPI, bypassing ad7616_spi_read()  */
+	if (spi_read(&dev->spi_dev, buf, sizeof(buf)) < 0) {
+		fprintf(stderr, "Error when reading data from SPI \n");
+		return -1;
+	}
+
+	for (i = 0; i < sizeof(buf); i++)
+		printf("%02X ", buf[i]);
+
+	printf("\n");
+
+	if (memcmp(&buf[0], channel_a, sizeof(channel_a))) {
+		fprintf(stderr, "Channel A values differ from expected 0xAAAA\n");
+		ret = -1;
+	}
+
+	if (memcmp(&buf[2], channel_b, sizeof(channel_b))) {
+		fprintf(stderr, "Channel B values differ from expected 0x5555\n");
+		ret = -1;
+	}
+
+	if (ret == 0) {
+		printf("\n!!All good!!\n");
+	}
+
+	return ret;
+}
+
 static int handle_mpsse_spi(const char *serial, int channel,
 			    const struct spi_read_args *sargs)
 {
@@ -457,6 +515,11 @@ static int handle_mpsse_spi(const char *serial, int channel,
 	if (ad7616_setup(&dev, &init) < 0) {
 		fprintf(stderr, "Could not initialize AD7616 device\n");
 		return EXIT_FAILURE;
+	}
+
+	if (sargs->self_test) {
+		ret = handle_self_test(dev);
+		goto out;
 	}
 
 	if (gpio_set_direction(&dev->gpio_dev, BUSY_PIN, GPIO_IN) < 0) {
@@ -651,6 +714,7 @@ int main(int argc, char **argv)
 		.voffset_div = 1,
 		.gain = 1,
 		.gain_div = 1,
+		.self_test = 0,
 	};
 
 	optind = 0;
@@ -658,6 +722,10 @@ int main(int argc, char **argv)
 	while ((c = getopt_long(argc, argv, "+C:S:V:R:A:E:",
 					options, &option_index)) != -1) {
 		switch (c) {
+			case 'T':
+				sargs.self_test = 1;
+				mode = BITMODE_MPSSE;
+				break;
 			case 'A':
 				if (parse_ranges_all(optarg) < 0)
 					return EXIT_FAILURE;
