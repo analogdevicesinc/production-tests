@@ -263,7 +263,7 @@ int32_t ad7616_setup(ad7616_dev **device, ad7616_init_param *init_param)
 	uint8_t i;
 	int32_t ret = 0;
 
-	dev = (ad7616_dev *)malloc(sizeof(*dev));
+	dev = (ad7616_dev *)calloc(1, sizeof(*dev));
 	if (!dev) {
 		return -1;
 	}
