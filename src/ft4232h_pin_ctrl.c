@@ -322,13 +322,19 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 {
 	int vchannel_idx = sargs->vchannel_idx;
 	uint16_t vchannel_mask = vchannel_masks[vchannel_idx].i;
+	uint16_t vchannel_clr_mask;
 	uint8_t buf[8] = {}; /* 2 bytes VA, 2 bytes VB */
 	int64_t voltage, voltage_abs;
 	int i;
 	int samples = sargs->samples;
 
+	if (vchannel_idx > 7)
+		vchannel_clr_mask = 0xf0;
+	else
+		vchannel_clr_mask = 0x0f;
+
 	/* Select channel to read from */
-	if (ad7616_write_mask(dev, AD7616_REG_CHANNEL, 0x0f, vchannel_mask) < 0) {
+	if (ad7616_write_mask(dev, AD7616_REG_CHANNEL, vchannel_clr_mask, vchannel_mask) < 0) {
 		fprintf(stderr, "Unable to select voltage channel 0x%04x\n", (0x1f & vchannel_mask));
 		return -1;
 	}
