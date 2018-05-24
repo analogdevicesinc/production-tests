@@ -455,7 +455,7 @@ static int handle_mpsse_spi(const char *serial, int channel,
 
 	if (gpio_set_direction(&dev->gpio_dev, BUSY_PIN, GPIO_IN) < 0) {
 		fprintf(stderr, "Error setting BUSY pin direction\n");
-		return EXIT_FAILURE;
+		goto out;
 	}
 
 	if (vchannel_mask == ALL_CHANNELS) {
