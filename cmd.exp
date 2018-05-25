@@ -91,17 +91,15 @@ while 1 {
     }
 }
 
-if {0} {
-    ### use u-boot default env
-    send "sudo dfu-util -D $releaseDir/uboot-env.dfu -a uboot-env.dfu\r"
-    while 1 {
-        expect {
-            "Done!" {
-                break
-            }
-            timeout {
-                exit 1
-            }
+### use u-boot default env
+send "sudo dfu-util -D $releaseDir/uboot-env.dfu -a uboot-env.dfu\r"
+while 1 {
+    expect {
+        "Done!" {
+            break
+        }
+        timeout {
+            exit 1
         }
     }
 }
