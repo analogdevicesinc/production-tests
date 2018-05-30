@@ -71,6 +71,11 @@ reset_adc() {
 		--serial "$FT4232H_SERIAL" pin4 || return 1
 }
 
+self_test() {
+	./work/ft4232h_pin_ctrl --mode spi --channel B \
+		--serial "$FT4232H_SERIAL" --self-test
+}
+
 measure_voltage() {
 	local channel="${1:-all}"
 	./work/ft4232h_pin_ctrl --mode spi --serial "$FT4232H_SERIAL" \
