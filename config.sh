@@ -60,6 +60,17 @@ enable_usb_port_2() {
 	./work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" --channel A pin6
 }
 
+reset_adc() {
+	./work/ft4232h_pin_ctrl --mode bitbang --channel B \
+		--serial "$FT4232H_SERIAL" pin4 || return 1
+	sleep 0.1
+	./work/ft4232h_pin_ctrl --mode bitbang --channel B \
+		--serial "$FT4232H_SERIAL" || return 1
+	sleep 0.1
+	./work/ft4232h_pin_ctrl --mode bitbang --channel B \
+		--serial "$FT4232H_SERIAL" pin4 || return 1
+}
+
 measure_voltage() {
 	local channel="${1:-all}"
 	./work/ft4232h_pin_ctrl --mode spi --serial "$FT4232H_SERIAL" \
