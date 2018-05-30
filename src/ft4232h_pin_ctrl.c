@@ -21,6 +21,8 @@
 #define PRECISION_MULT		10000	/* 0.1 mV or 100 uV */
 #define PRECISION_FMT		"%04d"	/* correlate this with PRECISION_MULT */
 
+#define BURST_EN	(AD7616_BURSTEN | AD7616_SEQEN)
+
 enum {
 	CONVST_PIN = GPIOL0,
 	RESET_PIN  = GPIOL1,
@@ -345,6 +347,11 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 	else
 		vchannel_clr_mask = 0x0f;
 
+	if (ad7616_write_mask(dev, AD7616_REG_CONFIG, BURST_EN, 0) < 0) {
+		fprintf(stderr, "Unable to disable burst mode\n");
+		return -1;
+	}
+
 	/* Select channel to read from */
 	if (ad7616_write_mask(dev, AD7616_REG_CHANNEL, vchannel_clr_mask, vchannel_mask) < 0) {
 		fprintf(stderr, "Unable to select voltage channel 0x%04x\n", (0x1f & vchannel_mask));
@@ -387,7 +394,6 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *sargs)
 {
 	uint8_t buf[8 * 8] = {}; /* (2 bytes VA, 2 bytes VB) x 8 */
-	uint16_t burst_en = AD7616_BURSTEN | AD7616_SEQEN;
 	int i, j;
 	int64_t voltages[16] = {};
 	int64_t voltage_abs;
@@ -399,7 +405,7 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 	/* Last register needs SSREN bit set */
 	ad7616_write(dev, AD7616_REG_SEQUENCER_STACK(7), 7 | (7 << 4) | AD7616_SSREN);
 
-	if (ad7616_write_mask(dev, AD7616_REG_CONFIG, burst_en, burst_en) < 0) {
+	if (ad7616_write_mask(dev, AD7616_REG_CONFIG, BURST_EN, BURST_EN) < 0) {
 		fprintf(stderr, "Unable to enable burst mode\n");
 		return -1;
 	}
