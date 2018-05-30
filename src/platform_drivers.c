@@ -256,11 +256,6 @@ static int32_t spi_set_mpsse_spi_mode(spi_device *dev)
 		return -1;
 	}
 
-	if (set_bits_low(mpsse, mpsse->pidle) < 0) {
-		fprintf(stderr, "Error when initializing port\n");
-		return -1;
-	}
-
 	return 0;
 }
 
@@ -470,6 +465,18 @@ out:
 *******************************************************************************/
 int32_t gpio_init(gpio_device *dev)
 {
+	mpsse *mpsse = &dev->spi_dev->mpsse;
+	int ret;
+
+	/* GPIO1 is the reset pin */
+	mpsse->pidle |= GPIO1;
+	mpsse->pstart |= GPIO1;
+	mpsse->pstop |= GPIO1;
+
+	ret = set_bits_low(mpsse, mpsse->pidle);
+	if (ret < 0)
+		return ret;
+	mdelay(20); /* 20 milliseconds to avoid glitches */
 	return 0;
 }
 
