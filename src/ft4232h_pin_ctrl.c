@@ -239,7 +239,7 @@ static int wait_busy_is(ad7616_dev *dev, uint8_t busy, int retries)
 	return timedout ? -1 : 0;
 }
 
-int start_conversion(ad7616_dev *dev)
+static int do_conversion(ad7616_dev *dev, uint8_t *buf, int buf_len)
 {
 	mdelay(1);
 
@@ -256,7 +256,19 @@ int start_conversion(ad7616_dev *dev)
 		return -1;
 	}
 
+	/* Read directly from SPI, bypassing ad7616_spi_read()  */
+	if (spi_read(&dev->spi_dev, buf, buf_len) < 0) {
+		fprintf(stderr, "Error when reading data from SPI \n");
+		return -1;
+	}
+
 	return 0;
+}
+
+static inline int dummy_conversion(ad7616_dev *dev)
+{
+	uint8_t buf[4 * 32];
+	return do_conversion(dev, buf, sizeof(buf));
 }
 
 static inline int64_t voltage_from_buf(uint8_t *buf)
@@ -339,14 +351,15 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 		return -1;
 	}
 
+	if (dummy_conversion(dev) < 0) {
+		fprintf(stderr, "Error while doing dummy conversion\n");
+		return -1;
+	}
+
 	voltage = 0;
 	for (i = 0; i < samples; i++) {
-		if (start_conversion(dev) < 0)
-			return -1;
-
-		/* Read directly from SPI, bypassing ad7616_spi_read()  */
-		if (spi_read(&dev->spi_dev, buf, sizeof(buf)) < 0) {
-			fprintf(stderr, "Error when reading data from SPI \n");
+		if (do_conversion(dev, buf, sizeof(buf)) < 0) {
+			fprintf(stderr, "Error while doing conversion\n");
 			return -1;
 		}
 
@@ -391,14 +404,15 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 		return -1;
 	}
 
+	if (dummy_conversion(dev) < 0) {
+		fprintf(stderr, "Error while doing dummy conversion\n");
+		return -1;
+	}
+
 	/* Collect samples of voltages */
 	for (i = 0; i < samples; i++) {
-		if (start_conversion(dev) < 0)
-			return -1;
-
-		/* Read directly from SPI, bypassing ad7616_spi_read()  */
-		if (spi_read(&dev->spi_dev, buf, sizeof(buf)) < 0) {
-			fprintf(stderr, "Error when reading data from SPI \n");
+		if (do_conversion(dev, buf, sizeof(buf)) < 0) {
+			fprintf(stderr, "Error while doing conversion\n");
 			return -1;
 		}
 
@@ -453,12 +467,13 @@ static int handle_self_test(ad7616_dev *dev)
 		ret = -1;
 	}
 
-	if (start_conversion(dev) < 0)
+	if (dummy_conversion(dev) < 0) {
+		fprintf(stderr, "Error while doing dummy conversion\n");
 		return -1;
+	}
 
-	/* Read directly from SPI, bypassing ad7616_spi_read()  */
-	if (spi_read(&dev->spi_dev, buf, sizeof(buf)) < 0) {
-		fprintf(stderr, "Error when reading data from SPI \n");
+	if (do_conversion(dev, buf, sizeof(buf)) < 0) {
+		fprintf(stderr, "Error while doing conversion\n");
 		return -1;
 	}
 
