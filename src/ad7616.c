@@ -299,11 +299,9 @@ int32_t ad7616_setup(ad7616_dev **device, ad7616_init_param *init_param)
 				__func__, ret);
 			goto out;
 		}
-		ret = gpio_set_value(&dev->gpio_dev,
-						dev->gpio_reset,
-						GPIO_HIGH);
+		ret = ad7616_reset(dev);
 		if (ret < 0) {
-			fprintf(stderr, "%s: Error setting the reset GPIO value: %d\n",
+			fprintf(stderr, "%s: Error setting the reset the device: %d\n",
 				__func__, ret);
 			goto out;
 		}
