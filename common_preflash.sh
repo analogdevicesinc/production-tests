@@ -14,6 +14,16 @@ MEASUREMENT_CYCLES=1
 # Functions section                #
 #----------------------------------#
 
+get_label() {
+	local idx="$1"
+	get_item_from_list $idx $VLABELS
+}
+
+get_target_voltage() {
+	local idx="$1"
+	get_item_from_list $idx $TARGET_VOLTAGES
+}
+
 check_voltage_ranges() {
 	# Use double indirection to get the variables
 	eval "local voltages_min=\"\$$1_VMIN\""
@@ -28,6 +38,8 @@ check_voltage_ranges() {
 	}
 
 	for m in $measured ; do
+		local label="$(get_label $cnt)"
+		local target_voltage="$(get_target_voltage $cnt)"
 		local min="$(get_item_from_list $cnt $voltages_min)"
 		[ "$min" == "N/A" ] && {
 			let cnt='cnt + 1'
@@ -40,7 +52,8 @@ check_voltage_ranges() {
 		}
 
 		value_in_range "$m" "$min" "$max" || {
-			echo_red "Value ($cnt) '$m' is not in range '$min..$max', or is invalid"
+			echo_red "Value ($label) '$m' is not in range '$min..$max', or is invalid"
+			echo_red "   Target voltage is '$target_voltage'"
 			exit 1
 		}
 		let cnt='cnt + 1'
