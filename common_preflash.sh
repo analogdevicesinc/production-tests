@@ -60,6 +60,7 @@ power_on_usb_1_and_measure() {
 	disable_all_usb_ports
 	power_cycle_sleep
 	enable_usb_port_1
+	power_cycle_sleep
 	check_voltage_ranges "BOARD_ON"
 	echo_green "   .Done"
 }
@@ -69,6 +70,7 @@ power_on_usb_2_and_measure() {
 	disable_all_usb_ports
 	power_cycle_sleep
 	enable_usb_port_2
+	power_cycle_sleep
 	check_voltage_ranges "BOARD_ON"
 	echo_green "   .Done"
 }
