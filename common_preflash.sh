@@ -47,6 +47,30 @@ check_voltage_ranges() {
 	done
 }
 
+validate_range_values() {
+	local cnt=$1
+	eval "local voltages_min=\"\$$2_VMIN\""
+	eval "local voltages_max=\"\$$2_VMAX\""
+
+	let cnt='cnt - 1'
+	for cnt in $(seq 0 $cnt) ; do
+		local label=$(get_label $cnt)
+		local min="$(get_item_from_list $cnt $voltages_min)"
+		if [ "$min" != "N/A" ] && ! is_valid_number "$min" ; then
+			echo_red "Invalid number ($cnt) '$min' for $label in $2_VMIN"
+			return 1
+		fi
+		local max="$(get_item_from_list $cnt $voltages_max)"
+		if [ "$max" != "N/A" ] && ! is_valid_number "$max" ; then
+			echo_red "Invalid number ($cnt) '$max' for $label in $2_VMAX"
+			return 1
+		fi
+		let cnt='cnt - 1'
+        done
+        return 0
+
+}
+
 power_off_and_measure() {
 	echo_green "   Measuring voltages with board off"
 	disable_all_usb_ports
@@ -87,6 +111,10 @@ BOARD="$1"
 }
 
 source config/$BOARD/values.sh
+
+for ranges in BOARD_OFF BOARD_ON ; do
+	validate_range_values 16 $ranges || exit 1
+done
 
 for measure_cnt in $(seq 1 $MEASUREMENT_CYCLES); do
 	echo_blue "Running measurement cycle $measure_cnt"
