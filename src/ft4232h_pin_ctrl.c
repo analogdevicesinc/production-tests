@@ -190,7 +190,7 @@ static int set_pin_values(const char *serial, int channel, char **argv,
 			  int from, int to)
 {
 	struct ftdi_context ftdi = {};
-	unsigned char buf[2];
+	unsigned char buf[3] = {};
 	int i;
 
 	if (open_device(&ftdi, serial, channel))
@@ -209,6 +209,7 @@ static int set_pin_values(const char *serial, int channel, char **argv,
 			return -1;
 		}
 		buf[1] |= 1 << pin;
+		buf[2] |= 1 << pin;
 	}
 
 	if (ftdi_write_data(&ftdi, buf, sizeof(buf)) != sizeof(buf)) {
