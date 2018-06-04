@@ -180,6 +180,9 @@ echo_green "Press CTRL-C to exit"
 
 ###### In Jtag Mode #######
 
+disable_all_usb_ports
+power_cycle_sleep
+
 flash_board "$TTYUSB" "$RELEASE_DIR" "$FIRMWARE_DFU_FILE"
 
 exit 0
