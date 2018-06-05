@@ -39,36 +39,51 @@ is_ft4232h() {
 	lsusb -v -d 0456:f001 &> /dev/null
 }
 
+valid_ftdi_channel() {
+	local channel="$1"
+	channel=$(echo $channel | tr a-z A-Z)
+	for chan in A B C D ; do
+		[ "$chan" == "$channel" ] && return 0
+	done
+	return 1
+}
+
+toggle_pins() {
+	local channel=$1
+	valid_ftdi_channel "$channel" || return 1
+	shift
+	./work/ft4232h_pin_ctrl --mode bitbang \
+		--serial "$FT4232H_SERIAL" \
+		--channel "$channel" $@
+}
+
 power_cycle_sleep() {
 	[ -z "$POWER_CYCLE_DELAY" ] || \
 		sleep "$POWER_CYCLE_DELAY"
 }
 
 disable_all_usb_ports() {
-	./work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" --channel A # will set all pins to low
+	toggle_pins A # will set all pins to low
 }
 
 enable_all_usb_ports() {
-	./work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" --channel A pin5 pin6
+	toggle_pins A pin5 pin6
 }
 
 enable_usb_port_1() {
-	./work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" --channel A pin5
+	toggle_pins A pin5
 }
 
 enable_usb_port_2() {
-	./work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" --channel A pin6
+	toggle_pins A pin6
 }
 
 reset_adc() {
-	./work/ft4232h_pin_ctrl --mode bitbang --channel B \
-		--serial "$FT4232H_SERIAL" pin4 || return 1
+	toggle_pins B pin4 || return 1
 	sleep 0.1
-	./work/ft4232h_pin_ctrl --mode bitbang --channel B \
-		--serial "$FT4232H_SERIAL" || return 1
+	toggle_pins B || return 1
 	sleep 0.1
-	./work/ft4232h_pin_ctrl --mode bitbang --channel B \
-		--serial "$FT4232H_SERIAL" pin4 || return 1
+	toggle_pins B pin4 || return 1
 }
 
 self_test() {
