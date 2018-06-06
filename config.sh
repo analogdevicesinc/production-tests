@@ -33,3 +33,5 @@ VOLTAGE_GAIN=1
 # Utils                            #
 #----------------------------------#
 source lib/utils.sh
+
+check_system_requirements
