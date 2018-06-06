@@ -53,17 +53,6 @@ get_config() {
 	}
 }
 
-force_terminate_programs() {
-	# terminate detached screen sesssions; they could be left over
-	# from a previous run
-	for session in $(screen -ls | grep Detached | awk '{print $1}') ; do
-		screen -X -S $session quit
-	done
-	killall -9 openocd 2> /dev/null
-	killall -9 expect 2> /dev/null
-	return 0
-}
-
 load_uboot() {
 	if [ "$MODE" == "DFU_ONLY" ] ; then
 		echo_green "  Skipping JTAG u-boot load"

@@ -148,3 +148,14 @@ value_in_range() {
 
 	[ "$(echo "$min <= $val && $val <= $max" | bc -l)" == "1" ]
 }
+
+force_terminate_programs() {
+	# terminate detached screen sesssions; they could be left over
+	# from a previous run
+	for session in $(screen -ls | grep Detached | awk '{print $1}') ; do
+		screen -X -S $session quit
+	done
+	killall -9 openocd 2> /dev/null
+	killall -9 expect 2> /dev/null
+	return 0
+}

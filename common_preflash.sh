@@ -125,6 +125,8 @@ BOARD="$1"
 
 source config/$BOARD/values.sh
 
+force_terminate_programs
+
 for ranges in BOARD_OFF BOARD_ON ; do
 	validate_range_values 16 $ranges || exit 1
 done
