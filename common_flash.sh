@@ -44,11 +44,11 @@ check_system_requirements() {
 get_config() {
 	local board="$1"
 	is_ft4232h && {
-		echo "config/${board}_ftdi4232.cfg"
+		echo "config/${board}/ftdi4232.cfg"
 		return
 	}
 	lsusb -v -d 0403:6014 &> /dev/null && {
-		echo "config/${board}_digilent.cfg"
+		echo "config/${board}/digilent.cfg"
 		return
 	}
 }
