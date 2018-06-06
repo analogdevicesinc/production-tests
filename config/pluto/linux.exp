@@ -1,0 +1,314 @@
+#!/usr/bin/expect
+
+set ttyUSB [lindex $argv 0]
+
+set timeout 50
+
+proc send_screen_quit_cmd {} {
+    # Send Ctrl-A to screen
+    send "\x01"
+    send ":quit\r"
+}
+
+############### Check Host Side ################
+
+spawn bash
+
+send "iio_info -s\r"
+while 1 {
+    expect {
+        "0456:b673" {
+            break
+        }
+        timeout {
+            send_error "Failed to find IIO USB device\n"
+            exit 1
+        }
+    }
+}
+
+
+########## Done Check Host Side ################
+
+spawn sshpass -panalog ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oCheckHostIP=no root@192.168.2.1
+set screen_id $spawn_id
+set multiPrompt {[#$] }
+
+set timeout 10
+
+while 1 {
+	expect {
+	-re $multiPrompt {
+		break
+	}
+        timeout {
+	    send_error "Failed to get Linux prompt after ssh\n"
+            exit 1
+        }
+    }
+}
+
+############### Check IIO device probing ################
+
+send "grep '' /sys/bus/iio/devices/iio\:device*/name | wc -l\r"
+# Expect 5
+
+while 1 {
+	expect {
+	-re "5.*$multiPrompt" {
+		break
+	}
+        timeout {
+	    send_error "Failed to find 5 IIO devices\n"
+            exit 1
+        }
+    }
+}
+
+############### Check ADM1177 ################
+
+#send "cat /sys/bus/iio/devices/iio\:device0/in_voltage0_raw\r"
+
+# Need to split this up to make sure I can use " in the send string
+send {awk "BEGIN{print $(cat /sys/bus/iio/devices/iio\:device0/in_voltage0_raw) * $(cat /sys/bus/iio/devices/iio\:device0/in_voltage0_scale)}"}
+send "\r"
+
+# result is in mV, look for 4500 to 5200
+
+while 1 {
+	expect {
+	-re "\[0-9]{4}" {
+		set in $expect_out(0,string)
+
+		if { $in < 4500 } {
+			send_error "Volatge below limit 4.5V ($in)\n"
+		}
+
+		if { $in > 5200 } {
+			send_error "Volatge above limit 5.2V ($in)\n"
+			exit 1
+		}
+
+		break
+	}
+        timeout {
+	    send_error "Failed to read ADM1177\n"
+	    exit 1
+        }
+    }
+}
+
+#send "cat /sys/bus/iio/devices/iio\:device0/in_current0_raw\r"
+send {awk "BEGIN{print $(cat /sys/bus/iio/devices/iio\:device0/in_current0_raw) * $(cat /sys/bus/iio/devices/iio\:device0/in_current0_scale)}"}
+send "\r"
+
+# result is in mA
+
+while 1 {
+	expect {
+	-re "\[0-9]{3,4}" {
+		set in $expect_out(0,string)
+
+		if { $in < 350 } {
+			send_error "Current below limit 350mA ($in)\n"
+			exit 1
+		}
+
+		if { $in > 550 } {
+			send_error "Current above limit 550mA ($in)\n"
+			exit 1
+		}
+
+		break
+	}
+        timeout {
+	    send_error "Failed to read ADM1177\n"
+           exit 1
+        }
+    }
+}
+
+############### Setup the extra environment ################
+
+send "echo /dev/mtd0 0xff000 0x1000 0x1000 > /var/fw_env.conf\r"
+while 1 {
+	expect {
+	-re $multiPrompt {
+		break
+	}
+        timeout {
+	    send_error "Failed to get Linux prompt after fw_env.conf\n"
+            exit 1
+        }
+    }
+}
+
+#### Initially the extra env has a bad CRC - make sure we remove the defaults
+
+send "echo bootcmd > /var/fw.scr\r"
+while 1 {
+	expect {
+	-re $multiPrompt {
+		break
+	}
+        timeout {
+	    send_error "Failed to get Linux prompt after fw_env.conf\n"
+            exit 1
+        }
+    }
+}
+
+send "echo baudrate >> /var/fw.scr\r"
+while 1 {
+	expect {
+	-re $multiPrompt {
+		break
+	}
+        timeout {
+	    send_error "Failed to get Linux prompt after fw_env.conf\n"
+            exit 1
+        }
+    }
+}
+
+send "echo bootdelay >> /var/fw.scr\r"
+while 1 {
+	expect {
+	-re $multiPrompt {
+		break
+	}
+        timeout {
+	    send_error "Failed to get Linux prompt after fw_env.conf\n"
+            exit 1
+        }
+    }
+}
+
+send "cat /etc/serial| xargs echo serial >> /var/fw.scr\r"
+while 1 {
+	expect {
+	-re $multiPrompt {
+		break
+	}
+        timeout {
+	    send_error "Failed to get Linux prompt after fw_env.conf\n"
+            exit 1
+        }
+    }
+}
+
+send "cat /etc/serial | xargs echo PlutoSDR_by_Analog_Devices_Inc! | sha1sum | cut -f 0 -d ' ' > pkey; cat pkey | xargs echo productkey >> /var/fw.scr\r"
+while 1 {
+	expect {
+	-re $multiPrompt {
+		break
+	}
+        timeout {
+	    send_error "Failed to get Linux prompt after fw_env.conf\n"
+            exit 1
+        }
+    }
+}
+
+############### Compute and set actual frequency here ################
+
+send "echo -n 'ad936x_ext_refclk <' >> /var/fw.scr;"
+send "echo -n $\(cat /sys/bus/iio/devices/iio:device1/xo_correction\) >> /var/fw.scr;"
+send "echo '>' >> /var/fw.scr\r"
+
+while 1 {
+	expect {
+	-re $multiPrompt {
+		break
+	}
+        timeout {
+	    send_error "Failed to get Linux prompt after fw_env.conf\n"
+            exit 1
+        }
+    }
+}
+
+send "fw_setenv -c /var/fw_env.conf -s /var/fw.scr\r"
+while 1 {
+	expect {
+	-re $multiPrompt {
+		break
+	}
+        timeout {
+	    send_error "Failed to get Linux prompt after fw_env.conf\n"
+            exit 1
+        }
+    }
+}
+
+set timeout 20
+
+send "device_reboot break\r"
+sleep 1
+close
+
+if [ catch "spawn screen /dev/$ttyUSB 115200\r" reason ] {
+        send_error "failed to spawn screen : $reason\n"
+        exit 1
+}
+
+while 1 {
+    expect {
+        "Pluto> " {
+            break
+        }
+        timeout {
+	    send_error "Failed to see u-boot prompt\n"
+            exit 1
+        }
+    }
+}
+
+### Protect SF Flash now
+
+send "sf probe; sf protect lock 0 0x100000\r"
+
+while 1 {
+    expect {
+        "SF: Locked" {
+            break
+        }
+        timeout {
+	    send_error "Failed to LOCK flash\n"
+            exit 1
+        }
+    }
+}
+
+while 1 {
+    expect {
+        "Pluto>" {
+            break
+        }
+        timeout {
+	    send_error "Failed to see u-boot prompt\n"
+            exit 1
+        }
+    }
+}
+
+send "reset\r"
+sleep 0.5
+
+while 1 {
+    expect {
+        "pluto login:" {
+                break
+        }
+        timeout {
+                send_error "timeout waiting for pluto login\n"
+                exit 1
+        }
+    }
+}
+
+send_screen_quit_cmd
+close
+
+exit 0
+

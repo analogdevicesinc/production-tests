@@ -1,0 +1,2 @@
+#!/bin/bash
+LD_LIBRARY_PATH=./work/libiio/build ./work/plutosdr_scripts/cal_ad9361 $@
