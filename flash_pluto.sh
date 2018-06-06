@@ -4,4 +4,4 @@
 # Main section                     #
 #----------------------------------#
 
-./common_flash.sh "pluto"
+./lib/flash.sh "pluto"

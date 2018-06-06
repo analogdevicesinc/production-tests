@@ -86,7 +86,7 @@ flash_board () {
 
 	echo_green "2. Running DFU utils step"
 
-	expect cmd.exp "$ttyUSB" "$releaseDir" "$firmwareDfuFile" || {
+	expect lib/cmd.exp "$ttyUSB" "$releaseDir" "$firmwareDfuFile" || {
 		echo_blue "expect command failed"
 		force_terminate_programs
 		exit 1

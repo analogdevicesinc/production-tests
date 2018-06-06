@@ -4,4 +4,4 @@
 # Main section                     #
 #----------------------------------#
 
-./common_flash.sh "m2k"
+./lib/flash.sh "m2k"
