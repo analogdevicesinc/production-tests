@@ -5,6 +5,8 @@
 #----------------------------------#
 
 COMMON_RELEASE_FILES="boot.dfu u-boot.elf uboot-env.dfu ps7_init.tcl"
+LD_LIBRARY_PATH=./work/libiio/build
+PATH="./work/libiio/build/tests:$PATH"
 
 # HOST x86 Config
 TTYUSB=ttyTest-A1

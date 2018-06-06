@@ -68,11 +68,50 @@ build_ft4232h_tool() {
 	gcc $c_files -o "work/$tool" $cflags $ldflags
 }
 
+build_libiio() {
+	[ -d work ] || mkdir -p work
+	[ -d work/libiio ] || \
+		git clone \
+			https://github.com/analogdevicesinc/libiio \
+			work/libiio
+	pushd work/libiio
+	mkdir -p build
+	pushd build
+
+	cmake ..
+	make
+
+	popd
+	popd
+}
+
+build_plutosdr_scripts() {
+	local cflags="-I../libiio -Wall -Wextra"
+	local ldflags="-L../libiio/build -lfftw3 -lpthread -liio -lm"
+
+	[ -d work ] || mkdir -p work
+
+	build_libiio
+
+	[ -d work/plutosdr_scripts ] || \
+		git clone \
+			https://github.com/analogdevicesinc/plutosdr_scripts \
+			work/plutosdr_scripts
+
+	pushd work/plutosdr_scripts
+
+	gcc -g -o cal_ad9361 cal_ad9361.c $cflags $ldflags
+
+	popd
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
 
 build_ft4232h_tool
+
+build_plutosdr_scripts
 
 check_open_ocd_on_system
 
