@@ -148,11 +148,15 @@ force_terminate_programs() {
 	return 0
 }
 
-enforce_openocd_version() {
+openocd_is_minimum_required() {
 	local ver="$(openocd --version 2>&1 | head -1 | cut -d' ' -f4)"
 	local min_ver="$(echo $ver | cut -d. -f2)"
 	local maj_ver="$(echo $ver | cut -d. -f1)"
-	if [ "$maj_ver" -le "0" ] && [ "$min_ver" -lt "10" ] ; then
+	[ "$maj_ver" -ge "0" ] && [ "$min_ver" -ge "10" ]
+}
+
+enforce_openocd_version() {
+	if ! openocd_is_minimum_required ; then
 		echo_red "You need at least version 0.10.0 for OpenOCD"
 		exit 1
 	fi
