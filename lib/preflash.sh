@@ -54,10 +54,11 @@ check_voltage_ranges() {
 		value_in_range "$m" "$min" "$max" || {
 			echo_red "Value ($label) '$m' is not in range '$min..$max', or is invalid"
 			echo_red "   Target voltage is '$target_voltage'"
-			exit 1
+			return 1
 		}
 		let cnt='cnt + 1'
 	done
+	return 0
 }
 
 validate_range_values() {
@@ -88,7 +89,7 @@ power_off_and_measure() {
 	echo_green "   Measuring voltages with board off"
 	disable_all_usb_ports
 	power_cycle_sleep
-	check_voltage_ranges "BOARD_OFF"
+	check_voltage_ranges "BOARD_OFF" || return 1
 	echo_green "   .Done - values are within range"
 }
 
@@ -98,7 +99,7 @@ power_on_usb_1_and_measure() {
 	power_cycle_sleep
 	enable_usb_port_1
 	power_cycle_sleep
-	check_voltage_ranges "BOARD_ON"
+	check_voltage_ranges "BOARD_ON" || return 1
 	echo_green "   .Done - values are within range"
 }
 
@@ -108,7 +109,7 @@ power_on_usb_2_and_measure() {
 	power_cycle_sleep
 	enable_usb_port_2
 	power_cycle_sleep
-	check_voltage_ranges "BOARD_ON"
+	check_voltage_ranges "BOARD_ON" || return 1
 	echo_green "   .Done - values are within range"
 }
 
@@ -133,9 +134,9 @@ done
 
 for measure_cnt in $(seq 1 $MEASUREMENT_CYCLES); do
 	echo_blue "Running measurement cycle $measure_cnt"
-	power_off_and_measure
-	power_on_usb_1_and_measure
-	power_on_usb_2_and_measure
+	retry 4 power_off_and_measure || exit 1
+	retry 4 power_on_usb_1_and_measure || exit 1
+	retry 4 power_on_usb_2_and_measure || exit 1
 done
 
 exit 0

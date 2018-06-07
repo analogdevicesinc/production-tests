@@ -105,13 +105,13 @@ wait_for_board || {
 }
 
 echo_green "2. XO Calibration"
-xo_calibration || {
+retry 4 xo_calibration || {
 	echo_red "  XO Calibration failed"
 	exit 1
 }
 
 echo_green "3. Testing TX Margin"
-tx_margin || {
+retry 4 tx_margin || {
 	echo_red "  TX Margin test failed"
 	exit 1
 }
