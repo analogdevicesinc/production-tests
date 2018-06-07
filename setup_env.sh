@@ -122,3 +122,7 @@ check_open_ocd_on_system
 check_udev_on_system
 
 sync_udev_rules_file
+
+for board in pluto m2k ; do
+	./update_${board}_release.sh
+done
