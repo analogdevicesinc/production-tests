@@ -50,6 +50,12 @@ flash_board () {
 		ttyUSB="SKIP_TTYUSB"
 	fi
 
+	force_terminate_programs
+
+	# Disable board first; OpenOCD will enable it
+	disable_all_usb_ports
+	power_cycle_sleep
+
 	echo_green "1. Loading uboot '$UBOOT_ELF_FILE'"
 	load_uboot
 
@@ -124,14 +130,9 @@ done
 
 UBOOT_ELF_FILE="$RELEASE_DIR/u-boot.elf"
 
-force_terminate_programs
-
 echo_green "Press CTRL-C to exit"
 
 ###### In Jtag Mode #######
-
-disable_all_usb_ports
-power_cycle_sleep
 
 flash_board "$TTYUSB" "$RELEASE_DIR" "$FIRMWARE_DFU_FILE"
 
