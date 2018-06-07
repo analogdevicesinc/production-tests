@@ -159,6 +159,10 @@ enforce_openocd_version() {
 }
 
 check_system_requirements() {
+	type bc &> /dev/null || {
+		echo_red "You need 'bc' on your system"
+		exit 1
+	}
 	type lsusb &> /dev/null || {
 		echo_red "You need 'lsusb' on your system ; please install libusb and/or usb-utils"
 		exit 1
