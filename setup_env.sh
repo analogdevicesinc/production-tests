@@ -5,6 +5,8 @@ set -e
 # Global definitions section       #
 #----------------------------------#
 
+source lib/utils.sh
+
 UDEV_RULES_FILE="50-ftdi-test.rules"
 
 UDEV_SECTION='
@@ -108,6 +110,8 @@ build_plutosdr_scripts() {
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
+
+enforce_root
 
 build_ft4232h_tool
 
