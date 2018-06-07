@@ -21,6 +21,18 @@ SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=
 # Functions section                #
 #----------------------------------#
 
+apt_install_prereqs() {
+	type apt-get &> /dev/null || {
+		echo "No 'apt-get' found; cannot install dependencies"
+		return 0
+	}
+	apt-get -y update
+	apt-get -y install libftdi-dev bc sshpass openocd sudo \
+		cmake build-essential git libxml2-dev bison flex \
+		libfftw3-dev expect usbutils dfu-util screen \
+		wget unzip
+}
+
 check_open_ocd_on_system() {
 	type openocd &> /dev/null || {
 		echo "Your system does not have openocd installed"
@@ -111,7 +123,10 @@ build_plutosdr_scripts() {
 # Main section                     #
 #----------------------------------#
 
+
 enforce_root
+
+apt_install_prereqs
 
 build_ft4232h_tool
 
