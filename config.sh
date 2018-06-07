@@ -38,3 +38,9 @@ BOARD_ONLINE_TIMEOUT=10	# seconds
 source lib/utils.sh
 
 check_system_requirements
+
+if [ `id -u` != "0" ]
+then
+	echo_red "This script must be run as root" 1>&2
+	exit 1
+fi

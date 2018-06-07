@@ -107,12 +107,6 @@ for file in $FIRMWARE_DFU_FILE $COMMON_RELEASE_FILES ; do
 	}
 done
 
-if [ `id -u` != "0" ]
-then
-	echo_red "This script must be run as root" 1>&2
-	exit 1
-fi
-
 while true ;
 do
 	CABLE_CFG="$(get_config "$BOARD")"
