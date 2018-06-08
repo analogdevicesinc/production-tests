@@ -87,6 +87,8 @@ build_ft4232h_tool() {
 	local cflags="-I./src -Werror -Wall"
 	local ldflags="-lftdi"
 
+	tool_c="${tool_c} ft4232h_bitbang.c ft4232h_spi_adc.c"
+
 	mkdir -p work
 
 	for c_file in $tool_c ; do
@@ -136,7 +138,6 @@ build_plutosdr_scripts() {
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
-
 
 enforce_root
 
