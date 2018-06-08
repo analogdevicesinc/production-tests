@@ -23,6 +23,9 @@
 
 #define BURST_EN	(AD7616_BURSTEN | AD7616_SEQEN)
 
+#define PIN_IN_MSK	0x8000
+#define PIN_NUM_MSK	0x07
+
 enum {
 	CONVST_PIN = GPIOL0,
 	RESET_PIN  = GPIOL1,
@@ -58,6 +61,15 @@ static const struct map pins[] = {
 	{ "PIN5", 5 },
 	{ "PIN6", 6 },
 	{ "PIN7", 7 },
+
+	{ "PIN0I", 0 | PIN_IN_MSK },
+	{ "PIN1I", 1 | PIN_IN_MSK },
+	{ "PIN2I", 2 | PIN_IN_MSK },
+	{ "PIN3I", 3 | PIN_IN_MSK },
+	{ "PIN4I", 4 | PIN_IN_MSK },
+	{ "PIN5I", 5 | PIN_IN_MSK },
+	{ "PIN6I", 6 | PIN_IN_MSK },
+	{ "PIN7I", 7 | PIN_IN_MSK },
 };
 
 static const struct map modes[] = {
@@ -208,8 +220,8 @@ static int set_pin_values(const char *serial, int channel, char **argv,
 			fprintf(stderr, "Invalid pin name '%s'\n", argv[i]);
 			return -1;
 		}
-		buf[1] |= 1 << pin;
-		buf[2] |= 1 << pin;
+		buf[1] |= 1 << (pin & PIN_NUM_MSK);
+		buf[2] |= (pin & PIN_IN_MSK) ? 0 : (1 << pin);
 	}
 
 	if (ftdi_write_data(&ftdi, buf, sizeof(buf)) != sizeof(buf)) {
