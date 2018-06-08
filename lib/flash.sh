@@ -134,6 +134,6 @@ echo_green "Press CTRL-C to exit"
 
 ###### In Jtag Mode #######
 
-flash_board "$TTYUSB" "$RELEASE_DIR" "$FIRMWARE_DFU_FILE"
+retry 4 flash_board "$TTYUSB" "$RELEASE_DIR" "$FIRMWARE_DFU_FILE"
 
 exit 0
