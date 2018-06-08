@@ -32,18 +32,32 @@ enum {
 	BUSY_PIN   = GPIOL3,
 };
 
+enum {
+	OPT_CHANNEL,
+	OPT_SERIAL,
+	OPT_MODE,
+	OPT_ADC_VCHANNEL,
+	OPT_ADC_REFINOUT,
+	OPT_ADC_VRANGE_EACH,
+	OPT_ADC_VRANGE_ALL,
+	OPT_ADC_NO_SAMPLES,
+	OPT_ADC_VOFFSET,
+	OPT_ADC_GAIN,
+	OPT_ADC_SELFTEST,
+};
+
 static const struct option options[] = {
-	{"channel", required_argument, 0, 'C'},
-	{"serial",  required_argument, 0, 'S'},
-	{"mode",    required_argument, 0, 'M'},
-	{"vchannel", required_argument, 0, 'V'},
-	{"refinout", required_argument, 0, 'R'},
-	{"vrange-each", required_argument, 0, 'E'},
-	{"vrange-all", required_argument, 0, 'A'},
-	{"no-samples", required_argument, 0, 'N'},
-	{"voffset",   required_argument, 0, 'O'},
-	{"gain",      required_argument, 0, 'G'},
-	{"self-test", no_argument, 0, 'T'},
+	{"channel", required_argument, 0, 0},
+	{"serial",  required_argument, 0, 0},
+	{"mode",    required_argument, 0, 0},
+	{"vchannel", required_argument, 0, 0},
+	{"refinout", required_argument, 0, 0},
+	{"vrange-each", required_argument, 0, 0},
+	{"vrange-all", required_argument, 0, 0},
+	{"no-samples", required_argument, 0, 0},
+	{"voffset",   required_argument, 0, 0},
+	{"gain",      required_argument, 0, 0},
+	{"self-test", no_argument, 0, 0},
 	{ 0, 0, 0, 0 },
 };
 
@@ -749,52 +763,52 @@ int main(int argc, char **argv)
 
 	optind = 0;
 
-	while ((c = getopt_long(argc, argv, "+C:S:V:R:A:E:",
+	while ((c = getopt_long_only(argc, argv, "",
 					options, &option_index)) != -1) {
-		switch (c) {
-			case 'T':
+		switch (option_index) {
+			case OPT_ADC_SELFTEST:
 				sargs.self_test = 1;
 				mode = BITMODE_MPSSE;
 				break;
-			case 'A':
+			case OPT_ADC_VRANGE_ALL:
 				if (parse_ranges_all(optarg) < 0)
 					return EXIT_FAILURE;
 				break;
-			case 'C':
+			case OPT_CHANNEL:
 				channel = parse_channel(optarg);
 				break;
-			case 'E':
+			case OPT_ADC_VRANGE_EACH:
 				if (parse_ranges_each(optarg) < 0)
 					return EXIT_FAILURE;
 				break;
-			case 'M':
+			case OPT_MODE:
 				mode = parse_mode(optarg);
 				break;
-			case 'N':
+			case OPT_ADC_NO_SAMPLES:
 				sargs.samples = atoi(optarg);
 				break;
-			case 'G':
+			case OPT_ADC_GAIN:
 				if (parse_voltage_arg(optarg, &sargs.gain, &sargs.gain_div) < 0) {
 					fprintf(stderr, "Could not parse gain\n");
 					return EXIT_FAILURE;
 				}
 				break;
-			case 'O':
+			case OPT_ADC_VOFFSET:
 				if (parse_voltage_arg(optarg, &sargs.voffset, &sargs.voffset_div) < 0) {
 					fprintf(stderr, "Could not parse refinout\n");
 					return EXIT_FAILURE;
 				}
 				break;
-			case 'R':
+			case OPT_ADC_REFINOUT:
 				if (parse_voltage_arg(optarg, &sargs.refinout, &sargs.refinout_div) < 0) {
 					fprintf(stderr, "Could not parse refinout\n");
 					return EXIT_FAILURE;
 				}
 				break;
-			case 'S':
+			case OPT_SERIAL:
 				serial = optarg;
 				break;
-			case 'V':
+			case OPT_ADC_VCHANNEL:
 				vchannel_idx = parse_vchannel_idx(optarg);
 				break;
 		}
