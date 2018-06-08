@@ -117,7 +117,7 @@ retry 4 tx_margin || {
 }
 
 echo_green "4. Testing Linux"
-expect config/pluto/linux.exp "$TTYUSB" || {
+retry 4 expect config/pluto/linux.exp "$TTYUSB" || {
 	echo
 	echo_red "   Linux test failed"
 	exit 1
