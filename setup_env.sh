@@ -82,7 +82,6 @@ sync_udev_rules_file() {
 
 build_ft4232h_tool() {
 	local tool="ft4232h_pin_ctrl"
-	local tool_c="${tool}.c"
 	local tool_c="${tool}.c ad7616.c platform_drivers.c"
 	local c_files
 	local cflags="-I./src -Werror -Wall"
