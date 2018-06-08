@@ -7,6 +7,8 @@ set -e
 
 source lib/utils.sh
 
+PATH="./work/openocd-0.10.0/installed/bin:$PATH"
+
 UDEV_RULES_FILE="50-ftdi-test.rules"
 
 UDEV_SECTION='
@@ -33,11 +35,24 @@ apt_install_prereqs() {
 		wget unzip
 }
 
-check_open_ocd_on_system() {
-	type openocd &> /dev/null || {
-		echo "Your system does not have openocd installed"
-		exit 1
-	}
+build_openocd_0_10_0() {
+	local url=https://sourceforge.net/projects/openocd/files/openocd/0.10.0/openocd-0.10.0.tar.gz/download
+
+	mkdir -p work
+	wget "$url" -O work/openocd-0.10.0.tar.gz
+
+	apt-get -y install libjim-dev
+
+	pushd work/
+	tar -xvf openocd-0.10.0.tar.gz
+	pushd openocd-0.10.0
+
+	./configure --enable-ftdi --disable-internal-jimtcl --prefix="$(pwd)/installed"
+	make -j3
+	make install
+
+	popd
+	popd
 }
 
 check_udev_on_system() {
@@ -128,11 +143,16 @@ enforce_root
 
 apt_install_prereqs
 
+openocd_is_minimum_required || {
+	echo_red "OpenOCD needs to be at least version 0.10.0"
+	# if  we have apt-get, we can try to build it and install deps too
+	type apt-get &> /dev/null || exit 1
+	build_openocd_0_10_0
+}
+
 build_ft4232h_tool
 
 build_plutosdr_scripts
-
-check_open_ocd_on_system
 
 check_udev_on_system
 
