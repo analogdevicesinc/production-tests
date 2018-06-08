@@ -88,7 +88,7 @@ build_ft4232h_tool() {
 	local cflags="-I./src -Werror -Wall"
 	local ldflags="-lftdi"
 
-	[ -d "work" ] || mkdir -p work
+	mkdir -p work
 
 	for c_file in $tool_c ; do
 		cp -f "src/$c_file" "work/$c_file"
@@ -98,7 +98,7 @@ build_ft4232h_tool() {
 }
 
 build_libiio() {
-	[ -d work ] || mkdir -p work
+	mkdir -p work
 	[ -d work/libiio ] || \
 		git clone \
 			https://github.com/analogdevicesinc/libiio \
@@ -108,7 +108,7 @@ build_libiio() {
 	pushd build
 
 	cmake ..
-	make
+	make -j3
 
 	popd
 	popd
@@ -118,7 +118,7 @@ build_plutosdr_scripts() {
 	local cflags="-I../libiio -Wall -Wextra"
 	local ldflags="-L../libiio/build -lfftw3 -lpthread -liio -lm"
 
-	[ -d work ] || mkdir -p work
+	mkdir -p work
 
 	build_libiio
 
