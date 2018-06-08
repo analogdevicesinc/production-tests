@@ -1,8 +1,12 @@
 #!/bin/bash
 
+source config.sh
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
+
+init_pins
 
 ./lib/preflash.sh "pluto" || exit 1
 

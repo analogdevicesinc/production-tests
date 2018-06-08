@@ -202,3 +202,33 @@ enforce_root() {
 		exit 1
 	fi
 }
+
+init_pins() {
+	local channel=$1
+	local pin_vals
+
+	if [ -n "$channel" ] ; then
+		[ "$channel" == "C" ] && return 1
+		valid_ftdi_channel "$channel" || return 1
+	else
+		# init all - except C for UART
+		channel="A B D"
+	fi
+
+	for chan in $channel ; do
+		pin_vals=
+		# Channel for JTAG, pin1 is TDI - OpenOCD will take of the JTAG pins,
+		# we just need to init all other pins
+		[ "$chan" == "A" ] && pin_vals="pin1i"
+		# Channel for SPI, pin1 is MOSI, pin3 is CS - these are controlled
+		# via the ft4232h_pin_ctrl utility in SPI mode
+		[ "$chan" == "B" ] && pin_vals="pin1i pin3"
+		# Channel for GPIOs - these are controlled via shell scripts and
+		# the ft4232h_pin_ctrl utility (in bitbang mode)
+		[ "$chan" == "D" ] && pin_vals="pin0 pin1i pin6i pin7i"
+
+		toggle_pins "$chan" $pin_vals || return 1
+	done
+
+	return 0
+}
