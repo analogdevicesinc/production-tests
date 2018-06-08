@@ -30,7 +30,7 @@ VOLTAGE_OFFSET=0
 VOLTAGE_GAIN=1
 
 IIO_URI_MODE="-u ip:192.168.2.1"
-BOARD_ONLINE_TIMEOUT=10	# seconds
+BOARD_ONLINE_TIMEOUT=20	# seconds
 
 #----------------------------------#
 # Utils                            #
