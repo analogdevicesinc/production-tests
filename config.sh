@@ -37,6 +37,4 @@ BOARD_ONLINE_TIMEOUT=20	# seconds
 #----------------------------------#
 source lib/utils.sh
 
-check_system_requirements
-
 enforce_root

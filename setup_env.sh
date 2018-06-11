@@ -87,7 +87,7 @@ build_ft4232h_tool() {
 	local cflags="-I./src -Werror -Wall"
 	local ldflags="-lftdi"
 
-	tool_c="${tool_c} ft4232h_bitbang.c ft4232h_spi_adc.c"
+	tool_c="${tool_c} ft4232h_bitbang.c ft4232h_spi_adc.c ft4232h_spi_eeprom.c"
 
 	mkdir -p work
 

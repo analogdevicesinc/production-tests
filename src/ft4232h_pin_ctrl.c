@@ -10,6 +10,7 @@
 enum {
 	BITBANG,
 	SPI_ADC,
+	SPI_EEPROM,
 };
 
 enum {
@@ -31,6 +32,7 @@ static const struct option options[] = {
 static const struct map modes[] = {
 	{ "BITBANG", BITBANG },
 	{ "SPI-ADC", SPI_ADC },
+	{ "SPI-EEPROM", SPI_EEPROM },
 };
 
 void copy_to_buf_upper(char *buf, const char *s, int len)
@@ -110,7 +112,7 @@ void close_device(struct ftdi_context *ctx)
 #endif
 }
 
-static int parse_channel(const char *arg)
+int parse_channel(const char *arg)
 {
 	char c;
 	if (!arg)
@@ -139,6 +141,7 @@ static void usage()
 			"\tWhere: X is A-to-D, the channel on the FTDI device\n");
 	usage_bitbang();
 	usage_spi_adc();
+	usage_spi_eeprom();
 }
 
 int main(int argc, char **argv)
@@ -188,8 +191,11 @@ int main(int argc, char **argv)
 		case SPI_ADC:
 			ret = handle_mpsse_spi_adc(serial, channel, subopts);
 			break;
+		case SPI_EEPROM:
+			ret = handle_mpsse_spi_eeprom(serial, channel, subopts);
+			break;
 		default:
-			fprintf(stderr, "Invalid mode; valid are <bitbang|spi-adc>\n");
+			fprintf(stderr, "Invalid mode; valid are <bitbang|spi-adc|spi-eeprom>\n");
 			ret = EXIT_FAILURE;
 			break;
 	}

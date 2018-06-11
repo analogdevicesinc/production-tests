@@ -256,6 +256,11 @@ static int32_t spi_set_mpsse_spi_mode(spi_device *dev)
 		return -1;
 	}
 
+	if (set_bits_low(mpsse, mpsse->pidle) < 0) {
+		fprintf(stderr, "Error when initializing port\n");
+		return -1;
+	}
+
 	return 0;
 }
 

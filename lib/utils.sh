@@ -234,3 +234,21 @@ init_pins() {
 
 	return 0
 }
+
+eeprom_rw() {
+	local op="$1"
+	local addr="$2"
+	local cnt_or_data="$3"
+
+	if [ "$op" == "read" ] ; then
+		./work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" \
+			--channel B --mode spi-eeprom \
+			--opts addr="$addr",read="$cnt_or_data",cs=D:0
+	elif [ "$op" == "write" ] ; then
+		./work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" \
+			--channel B --mode spi-eeprom \
+			--opts addr="$addr",write="$cnt_or_data",cs=D:0
+	else
+		echo_red "Invalid op '$op'"
+	fi
+}
