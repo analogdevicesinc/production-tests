@@ -1,2 +1,8 @@
 #!/bin/bash
+
+# Wrapper for calling the `cal_ad9361` utility
+# This utility must be built previously, via the `setup_env.sh` script.
+# For more details, refer to:
+#    https://github.com/analogdevicesinc/plutosdr_scripts/blob/master/cal_ad9361.c
+
 LD_LIBRARY_PATH=./work/libiio/build ./work/plutosdr_scripts/cal_ad9361 $@

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Wrapper script for updating release files for Pluto.
+# The script will handle downloading the files from Github and
+# making sure everything is properly setup for the ./flash_pluto.sk script.
+#
+# Can be called with:  ./update_pluto_release.sh [version]
+# If version is unspecified the latest version swill be used
+
 echo_red()   { printf "\033[1;31m$*\033[m\n"; }
 
 get_latest_release() {
