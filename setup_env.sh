@@ -23,16 +23,26 @@ SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=
 # Functions section                #
 #----------------------------------#
 
+sudo_required() {
+	type sudo &> /dev/null || {
+		echo_red "'sudo' utility required"
+		exit 1
+	}
+}
+
 apt_install_prereqs() {
 	type apt-get &> /dev/null || {
 		echo "No 'apt-get' found; cannot install dependencies"
 		return 0
 	}
+	sudo_required
+	sudo -s <<-EOF
 	apt-get -y update
-	apt-get -y install libftdi-dev bc sshpass openocd sudo \
+	apt-get -y install libftdi-dev bc sshpass openocd \
 		cmake build-essential git libxml2-dev bison flex \
 		libfftw3-dev expect usbutils dfu-util screen \
 		wget unzip
+	EOF
 }
 
 build_openocd_0_10_0() {
@@ -71,6 +81,7 @@ check_udev_on_system() {
 
 # sync udev rules file
 sync_udev_rules_file() {
+	sudo_required
 	sudo -s <<-EOF
 		echo -n "$UDEV_SECTION" > "/etc/udev/rules.d/$UDEV_RULES_FILE"
 		udevadm control --reload-rules
@@ -138,8 +149,6 @@ build_plutosdr_scripts() {
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
-
-enforce_root
 
 apt_install_prereqs
 

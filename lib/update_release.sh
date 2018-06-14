@@ -4,7 +4,7 @@
 # Global definitions section       #
 #----------------------------------#
 
-source config.sh
+source lib/utils.sh
 
 #----------------------------------#
 # Functions section                #
