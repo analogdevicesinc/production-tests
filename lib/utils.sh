@@ -66,14 +66,6 @@ enable_usb_port_2() {
 	toggle_pins A pin6
 }
 
-reset_adc() {
-	toggle_pins B pin4 || return 1
-	sleep 0.1
-	toggle_pins B || return 1
-	sleep 0.1
-	toggle_pins B pin4 || return 1
-}
-
 self_test() {
 	./work/ft4232h_pin_ctrl --mode spi-adc --channel B \
 		--serial "$FT4232H_SERIAL" --opts self-test
