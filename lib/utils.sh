@@ -73,6 +73,18 @@ self_test() {
 
 measure_voltage() {
 	local channel="${1:-all}"
+
+	[ -n "$VREF" ] && [ -n "$VGAIN" ] && [ -n "$VOFF" ] || {
+		eeprom_cfg load
+		if [ -z "$VREF" ] || [ -z "$VGAIN" ] || [ -z "$VOFF" ] ; then
+			echo_red "Empty ADC setting(s)"
+			echo_red "VREF=$VREF"
+			echo_red "VGAIN=$VGAIN"
+			echo_red "VOFF=$VOFF"
+			exit 1
+		fi
+	}
+
 	local opts="refinout=$VREF,no-samples=$NUM_SAMPLES"
 
 	opts="$opts,voffset=$VOFF,gain=$VGAIN,vchannel=$channel"
