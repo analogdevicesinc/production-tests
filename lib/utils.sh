@@ -73,9 +73,9 @@ self_test() {
 
 measure_voltage() {
 	local channel="${1:-all}"
-	local opts="refinout=$REFINOUT,no-samples=$NUM_SAMPLES"
+	local opts="refinout=$VREF,no-samples=$NUM_SAMPLES"
 
-	opts="$opts,voffset=$VOLTAGE_OFFSET,gain=$VOLTAGE_GAIN,vchannel=$channel"
+	opts="$opts,voffset=$VOFF,gain=$VGAIN,vchannel=$channel"
 
 	./work/ft4232h_pin_ctrl --mode spi-adc --serial "$FT4232H_SERIAL" \
 		--channel B --opts "$opts"
@@ -242,5 +242,55 @@ eeprom_rw() {
 			--opts addr="$addr",write="$cnt_or_data",cs=D:0
 	else
 		echo_red "Invalid op '$op'"
+	fi
+}
+
+eeprom_cfg() {
+	local op="$1"
+	local PAGES="0 16 32"
+	local CFGS="VREF VOFF VGAIN"
+	local PAGE_SIZE=16
+	local value
+
+	shift
+	if [ "$op" == "load" ] ; then
+		for page in $PAGES ; do
+			value="$(eeprom_rw "read" "$page" "$PAGE_SIZE")"
+			[ "$?" == "0" ] || {
+				echo_red "Failed to read EEPROM"
+				return 1
+			}
+			[ -n "$value" ] || {
+				echo_red "No value store in EEPROM at page '$page'"
+				return 1
+			}
+			# evaluate the entries in the EEPROM as shell vars
+			eval "export $value" || return 1
+			echo_green "$value"
+		done
+		return 0
+	elif [ "$op" == "save" ] ; then
+		# export all arguments as variables
+		while [ -n "$1" ] ; do
+			eval "export $1"
+			shift
+		done
+		# check that all of them are non-empty
+		for cfg in $CFGS ; do
+			value="$(eval echo "\$$cfg")"
+			[ -n "$value" ] || {
+				echo_red "No value provided for '$cfg'"
+				return 1
+			}
+		done
+		# Now write them to EEPROM
+		for cfg in $CFGS ; do
+			value="$(eval echo "\$$cfg")"
+			eeprom_rw "$op" "$page" "${cfg}=${value}" || return 1
+		done
+		return 0
+	else
+		echo_red "Invalid EEPROM op '$op'"
+		return 0
 	fi
 }

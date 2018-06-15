@@ -24,10 +24,10 @@ FT4232H_SERIAL="Test-Slot-A"
 # will be made and averaged
 NUM_SAMPLES=1
 
-# These need to be tuned per board
-REFINOUT=2.4989
-VOLTAGE_OFFSET=0
-VOLTAGE_GAIN=1
+# These need to be tuned per board; will be written to/read from EEPROM
+VREF=2.4989
+VOFF=0
+VGAIN=1
 
 IIO_URI_MODE="-u ip:192.168.2.1"
 BOARD_ONLINE_TIMEOUT=20	# seconds
