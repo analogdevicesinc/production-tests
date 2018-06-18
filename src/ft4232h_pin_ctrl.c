@@ -11,6 +11,7 @@ enum {
 	BITBANG,
 	SPI_ADC,
 	SPI_EEPROM,
+	WAIT_GPIO,
 };
 
 enum {
@@ -33,6 +34,7 @@ static const struct map modes[] = {
 	{ "BITBANG", BITBANG },
 	{ "SPI-ADC", SPI_ADC },
 	{ "SPI-EEPROM", SPI_EEPROM },
+	{ "WAIT-GPIO", WAIT_GPIO },
 };
 
 void copy_to_buf_upper(char *buf, const char *s, int len)
@@ -137,7 +139,7 @@ static int parse_mode(const char *arg)
 
 static void usage()
 {
-	fprintf(stderr, "ft4232h_pin_ctrl --serial <serial> --channel <X> --mode <bitbang|spi-adc|spi-eeprom>\n"
+	fprintf(stderr, "ft4232h_pin_ctrl --serial <serial> --channel <X> --mode <bitbang|spi-adc|spi-eeprom|wait-gpio>\n"
 			"\tWhere: X is A-to-D, the channel on the FTDI device\n");
 	usage_bitbang();
 	usage_spi_adc();
@@ -193,6 +195,13 @@ int main(int argc, char **argv)
 			break;
 		case SPI_EEPROM:
 			ret = handle_mpsse_spi_eeprom(serial, channel, subopts);
+			break;
+		case WAIT_GPIO:
+			if (optind >= argc) {
+				usage();
+				break;
+			}
+			ret = handle_mpsse_wait_gpio(serial, channel, argv, optind, argc);
 			break;
 		default:
 			fprintf(stderr, "Invalid mode; valid are <bitbang|spi-adc|spi-eeprom>\n");

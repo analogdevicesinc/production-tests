@@ -27,6 +27,8 @@ int set_pin_values(const char *serial, int channel, char **argv,
 		   int from, int to);
 int handle_mpsse_spi_adc(const char *serial, int channel, char *subopts);
 int handle_mpsse_spi_eeprom(const char *serial, int channel, char *subopts);
+int handle_mpsse_wait_gpio(const char *serial, int channel, char **argv,
+			   int from, int to);
 
 void usage_bitbang();
 void usage_spi_adc();
