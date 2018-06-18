@@ -16,10 +16,43 @@ source config.sh
 # Main section                     #
 #----------------------------------#
 
+echo_green "Initializing FTDI pins to default state"
 init_pins
 
-./lib/preflash.sh "pluto" || exit 1
+while true ; do
 
-./lib/flash.sh "pluto" || exit 1
+	[ -n "$VREF" ] && [ -n "$VGAIN" ] && [ -n "$VOFF" ] || {
+		echo_green "Loading settings from EEPROM"
+		eeprom_cfg load || {
+			echo_red "Failed to load settings from EEPROM..."
+			sleep 3
+			continue
+		}
+	}
 
-./config/pluto/postflash.sh "dont_power_cycle_on_start" || exit 1
+	echo_green "Waiting for start button"
+
+	wait_pins D "$START_BUTTON" || {
+		echo_red "Waiting for start button failed..."
+		sleep 3
+		continue
+	}
+
+	./lib/preflash.sh "pluto" || {
+		echo_red "Pre-flash step failed..."
+		sleep 3
+		continue
+	}
+
+	./lib/flash.sh "pluto" || {
+		echo_red "Flash step failed..."
+		sleep 3
+		continue
+	}
+
+	./config/pluto/postflash.sh "dont_power_cycle_on_start" || {
+		echo_red "Post-flash step failed..."
+		sleep 3
+		continue
+	}
+done

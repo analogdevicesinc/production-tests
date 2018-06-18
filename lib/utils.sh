@@ -45,6 +45,15 @@ toggle_pins() {
 		--channel "$channel" $@
 }
 
+wait_pins() {
+	local channel="$1"
+	valid_ftdi_channel "$channel" || return 1
+	shift
+	./work/ft4232h_pin_ctrl --mode wait-gpio \
+		--serial "$FT4232H_SERIAL" \
+		--channel "$channel" $@
+}
+
 power_cycle_sleep() {
 	[ -z "$POWER_CYCLE_DELAY" ] || \
 		sleep "$POWER_CYCLE_DELAY"
