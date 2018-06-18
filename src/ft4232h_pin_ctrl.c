@@ -15,6 +15,7 @@ enum {
 };
 
 enum {
+	OPT_HELP,
 	OPT_CHANNEL,
 	OPT_SERIAL,
 	OPT_MODE,
@@ -22,6 +23,7 @@ enum {
 };
 
 static const struct option options[] = {
+	[OPT_HELP]    = {"help",    no_argument, 0, 0},
 	[OPT_CHANNEL] = {"channel", required_argument, 0, 0},
 	[OPT_SERIAL]  = {"serial",  required_argument, 0, 0},
 	[OPT_MODE]    = {"mode",    required_argument, 0, 0},
@@ -171,6 +173,9 @@ int main(int argc, char **argv)
 			case OPT_CHANNEL:
 				channel = parse_channel(optarg);
 				break;
+			case OPT_HELP:
+				usage();
+				return EXIT_SUCCESS;
 		}
 	}
 
@@ -205,11 +210,10 @@ int main(int argc, char **argv)
 			break;
 		default:
 			fprintf(stderr, "Invalid mode; valid are <bitbang|spi-adc|spi-eeprom>\n");
+			usage();
 			ret = EXIT_FAILURE;
 			break;
 	}
-	if (ret != EXIT_SUCCESS)
-		usage();
 
 	return ret;
 }

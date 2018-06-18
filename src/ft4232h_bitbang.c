@@ -78,6 +78,7 @@ int handle_mpsse_wait_gpio(const char *serial, int channel, char **argv,
 
 	if (from >= to) {
 		fprintf(stderr, "No pin(s) specified to wait for\n");
+		usage_bitbang();
 		return EXIT_FAILURE;
 	}
 

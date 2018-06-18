@@ -579,12 +579,16 @@ int handle_mpsse_spi_adc(const char *serial, int channel, char *subopts)
 				sargs.self_test = 1;
 				break;
 			case OPT_ADC_VRANGE_ALL:
-				if (parse_ranges_all(value) < 0)
+				if (parse_ranges_all(value) < 0) {
+					usage_spi_adc();
 					return EXIT_FAILURE;
+				}
 				break;
 			case OPT_ADC_VRANGE_EACH:
-				if (parse_ranges_each(value) < 0)
+				if (parse_ranges_each(value) < 0) {
+					usage_spi_adc();
 					return EXIT_FAILURE;
+				}
 				break;
 			case OPT_ADC_NO_SAMPLES:
 				sargs.samples = atoi(value);
@@ -592,18 +596,21 @@ int handle_mpsse_spi_adc(const char *serial, int channel, char *subopts)
 			case OPT_ADC_GAIN:
 				if (parse_voltage_arg(value, &sargs.gain, &sargs.gain_div) < 0) {
 					fprintf(stderr, "Could not parse gain\n");
+					usage_spi_adc();
 					return EXIT_FAILURE;
 				}
 				break;
 			case OPT_ADC_VOFFSET:
 				if (parse_voltage_arg(value, &sargs.voffset, &sargs.voffset_div) < 0) {
 					fprintf(stderr, "Could not parse refinout\n");
+					usage_spi_adc();
 					return EXIT_FAILURE;
 				}
 				break;
 			case OPT_ADC_REFINOUT:
 				if (parse_voltage_arg(value, &sargs.refinout, &sargs.refinout_div) < 0) {
 					fprintf(stderr, "Could not parse refinout\n");
+					usage_spi_adc();
 					return EXIT_FAILURE;
 				}
 				break;
@@ -612,17 +619,20 @@ int handle_mpsse_spi_adc(const char *serial, int channel, char *subopts)
 				break;
 			default:
 				fprintf(stderr, "Unknown suboption `%s' for SPI-ADC mode\n", saved);
+				usage_spi_adc();
 				return EXIT_FAILURE;
 		}
 	}
 
 	if (sargs.samples <= 0) {
 		fprintf(stderr, "Invalid value for samples provided\n");
+		usage_spi_adc();
 		return EXIT_FAILURE;
 	}
 
 	if (sargs.vchannel_idx < 0) {
 		fprintf(stderr, "Invalid voltage channel name/selection\n");
+		usage_spi_adc();
 		return EXIT_FAILURE;
 	}
 

@@ -322,8 +322,10 @@ int handle_mpsse_spi_eeprom(const char *serial, int channel, char *subopts)
 					fprintf(stderr, "No value provided for 'cs' subopt\n");
 					return EXIT_FAILURE;
 				}
-				if (parse_cs_subopt(value, &eargs.cs.channel, &eargs.cs.pin) < 0)
+				if (parse_cs_subopt(value, &eargs.cs.channel, &eargs.cs.pin) < 0) {
+					usage_spi_eeprom();
 					return EXIT_FAILURE;
+				}
 				break;
 			case OPT_EEPROM_ADDR:
 				if (!value) {
@@ -365,6 +367,7 @@ int handle_mpsse_spi_eeprom(const char *serial, int channel, char *subopts)
 				break;
 			default:
 				fprintf(stderr, "Unknown suboption '%s' for SPI-EEPROM mode\n", saved);
+				usage_spi_eeprom();
 				return EXIT_FAILURE;
 		}
 	}
