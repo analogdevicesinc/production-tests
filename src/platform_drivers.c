@@ -116,6 +116,7 @@ static int32_t spi_init_ftdi_mpsse(spi_device *dev)
 		fprintf(stderr, "Failed to set MPSSE mode\n");
 		return -1;
 	}
+	ftdi_usb_purge_buffers(ctx);
 	mpsse->xsize = SPI_RW_SIZE;
 
 	return 0;
@@ -322,9 +323,6 @@ int32_t spi_init(spi_device *dev)
 
 	if (spi_set_mpsse_spi_mode(dev) < 0)
 		return -1;
-
-	//usleep(25000); /* wait some time for setup */
-	//ftdi_usb_purge_buffers(dev->mpsse.ftdi);
 
 	return 0;
 }
