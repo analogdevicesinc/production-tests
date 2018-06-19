@@ -85,7 +85,11 @@ while true ; do
 		}
 	}
 
-	show_ready_state
+	show_ready_state || {
+		echo_red "Cannot enter READY state"
+		sleep 3
+		continue
+	}
 
 	echo_green "Waiting for start button"
 
