@@ -79,29 +79,31 @@ set timeout 20
 
 send "sudo dfu-util -D $releaseDir/boot.dfu -a boot.dfu\r"
 
-while 1 {
-    expect {
-        "Done!" {
-            break
-        }
-        timeout {
-            send_error "dfu DL failed at boot.dfu\n"
-            exit 1
-        }
-    }
+expect {
+	"Done!" {
+		send_user "boot.dfu OK\r"
+	}
+	"Error during download" {
+		exit 1
+	}
+	timeout {
+		send_error "dfu DL failed at boot.dfu\n"
+		exit 1
+	}
 }
 
 ### use u-boot default env
 send "sudo dfu-util -D $releaseDir/uboot-env.dfu -a uboot-env.dfu\r"
-while 1 {
-    expect {
-        "Done!" {
-            break
-        }
-        timeout {
-            exit 1
-        }
-    }
+expect {
+	"Done!" {
+		send_user "uboot-env.dfu OK\r"
+	}
+	"Error during download" {
+		exit 1
+	}
+	timeout {
+		exit 1
+	}
 }
 
 after 1000
@@ -109,17 +111,17 @@ after 1000
 set timeout 180
 
 send "sudo dfu-util -D $releaseDir/$firmwareDfuFile -a firmware.dfu\r"
-
-while 1 {
-    expect {
-        "Done!" {
-            break
-        }
-        timeout {
-            send_error "dfu DL failed at firmware.dfu\n"
-            exit 1
-        }
-    }
+expect {
+	"Done!" {
+		send_user "firmware.dfu OK\r"
+	}
+	"Error during download" {
+		exit 1
+	}
+	timeout {
+		send_error "dfu DL failed at firmware.dfu\n"
+		exit 1
+	}
 }
 
 after 1000
