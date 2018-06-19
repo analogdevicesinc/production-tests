@@ -46,8 +46,11 @@ int set_pin_values(const char *serial, int channel, char **argv,
 			fprintf(stderr, "Invalid pin name '%s'\n", argv[i]);
 			return -1;
 		}
-		buf[1] |= 1 << (pin & PIN_NUM_MSK);
-		buf[2] |= (pin & PIN_IN_MSK) ? 0 : (1 << pin);
+		if (pin & PIN_IN_MSK)
+			continue;
+		pin = 1 << (pin & PIN_NUM_MSK);
+		buf[1] |= pin;
+		buf[2] |= pin;
 	}
 
 	if (ftdi_write_data(&ftdi, buf, sizeof(buf)) != sizeof(buf)) {
