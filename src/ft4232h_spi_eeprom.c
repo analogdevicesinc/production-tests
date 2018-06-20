@@ -226,6 +226,7 @@ static int handle_mpsse_spi_eeprom_with_args(const char *serial, int channel,
 	}
 
 	sdev.mode = SPI_MODE_0;
+	sdev.chip_select = -1; /* don't use chip select */
 
 	mpsse = &(sdev.mpsse);
 	mpsse->ftdi = &ftdi;

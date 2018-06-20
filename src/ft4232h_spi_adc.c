@@ -377,6 +377,7 @@ static int handle_mpsse_spi_with_args(const char *serial, int channel,
 	struct ftdi_context ftdi = {};
 	static ad7616_init_param init = {
 		.gpio_reset = RESET_PIN,
+		.spi_chip_select = CS_PIN,
 		.mode = AD7616_SW,
 		.osr = AD7616_OSR_128,
 		.spi_mode = SPI_MODE_2,

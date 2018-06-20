@@ -67,6 +67,7 @@
 
 enum gpio_pins
 {
+	CS_PIN = 3,
 	GPIOL0 = 4,
 	GPIOL1 = 5,
 	GPIOL2 = 6,

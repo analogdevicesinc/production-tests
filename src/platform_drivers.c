@@ -97,7 +97,7 @@ enum pins
 };
 
 #define DEFAULT_TRIS	(SK | DO | CS | GPIO0 | GPIO1 | GPIO2 | GPIO3)  /* SK/DO/CS and GPIOs are outputs, DI is an input */
-#define DEFAULT_PORT	(SK | CS)                                       /* SK and CS are high, all others low */
+#define DEFAULT_PORT	(SK)                                       /* SK and CS are high, all others low */
 #define SPI_RW_SIZE	(63 * 1024)
 #define CMD_SIZE	3
 #define SPI_TRANSFER_SIZE	512
@@ -186,6 +186,7 @@ static int32_t spi_set_mpsse_spi_mode(spi_device *dev)
 	unsigned char buf[3] = { 0 };
 	mpsse *mpsse = &dev->mpsse;
 	struct ftdi_context *ctx = mpsse->ftdi;
+	uint8_t cs_msk = 0;
 
 	/* Read and write commands need to include endianess */
 	mpsse->txrx = MPSSE_DO_WRITE | MPSSE_DO_READ | mpsse->endianess;
@@ -193,11 +194,14 @@ static int32_t spi_set_mpsse_spi_mode(spi_device *dev)
 	/* Clock, data out, chip select pins are outputs; all others are inputs. */
 	mpsse->tris = DEFAULT_TRIS;
 
+	if (dev->chip_select > -1)
+		cs_msk = (1 << dev->chip_select);
+
 	/* Clock and chip select pins idle high; all others are low */
-	mpsse->pidle = mpsse->pstart = mpsse->pstop = DEFAULT_PORT;
+	mpsse->pstart = mpsse->pstop = mpsse->pidle = DEFAULT_PORT | cs_msk;
 
 	/* During reads and writes the chip select pin is brought low */
-	mpsse->pstart &= ~CS;
+	mpsse->pstart &= ~cs_msk;
 
 	/* Disable FTDI internal loopback */
 	buf[0] = LOOPBACK_END;
