@@ -11,6 +11,7 @@ enum {
 	BITBANG,
 	SPI_ADC,
 	SPI_EEPROM,
+	SPI_GPIO_EXP,
 	WAIT_GPIO,
 };
 
@@ -36,6 +37,7 @@ static const struct map modes[] = {
 	{ "BITBANG", BITBANG },
 	{ "SPI-ADC", SPI_ADC },
 	{ "SPI-EEPROM", SPI_EEPROM },
+	{ "SPI-GPIO-EXP", SPI_GPIO_EXP },
 	{ "WAIT-GPIO", WAIT_GPIO },
 };
 
@@ -146,6 +148,7 @@ static void usage()
 	usage_bitbang();
 	usage_spi_adc();
 	usage_spi_eeprom();
+	usage_spi_gpio_exp();
 }
 
 int main(int argc, char **argv)
@@ -201,6 +204,9 @@ int main(int argc, char **argv)
 		case SPI_EEPROM:
 			ret = handle_mpsse_spi_eeprom(serial, channel, subopts);
 			break;
+		case SPI_GPIO_EXP:
+			ret = handle_mpsse_spi_gpio_exp(serial, channel, argv, optind, argc);
+			break;
 		case WAIT_GPIO:
 			if (optind >= argc) {
 				usage();
@@ -209,7 +215,7 @@ int main(int argc, char **argv)
 			ret = handle_mpsse_wait_gpio(serial, channel, argv, optind, argc);
 			break;
 		default:
-			fprintf(stderr, "Invalid mode; valid are <bitbang|spi-adc|spi-eeprom>\n");
+			fprintf(stderr, "Invalid mode; valid are <bitbang|spi-adc|spi-eeprom|spi-gpio-exp>\n");
 			usage();
 			ret = EXIT_FAILURE;
 			break;

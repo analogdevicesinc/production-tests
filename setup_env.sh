@@ -99,6 +99,7 @@ build_ft4232h_tool() {
 	local ldflags="-lftdi"
 
 	tool_c="${tool_c} ft4232h_bitbang.c ft4232h_spi_adc.c ft4232h_spi_eeprom.c"
+	tool_c="${tool_c} ft4232h_spi_gpio_exp.c"
 
 	mkdir -p work
 

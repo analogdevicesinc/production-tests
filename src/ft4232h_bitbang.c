@@ -1,9 +1,6 @@
 #include "ft4232h_pin_ctrl.h"
 #include "platform_drivers.h"
 
-#define PIN_IN_MSK	0x8000
-#define PIN_NUM_MSK	0x07
-
 static const struct map pins[] = {
 	{ "PIN0", 0 },
 	{ "PIN1", 1 },
@@ -33,7 +30,7 @@ int set_pin_values(const char *serial, int channel, char **argv,
 
 	buf[0] = SET_BITS_LOW;
 	for (i = from; i < to; i++) {
-		int pin = get_int_from_map(pins, ARRAY_SIZE(pins), argv[i]);
+		int pin = get_pin_val(argv[i]);
 		if (pin < 0) {
 			fprintf(stderr, "Invalid pin name '%s'\n", argv[i]);
 			return EXIT_FAILURE;
@@ -61,6 +58,11 @@ int set_pin_values(const char *serial, int channel, char **argv,
 	close_device(&ftdi);
 
 	return EXIT_SUCCESS;
+}
+
+int get_pin_val(const char *name)
+{
+	return get_int_from_map(pins, ARRAY_SIZE(pins), name);
 }
 
 void usage_bitbang()
