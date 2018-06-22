@@ -31,26 +31,26 @@ int set_pin_values(const char *serial, int channel, char **argv,
 	unsigned char buf[3] = {};
 	int i;
 
-	if (open_device(&ftdi, serial, channel))
-		return EXIT_FAILURE;
-
-	if (ftdi_set_bitmode(&ftdi, 0xFF, BITMODE_BITBANG) < 0) {
-		fprintf(stderr, "Failed to set bitbang mode: %s\n", ftdi_get_error_string(&ftdi));
-		return EXIT_FAILURE;
-	}
-
 	buf[0] = SET_BITS_LOW;
 	for (i = from; i < to; i++) {
 		int pin = get_int_from_map(pins, ARRAY_SIZE(pins), argv[i]);
 		if (pin < 0) {
 			fprintf(stderr, "Invalid pin name '%s'\n", argv[i]);
-			return -1;
+			return EXIT_FAILURE;
 		}
 		if (pin & PIN_IN_MSK)
 			continue;
 		pin = 1 << (pin & PIN_NUM_MSK);
 		buf[1] |= pin;
 		buf[2] |= pin;
+	}
+
+	if (open_device(&ftdi, serial, channel))
+		return EXIT_FAILURE;
+
+	if (ftdi_set_bitmode(&ftdi, 0xFF, BITMODE_BITBANG) < 0) {
+		fprintf(stderr, "Failed to set bitbang mode: %s\n", ftdi_get_error_string(&ftdi));
+		return EXIT_FAILURE;
 	}
 
 	if (ftdi_write_data(&ftdi, buf, sizeof(buf)) != sizeof(buf)) {
