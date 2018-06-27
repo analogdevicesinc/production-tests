@@ -41,7 +41,7 @@ apt_install_prereqs() {
 	apt-get -y install libftdi-dev bc sshpass openocd \
 		cmake build-essential git libxml2-dev bison flex \
 		libfftw3-dev expect usbutils dfu-util screen \
-		wget unzip
+		wget unzip curl
 	EOF
 }
 
