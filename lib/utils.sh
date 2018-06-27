@@ -305,9 +305,11 @@ eeprom_cfg() {
 			}
 		done
 		# Now write them to EEPROM
+		local page
 		for cfg in $CFGS ; do
 			value="$(eval echo "\$$cfg")"
-			eeprom_rw "$op" "$page" "${cfg}=${value}" || return 1
+			eeprom_rw "write" "$page" "${cfg}=${value}" || return 1
+			let page='page + PAGE_SIZE'
 		done
 		return 0
 	else
