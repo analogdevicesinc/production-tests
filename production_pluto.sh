@@ -67,6 +67,10 @@ show_error_state() {
 	show_leds
 }
 
+need_to_read_eeprom() {
+	[ "$ERROR" == "1" ] || [ -z "$VREF" ] || [ -z "$VOFF" ] || [ -z "$VGAIN" ]
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -76,14 +80,14 @@ init_pins
 
 while true ; do
 
-	[ -n "$VREF" ] && [ -n "$VGAIN" ] && [ -n "$VOFF" ] || {
+	if need_to_read_eeprom ; then
 		echo_green "Loading settings from EEPROM"
 		eeprom_cfg load || {
 			echo_red "Failed to load settings from EEPROM..."
 			sleep 3
 			continue
 		}
-	}
+	fi
 
 	show_ready_state || {
 		echo_red "Cannot enter READY state"
