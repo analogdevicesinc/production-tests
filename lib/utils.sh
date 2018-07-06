@@ -317,3 +317,7 @@ eeprom_cfg() {
 		return 0
 	fi
 }
+
+scopy() {
+	LD_LIBRARY_PATH=$(pwd)/work/scopy/deps/staging/lib $(pwd)/work/scopy/build/scopy $@
+}
