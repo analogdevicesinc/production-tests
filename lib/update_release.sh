@@ -96,6 +96,7 @@ done
 sed -i -e "s/variable PCW_SILICON_VER_1_0/set PCW_SILICON_VER_1_0 \"0x0\"/g" \
 	-e "s/variable PCW_SILICON_VER_2_0/set PCW_SILICON_VER_2_0 \"0x1\"/g" \
 	-e "s/variable PCW_SILICON_VER_3_0/set PCW_SILICON_VER_3_0 \"0x2\"/g" \
+	-e "/configparams/d" \
 	-e "s/variable APU_FREQ/set APU_FREQ 666666666/g" $RELEASE_DIR/ps7_init.tcl
 
 exit 0
