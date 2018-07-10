@@ -37,16 +37,22 @@ toupper() {
 
 valid_ftdi_channel() {
 	local channel="$(toupper $1)"
-	for chan in A B C D ; do
+	for chan in A B C D GPIO_EXP1 ; do
 		[ "$chan" == "$channel" ] && return 0
 	done
 	return 1
 }
 
 toggle_pins() {
-	local channel=$1
+	local channel="$(toupper $1)"
 	valid_ftdi_channel "$channel" || return 1
 	shift
+	if [ "$channel" == "GPIO_EXP1" ] ; then
+		./work/ft4232h_pin_ctrl --channel B \
+			--serial "$FT4232H_SERIAL" \
+			--mode spi-gpio-exp $@
+		return $?
+	fi
 	./work/ft4232h_pin_ctrl --mode bitbang \
 		--serial "$FT4232H_SERIAL" \
 		--channel "$channel" $@
