@@ -302,7 +302,7 @@ eeprom_cfg() {
 			}
 			# evaluate the entries in the EEPROM as shell vars
 			eval "export $value" || return 1
-			echo_green "$value"
+			[ "$EEPROM_VERBOSE" != "1" ] || echo_green "$value"
 		done
 		return 0
 	elif [ "$op" == "save" ] ; then

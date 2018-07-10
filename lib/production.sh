@@ -15,6 +15,8 @@ ERROR=0
 READ=0
 PROGRESS=0
 
+EEPROM_VERBOSE=1
+
 #----------------------------------#
 # Functions section                #
 #----------------------------------#
