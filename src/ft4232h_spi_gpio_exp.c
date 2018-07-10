@@ -112,8 +112,6 @@ int handle_mpsse_spi_gpio_exp(const char *serial, int channel, char **argv,
 	}
 	mdelay(10);
 
-	printf("dir %02x olat %02x\n", direction, output);
-
 	if (mcp23s08_init(&sdev) < 0) {
 		fprintf(stderr, "Failed to init MCP23S08\n");
 		goto out;
