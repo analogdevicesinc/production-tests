@@ -333,6 +333,30 @@ eeprom_cfg() {
 	fi
 }
 
+ref_measure_ctl() {
+	local cmd="$(tolower $1)"
+
+	# pin0 - select ref voltage - out-low == 10V, ough-high == 2.5V
+	# pin1 - GND_REF_SEL - must be out-low
+	# pin2 - REF_CH2_N_P_SEL - should be out-hi for now
+	# pin3 - REF_CH1_N_P_SEL - should be out-hi for now
+	# pin4 - EN_REF_MEASURE - active low
+
+	if [ "$cmd" == "ref10v" ] ; then
+		toggle_pins GPIO_EXP1 pin2 pin3 # pin4 - out-lo, pin1 - out-low, pin0 - out-lo
+		sleep 0.5
+	elif [ "$cmd" == "ref2.5v" ] ; then
+		toggle_pins GPIO_EXP1 pin0 pin2 pin3 # # pin4 - out-lo, pin1 - out-low
+		sleep 0.5
+	elif [ "$cmd" == "disable" ] ; then
+		toggle_pins GPIO_EXP1 pin4
+		sleep 0.1
+	else
+		echo_red "Unknown command '$cmd' ; valid commands are: ref10v, ref2.5v, enabled & disable"
+		return 1
+	fi
+}
+
 scopy() {
 	LD_LIBRARY_PATH=$(pwd)/work/scopy/deps/staging/lib $(pwd)/work/scopy/build/scopy $@
 }
