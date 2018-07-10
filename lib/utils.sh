@@ -240,7 +240,7 @@ init_pins() {
 		valid_ftdi_channel "$channel" || return 1
 	else
 		# init all - except C for UART
-		channel="A B D"
+		channel="A B D GPIO_EXP1"
 	fi
 
 	for chan in $channel ; do
@@ -254,6 +254,8 @@ init_pins() {
 		# Channel for GPIOs - these are controlled via shell scripts and
 		# the ft4232h_pin_ctrl utility (in bitbang mode)
 		[ "$chan" == "D" ] && pin_vals="pin0 pin1i pin6i pin7i"
+		# GPIO expander (1) - pin4 HI disables ref measurement
+		[ "$chan" == "GPIO_EXP1" ] && pin_vals="pin4"
 
 		toggle_pins "$chan" $pin_vals || return 1
 	done
