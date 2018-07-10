@@ -27,9 +27,16 @@ is_ft4232h() {
 	lsusb -v -d 0456:f001 &> /dev/null
 }
 
+tolower() {
+	echo "$1" | tr A-Z a-z
+}
+
+toupper() {
+	echo "$1" | tr a-z A-Z
+}
+
 valid_ftdi_channel() {
-	local channel="$1"
-	channel=$(echo $channel | tr a-z A-Z)
+	local channel="$(toupper $1)"
 	for chan in A B C D ; do
 		[ "$chan" == "$channel" ] && return 0
 	done
