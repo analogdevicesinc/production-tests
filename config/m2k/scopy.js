@@ -22,7 +22,7 @@ function _osc_change_gain_mode(ch, high)
 	} else {
 		osc.channels[ch].volts_per_div = 0.5;
 	}
-	msleep(200);
+	msleep(1000);
 }
 
 function _osc_check_range(high, value)
@@ -136,7 +136,7 @@ function _awg_output_constant(ch, value)
 	siggen.mode[ch] = 0;
 	siggen.constant_volts[ch] = value;
 	siggen.running = true;
-	msleep(500);
+	msleep(2000);
 }
 
 /* Read OSC values */
@@ -388,7 +388,7 @@ function _awg_output_square(ch, frequency, amplitude, offset)
 	siggen.waveform_amplitude[ch] = amplitude;
 	siggen.waveform_offset[ch] = offset;
 	siggen.running = true;
-	msleep(500);
+	msleep(2000);
 }
 
 function toggle_relay(pos)
@@ -498,7 +498,7 @@ function _awg_output_sine(ch, frequency, amplitude, offset)
 	siggen.waveform_amplitude[ch] = amplitude;
 	siggen.waveform_offset[ch] = offset;
 	siggen.running = true;
-	msleep(500);
+	msleep(2000);
 }
 
 function _spectrum_setup_general()
