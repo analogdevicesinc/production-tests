@@ -663,7 +663,7 @@ function runTest(step)
 
 		ret = eval("step_" + step + "();");
 
-		log("Step " + step + " finished: " + get_now_s());
+		log("Step " + step + " finished: " + get_now_s() + "\n");
 
 		if (!ret) {
 			if (trial_nb != 2) {
