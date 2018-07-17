@@ -22,7 +22,6 @@ function _osc_change_gain_mode(ch, high)
 	} else {
 		osc.channels[ch].volts_per_div = 0.5;
 	}
-	msleep(2000);
 }
 
 function _osc_check_range(high, value)
@@ -53,6 +52,7 @@ function _test_osc_range(ch, high)
 	var value;
 	var ret;
 	var output;
+	var i;
 
 	if (high) {
 		output = extern.start("./ref_measure_ctl.sh ref2.5v");
@@ -60,13 +60,17 @@ function _test_osc_range(ch, high)
 		output = extern.start("./ref_measure_ctl.sh ref10v");
 	}
 
-	msleep(2500);
-
 	osc.running = true;
 
 	_osc_change_gain_mode(ch, high);
-	value = _osc_read_constant(ch);
-	ret = _osc_check_range(high, value);
+	/* Busy wait for 10 seconds, with 100 milliseconds intervals */
+	for (i = 0; i < 100; i++) {
+		value = _osc_read_constant(ch);
+		ret = _osc_check_range(high, value);
+		if (ret)
+			break;
+		msleep(100);
+	}
 	if (ret) {
 		result += "PASSED ";
 	} else {
@@ -138,7 +142,7 @@ function _awg_output_constant(ch, value)
 	siggen.mode[ch] = 0;
 	siggen.constant_volts[ch] = value;
 	siggen.running = true;
-	msleep(1500);
+	msleep(500);
 }
 
 /* Read OSC values */
@@ -154,14 +158,21 @@ function _osc_read_constant(ch)
 function _awg_osc_constant(ch, value)
 {
 	var ret;
+	var i;
 	var result = "";
-	_awg_output_constant(ch, value);
-	var ret_value = _osc_read_constant(ch);
+	var ret_value;
 
-	if ((ret_value < (value + ADC_CONST_ERR_THRESHOLD)) && (ret_value > (value - ADC_CONST_ERR_THRESHOLD))) {
-		ret = true;
-	} else {
-		ret = false;
+	_awg_output_constant(ch, value);
+
+	ret = false;
+	/* busy wait for 10 seconds with 100 milliseconds intervals */
+	for (i = 0; i < 100; i++) {
+		ret_value = _osc_read_constant(ch);
+		if ((ret_value < (value + ADC_CONST_ERR_THRESHOLD)) && (ret_value > (value - ADC_CONST_ERR_THRESHOLD))) {
+			ret = true;
+			break;
+		}
+		msleep(100);
 	}
 
 	if (ret) {
@@ -279,12 +290,9 @@ function step_7()
 	_calibrate_pos_power_supply();
 	_calibrate_neg_power_supply();
 	manual_calib.start(2);
-	var ok = manual_calib.saveCalibration(M2KCALIB_INI);
+	manual_calib.saveCalibration(M2KCALIB_INI);
 	log("Saved calibration parameters to file");
-	if (!ok) {
-		printToConsole("Could not save the params on the board");
-	}
-	return ok;
+	return true;
 }
 
 
@@ -558,6 +566,9 @@ function step_10()
 {
 	log(createStepHeader(10));
 	var ret;
+
+	manual_calib.autoCalibration();
+
 	ret = _compute_adc_bandwidth(0);
 	if (!ret) {
 		return false;
