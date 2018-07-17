@@ -1,15 +1,15 @@
 #!/usr/bin/scopy -s
 
-var SHOW_TIMESTAMP = true
-var SHOW_START_END_TIME = true
-var MAX_HIGH_GAIN = 2.525
-var MIN_HIGH_GAIN = 2.475
-var MAX_LOW_GAIN = 10.25
-var MIN_LOW_GAIN = 9.75
-var ADC_CONST_ERR_THRESHOLD = 0.03
-var ADC_BANDWIDTH_THRESHOLD = 4
-var WORKING_DIR = "."
-var M2KCALIB_INI = "/media/jig/M2k/m2k-calib.ini"
+var SHOW_TIMESTAMP = true;
+var SHOW_START_END_TIME = true;
+var MAX_HIGH_GAIN = 2.525;
+var MIN_HIGH_GAIN = 2.475;
+var MAX_LOW_GAIN = 10.25;
+var MIN_LOW_GAIN = 9.75;
+var ADC_CONST_ERR_THRESHOLD = 0.03;
+var ADC_BANDWIDTH_THRESHOLD = 7;
+var WORKING_DIR = ".";
+var M2KCALIB_INI = "/media/jig/M2k/m2k-calib.ini";
 
 /*********************************************************************************************************
 *	STEP 5
@@ -22,7 +22,7 @@ function _osc_change_gain_mode(ch, high)
 	} else {
 		osc.channels[ch].volts_per_div = 0.5;
 	}
-	msleep(1000);
+	msleep(2000);
 }
 
 function _osc_check_range(high, value)
@@ -59,6 +59,8 @@ function _test_osc_range(ch, high)
 	} else {
 		output = extern.start("./ref_measure_ctl.sh ref10v");
 	}
+
+	msleep(2500);
 
 	osc.running = true;
 
@@ -136,7 +138,7 @@ function _awg_output_constant(ch, value)
 	siggen.mode[ch] = 0;
 	siggen.constant_volts[ch] = value;
 	siggen.running = true;
-	msleep(2000);
+	msleep(1500);
 }
 
 /* Read OSC values */
@@ -169,7 +171,7 @@ function _awg_osc_constant(ch, value)
 	}
 	result += "channel: " + ch + " ";
 	result += "output: " + value + " ";
-	result += "input: " + ret_value + "\n";
+	result += "input: " + ret_value;
 	
 	log(result);
 	
@@ -234,7 +236,6 @@ function _calibrate_pos_power_supply()
 	while (next_step > 0) {
 		// call some shell script which returns the ADC value
 		value = extern.start("./measure.sh V5B");
-		//value = 0.1;
 		ok = manual_calib.setParam(value);
 		next_step = manual_calib.next();
 		step++;
@@ -244,7 +245,6 @@ function _calibrate_pos_power_supply()
 	if (next_step < 0) {
 		next_calib = manual_calib.finish();
 	}
-	res += "\n";
 	res = "DONE - pos supply " + res;
 	log(res);
 }
@@ -260,7 +260,6 @@ function _calibrate_neg_power_supply()
 	while (next_step > 0) {
 		// call some shell script which returns the ADC value
 		value = extern.start("./measure.sh V6B");
-		//value = 0.1;
 		ok = manual_calib.setParam(value);
 		next_step = manual_calib.next();
 		step++;
@@ -270,7 +269,6 @@ function _calibrate_neg_power_supply()
 	if (next_step < 0) {
 		next_calib = manual_calib.finish();
 	}
-	res += "\n";
 	res = "DONE - neg supply " + res;
 	log(res);
 }
@@ -282,11 +280,11 @@ function step_7()
 	_calibrate_neg_power_supply();
 	manual_calib.start(2);
 	var ok = manual_calib.saveCalibration(M2KCALIB_INI);
+	log("Saved calibration parameters to file");
 	if (!ok) {
 		printToConsole("Could not save the params on the board");
 	}
 	return ok;
-	return true;
 }
 
 
@@ -344,7 +342,7 @@ function _test_DIO_pair(input, output)
 	result += input;
 	result += "	output: ";
 	result += output;
-	log(result + '\n');
+	log(result);
 
 	return ret;
 }
@@ -388,7 +386,7 @@ function _awg_output_square(ch, frequency, amplitude, offset)
 	siggen.waveform_amplitude[ch] = amplitude;
 	siggen.waveform_offset[ch] = offset;
 	siggen.running = true;
-	msleep(2000);
+	msleep(500);
 }
 
 function toggle_relay(pos)
@@ -407,6 +405,9 @@ function _test_osc_trimmer_adjust(ch, positive)
 	var ret;
 	var ch_type = "positive";
 
+	osc.internal_trigger = true;
+	osc.trigger_source = ch;
+	osc.internal_condition = 0;
 	toggle_relay(positive);
 
 	if (!positive) {
@@ -415,20 +416,20 @@ function _test_osc_trimmer_adjust(ch, positive)
 
 	while (!ok) {
 		/* Start the SIG GEN */
-		_awg_output_square(ch, 1000, 2, 2);
+		_awg_output_square(ch, 1000, 2, 0);
 	
 		/* Display and run the OSC */
 		osc.show();
-		_osc_change_gain_mode(ch, false);
-		osc.time_base = 0.001;
+		_osc_change_gain_mode(ch, true);
+		osc.time_base = 0.0001;
 		osc.running = true;
 
 		while (input != "OK" && input != "ok") {
-			input = readFromConsole("\nAdjust the trimmers for channel " + ch + " " + ch_type + ", then type OK\n");
+			input = readFromConsole("Adjust the trimmers for channel " + ch + " " + ch_type + ", then type OK");
 		}
 
 		if (input == "OK" || input == "ok") {
-			input = readFromConsole("\nAre you sure? (y/n)\n");
+			input = readFromConsole("Are you sure? (y/n)");
 			if (input == "Y" || input == "y") {
 				ok = true;
 			} else {
@@ -437,6 +438,7 @@ function _test_osc_trimmer_adjust(ch, positive)
 		}
 		osc.running = false;
 		siggen.running = false;
+		_osc_change_gain_mode(ch, false);
 		osc.channels[ch].enabled = false;
 		ret = ok;
 	}
@@ -498,7 +500,7 @@ function _awg_output_sine(ch, frequency, amplitude, offset)
 	siggen.waveform_amplitude[ch] = amplitude;
 	siggen.waveform_offset[ch] = offset;
 	siggen.running = true;
-	msleep(2000);
+	msleep(500);
 }
 
 function _spectrum_setup_general()
@@ -515,11 +517,11 @@ function _spectrum_setup_general()
 function _spectrum_setup_marker(ch, frequency)
 {
 	var idx = ch * 5;
-	if (idx != spectrum.markers[idx].chId) {
+	if (ch != spectrum.markers[idx].chId) {
 		return 0;
 	}
 	spectrum.markers[idx].en = true;
-	spectrum.markers[idx].type = 
+	spectrum.markers[idx].type = 0;
 	spectrum.markers[idx].freq = frequency;
 	return spectrum.markers[idx].magnitude;	
 }
@@ -539,14 +541,14 @@ function _compute_adc_bandwidth(ch)
 	db_2 = _spectrum_setup_marker(ch, freq_2);
 	
 	var diff = db_1 - db_2;
-	log("channel: " + ch + " diff dB: " + diff + "\n");
+	log("channel: " + ch + " diff dB: " + diff);
 	if ((diff > ADC_BANDWIDTH_THRESHOLD) || (diff < 0)) {
-		printToConsole("Error: dB difference is too big");
+		log("Error: dB difference is too big");
 		spectrum.running = false;
 		siggen.running = false;
 		return false;
 	}
-	
+
 	spectrum.running = false;
 	siggen.running = false;
 	return true;
@@ -574,13 +576,13 @@ function step_10()
 
 function connectToUSB(host)
 {
-	printToConsole("Connecting to " + host + "...")
+	log("Connecting to " + host + "...")
 	var success = launcher.connect(host)
 
 	if (success)
-		printToConsole("Connected!")
+		log("Connected!")
 	else
-        	printToConsole("Failed to connect to: " + host + "!")
+        	log("Failed to connect to: " + host + "!")
 
 	return success;
 }
@@ -594,7 +596,7 @@ function connect()
         	if (!connected)
             		return false;
     	} else {
-        	printToConsole("No usb devices available");
+        	log("No usb devices available");
         	return false;
     	}
 	return true;
@@ -606,10 +608,9 @@ function log(message) {
 
 function createStepHeader(step)
 {
-	var str = "\n";
+	var str = "";
 	str += "STEP ";
 	str += step;
-	str += "\n";
 	return str;
 }
 
@@ -619,7 +620,7 @@ function enableExternScripts()
 	launcher.debugger = true;
 	var ret = launcher.enableExtern(true);
 	if (!ret) {
-		printToConsole("Error: can't run external scripts");
+		log("Error: can't run external scripts");
 		return Error();
 	}
 	extern.setProcessTimeout(0);
@@ -631,37 +632,33 @@ function enableCalibScripts()
 	launcher.manual_calibration = true;
 	var ret = launcher.enableCalibScript(true);
 	if (!ret) {
-		printToConsole("Error: can't run manual calibration scripts");
+		log("Error: can't run manual calibration scripts");
 		return Error();
 	}
+}
+
+function get_now_s()
+{
+	var date = new Date();
+	return date.toTimeString();
 }
 
 function runTest(step)
 {
 	var trial_nb = 1;
 	var ret = false;
-	while (!ret && trial_nb < 3) {
-		if (step == 5) {
-			ret = step_5();
-		} else if (step == 6) {
-			ret = step_6();
-		} else if (step == 7) {
-			ret = step_7();
-		} else if (step == 8) {
-			ret = step_8();
-		} else if (step == 9) {
-			ret = step_9();
-		} else if (step == 10) {
-			ret = step_10();
-		}
+	while (!ret && trial_nb < 4) {
+		log("Step " + step + " started: " + get_now_s());
+
+		ret = eval("step_" + step + "();");
+
+		log("Step " + step + " finished: " + get_now_s());
 
 		if (!ret) {
 			if (trial_nb != 2) {
-				log("Restarting step " + step + "\n");
-				printToConsole("Restarting step " + step + "...");
+				log("Restarting step " + step);
 			} else {
-				log("Failed " + trial_nb + " times at step " + step + "\n");
-				printToConsole("Failed " + trial_nb + " times at step " + step);				
+				log("Failed " + trial_nb + " times at step " + step);				
 			}
 			trial_nb++;
 			manual_calib.autoCalibration();
@@ -672,8 +669,7 @@ function runTest(step)
 
 function main()
 {
-	var ret;
-	var date = new Date()
+	var i;
 
 	if (!connect())      
 		return Error()
@@ -684,32 +680,17 @@ function main()
 	extern.setProcessTimeout(0);
 
 	if (SHOW_START_END_TIME)
-		log("Script started on: " + date.toTimeString() + '\n');
+		log("Script started on: " + get_now_s() + '\n');
 
-
-	if (!runTest(5)) {
-		return Error();
-	}
-	if (!runTest(6)) {
-		return Error();
-	}
-	if (!runTest(7)) {
-		return Error();
-	}
-	if (!runTest(8)) {
-		return Error();
-	}
-	if (!runTest(9)) {
-		return Error();
-	}
-	if (!runTest(10)) {
-		return Error();
+	for (i = 5; i <= 10; i++) {
+		if (!runTest(i)) {
+			return Error();
+		}
 	}
 
-	printToConsole("\nDone\n");
+	log("\nDone\n");
 	if (SHOW_START_END_TIME) {
-        	date = new Date()
-        	log("Script ended on: " + date.toTimeString() + '\n')
-    }
+		log("Script ended on: " + get_now_s() + '\n')
+	}
 }
 main()
