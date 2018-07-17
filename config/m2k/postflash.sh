@@ -10,6 +10,12 @@ source config.sh
 # Functions section                #
 #----------------------------------#
 
+terminate_any_lingering_scopies() {
+	for pid in $(pgrep scopy) ; do
+		kill -9 $pid
+	done
+}
+
 wait_for_board() {
 	local serial
 	for iter in $(seq $BOARD_ONLINE_TIMEOUT) ; do
@@ -25,6 +31,7 @@ wait_for_board() {
 #----------------------------------#
 
 force_terminate_programs
+terminate_any_lingering_scopies
 
 echo_green "Press CTRL-C to exit"
 
@@ -41,14 +48,18 @@ fi
 
 echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
 wait_for_board || {
+	terminate_any_lingering_scopies
 	echo_red "Board did not come online"
 	exit 1
 }
 
 scopy --script config/m2k/scopy.js || {
+	terminate_any_lingering_scopies
 	echo_red "Scopy tests have failed..."
 	exit 1
 }
+
+terminate_any_lingering_scopies
 
 echo
 echo_green "PASSED ALL TESTS"
