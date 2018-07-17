@@ -344,13 +344,10 @@ ref_measure_ctl() {
 
 	if [ "$cmd" == "ref10v" ] ; then
 		toggle_pins GPIO_EXP1 pin2 pin3 # pin4 - out-lo, pin1 - out-low, pin0 - out-lo
-		sleep 2
 	elif [ "$cmd" == "ref2.5v" ] ; then
 		toggle_pins GPIO_EXP1 pin0 pin2 pin3 # # pin4 - out-lo, pin1 - out-low
-		sleep 2
 	elif [ "$cmd" == "disable" ] ; then
 		toggle_pins GPIO_EXP1 pin4
-		sleep 2
 	else
 		echo_red "Unknown command '$cmd' ; valid commands are: ref10v, ref2.5v, enabled & disable"
 		return 1
