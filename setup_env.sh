@@ -13,6 +13,8 @@ PATH="$SCRIPT_DIR/work/openocd-0.10.0/installed/bin:$PATH"
 
 UDEV_RULES_FILE="50-ftdi-test.rules"
 
+INIT_PINS_SCRIPT="$SCRIPT_DIR"/init.sh
+
 UDEV_SECTION='
 SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", ATTRS{serial}==\"Test-Slot-A\", SYMLINK+=\"ttyTest-A%n\"
 SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", ATTRS{serial}==\"Test-Slot-B\", SYMLINK+=\"ttyTest-B%n\"
@@ -20,6 +22,8 @@ SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=
 SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", ATTRS{serial}==\"Test-Slot-D\", SYMLINK+=\"ttyTest-D%n\"
 SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", GROUP=\"plugdev\"
 '
+
+UDEV_SECTION_PINS="SUBSYSTEM==\\\"usb\\\", ATTRS{idVendor}==\\\"0456\\\", ATTRS{idProduct}==\\\"f001\\\", MODE=\\\"660\\\", RUN+=\\\"$INIT_PINS_SCRIPT\\\""
 
 #----------------------------------#
 # Functions section                #
@@ -87,6 +91,7 @@ sync_udev_rules_file() {
 	sudo_required
 	sudo -s <<-EOF
 		echo -n "$UDEV_SECTION" > "/etc/udev/rules.d/$UDEV_RULES_FILE"
+		echo "$UDEV_SECTION_PINS" >> "/etc/udev/rules.d/$UDEV_RULES_FILE"
 		udevadm control --reload-rules
 		udevadm trigger
 	EOF
