@@ -357,3 +357,7 @@ ref_measure_ctl() {
 scopy() {
 	LD_LIBRARY_PATH=$SCRIPT_DIR/work/scopy/deps/staging/lib $SCRIPT_DIR/work/scopy/build/scopy $@
 }
+
+get_hwserial() {
+	LD_LIBRARY_PATH=$SCRIPT_DIR/work/libiio/build iio_attr -C $IIO_URI_MODE hw_serial 2> /dev/null | cut -d' ' -f2
+}
