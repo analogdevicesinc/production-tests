@@ -7,7 +7,7 @@
 # Can be called with:  ./update_pluto_release.sh [version]
 # If version is unspecified the latest version swill be used
 
-echo_red()   { printf "\033[1;31m$*\033[m\n"; }
+source lib/update_release.sh
 
 get_latest_release() {
 	curl --silent "https://api.github.com/repos/$1/releases/latest" |
@@ -42,4 +42,4 @@ RELEASE_DIR="$(pwd)/release/pluto"
 FW_URL="https://github.com/analogdevicesinc/plutosdr-fw/releases/download/${VERSION_TO_UPDATE}/plutosdr-fw-${VERSION_TO_UPDATE}.zip"
 FW_BOOTSTRAP_URL="https://github.com/analogdevicesinc/plutosdr-fw/releases/download/${VERSION_TO_UPDATE}/plutosdr-jtag-bootstrap-${VERSION_TO_UPDATE}.zip"
 
-./lib/update_release.sh "$RELEASE_DIR" "pluto.dfu" "$FW_URL" "$FW_BOOTSTRAP_URL"
+update_release "$RELEASE_DIR" "pluto.dfu" "$FW_URL" "$FW_BOOTSTRAP_URL"

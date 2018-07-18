@@ -83,47 +83,46 @@ tx_margin() {
 # Main section                     #
 #----------------------------------#
 
-force_terminate_programs
+post_flash() {
+	force_terminate_programs
 
-echo_green "Press CTRL-C to exit"
+	# This is a small workaround to avoid power-cycling the board
+	# when running this script; it means that someone else took care of
+	# this before calling the script
+	if [ "$1" != "dont_power_cycle_on_start" ] ; then
+		echo_green "0. Power cycling the board"
+		disable_all_usb_ports
+		power_cycle_sleep
+		enable_all_usb_ports
+		power_cycle_sleep
+	fi
 
-# This is a small workaround to avoid power-cycling the board
-# when running this script; it means that someone else took care of
-# this before calling the script
-if [ "$1" != "dont_power_cycle_on_start" ] ; then
-	echo_green "0. Power cycling the board"
-	disable_all_usb_ports
-	power_cycle_sleep
-	enable_all_usb_ports
-	power_cycle_sleep
-fi
+	echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
+	wait_for_board || {
+		echo_red "Board did not come online"
+		return 1
+	}
 
-echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
-wait_for_board || {
-	echo_red "Board did not come online"
-	exit 1
-}
+	echo_green "2. XO Calibration"
+	retry 4 xo_calibration || {
+		echo_red "  XO Calibration failed"
+		return 1
+	}
 
-echo_green "2. XO Calibration"
-retry 4 xo_calibration || {
-	echo_red "  XO Calibration failed"
-	exit 1
-}
+	echo_green "3. Testing TX Margin"
+	retry 4 tx_margin || {
+		echo_red "  TX Margin test failed"
+		return 1
+	}
 
-echo_green "3. Testing TX Margin"
-retry 4 tx_margin || {
-	echo_red "  TX Margin test failed"
-	exit 1
-}
+	echo_green "4. Testing Linux"
+	retry 4 expect config/pluto/linux.exp "$TTYUSB" || {
+		echo
+		echo_red "   Linux test failed"
+		return 1
+	}
 
-echo_green "4. Testing Linux"
-retry 4 expect config/pluto/linux.exp "$TTYUSB" || {
 	echo
-	echo_red "   Linux test failed"
-	exit 1
+	echo_green "PASSED ALL TESTS"
+	return 0
 }
-
-echo
-echo_green "PASSED ALL TESTS"
-
-exit 0

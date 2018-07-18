@@ -31,23 +31,45 @@ load_uboot() {
 	openocd -f "$CABLE_CFG" -c "load_uboot $UBOOT_ELF_FILE" || {
 		echo_blue "OpenOCD command failed"
 		force_terminate_programs
-		exit 1
+		return 1
 	}
 }
 
-flash_board () {
-	local ttyUSB="$1"
-	local releaseDir="$2"
-	local firmwareDfuFile="$3"
+flash() {
+	local BOARD="$1"
+	local MODE="$2"
 
-	if [ ! -e "/dev/$ttyUSB" ] ; then
+	local CABLE_CFG="$(get_config "$BOARD")"
+	[ -n "$CABLE_CFG" ] || {
+		echo_red "Could not find a supported JTAG cable on your system"
+		return 1
+	}
+	[ -f "$CABLE_CFG" ] || {
+		echo_red "Cable config file '$CABLE_CFG' does not exist"
+		return 1
+	}
+
+	local releaseDir="$(readlink -f "release/$BOARD")"
+	local firmwareDfuFile="${BOARD}.dfu"
+
+	# Sanity check that we have all release files, before going forward
+	for file in $firmwareDfuFile $COMMON_RELEASE_FILES ; do
+		[ -f "$releaseDir/$file" ] || {
+			echo_red "File not found: '$releaseDir/$file'"
+			return 1
+		}
+	done
+
+	local UBOOT_ELF_FILE="$releaseDir/u-boot.elf"
+
+	if [ ! -e "/dev/$TTYUSB" ] ; then
 		for board in pluto m2k ; do
 			if [ "$BOARD" == "$board" ] ; then
-				echo_red "'/dev/$ttyUSB' does not exist ; board '$BOARD' requires it"
-				exit 1
+				echo_red "'/dev/$TTYUSB' does not exist ; board '$BOARD' requires it"
+				return 1
 			fi
 		done
-		ttyUSB="SKIP_TTYUSB"
+		TTYUSB="SKIP_TTYUSB"
 	fi
 
 	force_terminate_programs
@@ -61,10 +83,10 @@ flash_board () {
 
 	echo_green "2. Running DFU utils step"
 
-	expect lib/cmd.exp "$ttyUSB" "$releaseDir" "$firmwareDfuFile" || {
+	expect lib/cmd.exp "$TTYUSB" "$releaseDir" "$firmwareDfuFile" || {
 		echo_blue "expect command failed"
 		force_terminate_programs
-		exit 1
+		return 1
 	}
 
 	# wait until env is saved by uboot
@@ -81,59 +103,3 @@ flash_board () {
 
 	return 0
 }
-
-#----------------------------------#
-# Main section                     #
-#----------------------------------#
-
-BOARD="$1"
-MODE="$2"
-
-[ -n "$BOARD" ] || {
-	echo_red "No board-name provided"
-	exit 1
-}
-
-RELEASE_DIR="$(readlink -f "release/$BOARD")"
-
-[ -d "$RELEASE_DIR" ] || {
-	echo_red "No valid release dir provided"
-	exit 1
-}
-
-FIRMWARE_DFU_FILE="${BOARD}.dfu"
-
-echo "Note: using release dir '$RELEASE_DIR'"
-
-# Sanity check that we have all release files, before going forward
-for file in $FIRMWARE_DFU_FILE $COMMON_RELEASE_FILES ; do
-	[ -f "$RELEASE_DIR/$file" ] || {
-		echo_red "File not found: '$RELEASE_DIR/$file'"
-		exit 1
-	}
-done
-
-while true ;
-do
-	CABLE_CFG="$(get_config "$BOARD")"
-	[ -n "$CABLE_CFG" ] || {
-		echo_red "Could not find a supported JTAG cable on your system"
-		sleep 4
-		continue
-	}
-	[ -f "$CABLE_CFG" ] || {
-		echo_red "Cable config file '$CABLE_CFG' does not exist"
-		exit 1
-	}
-	break
-done
-
-UBOOT_ELF_FILE="$RELEASE_DIR/u-boot.elf"
-
-echo_green "Press CTRL-C to exit"
-
-###### In Jtag Mode #######
-
-retry 4 flash_board "$TTYUSB" "$RELEASE_DIR" "$FIRMWARE_DFU_FILE"
-
-exit 0

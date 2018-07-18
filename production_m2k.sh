@@ -10,4 +10,6 @@
 #
 # The ./update_m2k_release.sh must be called to update release files
 
-./lib/production.sh "m2k"
+source lib/production.sh
+
+production "m2k"

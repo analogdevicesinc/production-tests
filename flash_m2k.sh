@@ -7,12 +7,10 @@
 #
 # The ./update_m2k_release.sh must be called to update release files
 
-source lib/utils.sh
+source lib/flash.sh
 
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
 
-init_pins A
-
-./lib/flash.sh "m2k"
+flash "m2k"

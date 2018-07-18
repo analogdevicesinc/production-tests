@@ -10,4 +10,6 @@
 #
 # The ./update_pluto_release.sh must be called to update release files
 
-./lib/production.sh "pluto"
+source lib/production.sh
+
+production "pluto"

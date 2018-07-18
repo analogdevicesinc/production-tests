@@ -7,12 +7,10 @@
 #
 # The ./update_pluto_release.sh must be called to update release files
 
-source lib/utils.sh
+source lib/flash.sh
 
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
 
-init_pins A
-
-./lib/flash.sh "pluto"
+flash "pluto"

@@ -1,21 +1,8 @@
 #!/bin/bash
 
-TARGET="$1"
-
 source config.sh
-
-[ -n "$TARGET" ] || {
-	echo_red "No target specified"
-	exit 1
-}
-
-# State variables; are set during state transitions
-DONE=0
-ERROR=0
-READ=0
-PROGRESS=0
-
-EEPROM_VERBOSE=1
+source lib/preflash.sh
+source lib/flash.sh
 
 #----------------------------------#
 # Functions section                #
@@ -70,56 +57,80 @@ need_to_read_eeprom() {
 # Main section                     #
 #----------------------------------#
 
-echo_green "Initializing FTDI pins to default state"
-init_pins
+production() {
+	local TARGET="$1"
 
-while true ; do
+	[ -n "$TARGET" ] || {
+		echo_red "No target specified"
+        	return 1
+	}
 
-	if need_to_read_eeprom ; then
-		echo_green "Loading settings from EEPROM"
-		eeprom_cfg load || {
-			echo_red "Failed to load settings from EEPROM..."
+	[ -f "config/$TARGET/postflash.sh" ] || {
+		echo_red "File 'config/$TARGET/postflash.sh' not found"
+		return 1
+	}
+
+	source config/$TARGET/postflash.sh
+
+	# State variables; are set during state transitions
+	local DONE=0
+	local ERROR=0
+	local READY=0
+	local PROGRESS=0
+
+	local EEPROM_VERBOSE=1
+
+	echo_green "Initializing FTDI pins to default state"
+	init_pins
+
+	while true ; do
+
+		if need_to_read_eeprom ; then
+			echo_green "Loading settings from EEPROM"
+			eeprom_cfg load || {
+				echo_red "Failed to load settings from EEPROM..."
+				sleep 3
+				continue
+			}
+		fi
+
+		show_ready_state || {
+			echo_red "Cannot enter READY state"
 			sleep 3
 			continue
 		}
-	fi
 
-	show_ready_state || {
-		echo_red "Cannot enter READY state"
-		sleep 3
-		continue
-	}
+		echo_green "Waiting for start button"
 
-	echo_green "Waiting for start button"
+		wait_pins D "$START_BUTTON" || {
+			echo_red "Waiting for start button failed..."
+			show_error_state
+			sleep 3
+			continue
+		}
 
-	wait_pins D "$START_BUTTON" || {
-		echo_red "Waiting for start button failed..."
-		show_error_state
-		sleep 3
-		continue
-	}
+		show_start_state
 
-	show_start_state
+		pre_flash "$TARGET" || {
+			echo_red "Pre-flash step failed..."
+			show_error_state
+			sleep 3
+			continue
+		}
 
-	./lib/preflash.sh "$TARGET" || {
-		echo_red "Pre-flash step failed..."
-		show_error_state
-		sleep 3
-		continue
-	}
+		retry 4 flash "$TARGET" || {
+			echo_red "Flash step failed..."
+			show_error_state
+			sleep 3
+			continue
+		}
 
-	./lib/flash.sh "$TARGET" || {
-		echo_red "Flash step failed..."
-		show_error_state
-		sleep 3
-		continue
-	}
-
-	./config/$TARGET/postflash.sh "dont_power_cycle_on_start" || {
-		echo_red "Post-flash step failed..."
-		show_error_state
-		sleep 3
-		continue
-	}
-	DONE=1
-done
+		post_flash "dont_power_cycle_on_start" || {
+			echo_red "Post-flash step failed..."
+			show_error_state
+			sleep 3
+			continue
+		}
+		DONE=1
+	done
+}

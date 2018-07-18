@@ -34,7 +34,7 @@ check_voltage_ranges() {
 	echo_blue "Values on channels: '$measured'"
 	valid_numbers 16 $measured || {
 		echo_red "Error when attempting to read voltages; did not get 16 values"
-		exit 1
+		return 1
 	}
 
 	for m in $measured ; do
@@ -117,26 +117,28 @@ power_on_usb_2_and_measure() {
 # Main section                     #
 #----------------------------------#
 
-BOARD="$1"
+pre_flash() {
+	BOARD="$1"
 
-[ -f "config/$BOARD/values.sh" ] || {
-	echo_red "File 'config/$BOARD/values.sh' does not exist"
-	exit 1
+	[ -f "config/$BOARD/values.sh" ] || {
+		echo_red "File 'config/$BOARD/values.sh' does not exist"
+		return 1
+	}
+
+	source config/$BOARD/values.sh
+
+	force_terminate_programs
+
+	for ranges in BOARD_OFF BOARD_ON ; do
+		validate_range_values 16 $ranges || return 1
+	done
+
+	for measure_cnt in $(seq 1 $MEASUREMENT_CYCLES); do
+		echo_blue "Running measurement cycle $measure_cnt"
+		retry 4 power_off_and_measure || return 1
+		retry 4 power_on_usb_1_and_measure || return 1
+		retry 4 power_on_usb_2_and_measure || return 1
+	done
+
+	return 0
 }
-
-source config/$BOARD/values.sh
-
-force_terminate_programs
-
-for ranges in BOARD_OFF BOARD_ON ; do
-	validate_range_values 16 $ranges || exit 1
-done
-
-for measure_cnt in $(seq 1 $MEASUREMENT_CYCLES); do
-	echo_blue "Running measurement cycle $measure_cnt"
-	retry 4 power_off_and_measure || exit 1
-	retry 4 power_on_usb_1_and_measure || exit 1
-	retry 4 power_on_usb_2_and_measure || exit 1
-done
-
-exit 0
