@@ -6,6 +6,8 @@
 # 'op' is 'ref10v' or 'ref2.5v' or 'disable'
 #
 
-source config.sh
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
+source $SCRIPT_DIR/config.sh
 
 ref_measure_ctl "$1"

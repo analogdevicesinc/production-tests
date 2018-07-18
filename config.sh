@@ -5,8 +5,8 @@
 #----------------------------------#
 
 COMMON_RELEASE_FILES="boot.dfu u-boot.elf uboot-env.dfu ps7_init.tcl"
-LD_LIBRARY_PATH=./work/libiio/build
-PATH="./work/openocd-0.10.0/installed/bin:./work/libiio/build/tests:./work/plutosdr_scripts:$PATH"
+LD_LIBRARY_PATH=$SCRIPT_DIR/work/libiio/build
+PATH="$SCRIPT_DIR/work/openocd-0.10.0/installed/bin:$SCRIPT_DIR/work/libiio/build/tests:$SCRIPT_DIR/work/plutosdr_scripts:$PATH"
 
 # HOST x86 Config
 TTYUSB=ttyTest-A1
@@ -37,6 +37,6 @@ BOARD_ONLINE_TIMEOUT=20	# seconds
 #----------------------------------#
 # Utils                            #
 #----------------------------------#
-source lib/utils.sh
+source $SCRIPT_DIR/lib/utils.sh
 
 enforce_root

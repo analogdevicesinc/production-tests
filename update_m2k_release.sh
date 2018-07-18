@@ -7,7 +7,9 @@
 # Can be called with:  ./update_m2k_release.sh [version]
 # If version is unspecified the latest version swill be used
 
-source lib/update_release.sh
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
+source $SCRIPT_DIR/lib/update_release.sh
 
 get_latest_release() {
 	curl --silent "https://api.github.com/repos/$1/releases/latest" |
@@ -30,7 +32,7 @@ VERSION_TO_UPDATE="$1"
 	echo_red "No version provided for m2k release getting latest $VERSION_TO_UPDATE"
 }
 
-RELEASE_DIR="$(pwd)/release/m2k"
+RELEASE_DIR="$SCRIPT_DIR/release/m2k"
 
 [ -d "$RELEASE_DIR" ] || {
 	if ! mkdir -p "$RELEASE_DIR" ; then

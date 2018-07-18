@@ -5,4 +5,6 @@
 # For more details, refer to:
 #    https://github.com/analogdevicesinc/plutosdr_scripts/blob/master/cal_ad9361.c
 
-LD_LIBRARY_PATH=./work/libiio/build ./work/plutosdr_scripts/cal_ad9361 $@
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
+LD_LIBRARY_PATH=$SCRIPT_DIR/work/libiio/build $SCRIPT_DIR/work/plutosdr_scripts/cal_ad9361 $@

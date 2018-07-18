@@ -5,7 +5,9 @@
 #
 # Can be called with:  ./self_test.sh
 
-source config.sh
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
+source $SCRIPT_DIR/config.sh
 
 self_test || {
 	echo_red "Self test failed"

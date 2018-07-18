@@ -7,6 +7,8 @@
 #   Where `chan` can be V0A, V1A, ... V7A, V0B, V1B, .. V7B or `all`
 #   If unspecified, `all` is used
 
-source config.sh
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
+source $SCRIPT_DIR/config.sh
 
 measure_voltage $1

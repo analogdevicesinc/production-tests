@@ -5,9 +5,11 @@ set -e
 # Global definitions section       #
 #----------------------------------#
 
-source lib/utils.sh
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
-PATH="./work/openocd-0.10.0/installed/bin:$PATH"
+source $SCRIPT_DIR/lib/utils.sh
+
+PATH="$SCRIPT_DIR/work/openocd-0.10.0/installed/bin:$PATH"
 
 UDEV_RULES_FILE="50-ftdi-test.rules"
 
@@ -168,6 +170,8 @@ build_scopy() {
 # Main section                     #
 #----------------------------------#
 
+pushd $SCRIPT_DIR
+
 apt_install_prereqs
 
 openocd_is_minimum_required || {
@@ -190,3 +194,5 @@ sync_udev_rules_file
 for board in pluto m2k ; do
 	./update_${board}_release.sh
 done
+
+popd

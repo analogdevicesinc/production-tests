@@ -10,6 +10,8 @@
 #
 # The ./update_m2k_release.sh must be called to update release files
 
-source lib/production.sh
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
+source $SCRIPT_DIR/lib/production.sh
 
 production "m2k"

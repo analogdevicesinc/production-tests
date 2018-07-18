@@ -48,12 +48,12 @@ toggle_pins() {
 	valid_ftdi_channel "$channel" || return 1
 	shift
 	if [ "$channel" == "GPIO_EXP1" ] ; then
-		./work/ft4232h_pin_ctrl --channel B \
+		$SCRIPT_DIR/work/ft4232h_pin_ctrl --channel B \
 			--serial "$FT4232H_SERIAL" \
 			--mode spi-gpio-exp $@
 		return $?
 	fi
-	./work/ft4232h_pin_ctrl --mode bitbang \
+	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode bitbang \
 		--serial "$FT4232H_SERIAL" \
 		--channel "$channel" $@
 }
@@ -62,7 +62,7 @@ wait_pins() {
 	local channel="$1"
 	valid_ftdi_channel "$channel" || return 1
 	shift
-	./work/ft4232h_pin_ctrl --mode wait-gpio \
+	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode wait-gpio \
 		--serial "$FT4232H_SERIAL" \
 		--channel "$channel" $@
 }
@@ -89,7 +89,7 @@ enable_usb_port_2() {
 }
 
 self_test() {
-	./work/ft4232h_pin_ctrl --mode spi-adc --channel B \
+	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode spi-adc --channel B \
 		--serial "$FT4232H_SERIAL" --opts self-test
 }
 
@@ -111,7 +111,7 @@ measure_voltage() {
 
 	opts="$opts,voffset=$VOFF,gain=$VGAIN,vchannel=$channel"
 
-	./work/ft4232h_pin_ctrl --mode spi-adc --serial "$FT4232H_SERIAL" \
+	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode spi-adc --serial "$FT4232H_SERIAL" \
 		--channel B --opts "$opts"
 }
 
@@ -269,11 +269,11 @@ eeprom_rw() {
 	local cnt_or_data="$3"
 
 	if [ "$op" == "read" ] ; then
-		./work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" \
+		$SCRIPT_DIR/work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" \
 			--channel B --mode spi-eeprom \
 			--opts addr="$addr",read="$cnt_or_data",cs=D:0
 	elif [ "$op" == "write" ] ; then
-		./work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" \
+		$SCRIPT_DIR/work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" \
 			--channel B --mode spi-eeprom \
 			--opts addr="$addr",write="$cnt_or_data",cs=D:0
 	else
@@ -355,5 +355,5 @@ ref_measure_ctl() {
 }
 
 scopy() {
-	LD_LIBRARY_PATH=$(pwd)/work/scopy/deps/staging/lib $(pwd)/work/scopy/build/scopy $@
+	LD_LIBRARY_PATH=$SCRIPT_DIR/work/scopy/deps/staging/lib $SCRIPT_DIR/work/scopy/build/scopy $@
 }

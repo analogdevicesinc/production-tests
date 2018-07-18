@@ -7,7 +7,9 @@
 #
 # The ./update_pluto_release.sh must be called to update release files
 
-source lib/flash.sh
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
+source $SCRIPT_DIR/lib/flash.sh
 
 #----------------------------------#
 # Main section                     #

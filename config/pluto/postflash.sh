@@ -4,7 +4,7 @@
 # Global definitions section       #
 #----------------------------------#
 
-source config.sh
+source $SCRIPT_DIR/config.sh
 
 #----------------------------------#
 # Functions section                #

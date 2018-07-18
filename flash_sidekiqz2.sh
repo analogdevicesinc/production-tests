@@ -11,6 +11,6 @@
 # Main section                     #
 #----------------------------------#
 
-source lib/flash.sh
+source $SCRIPT_DIR/lib/flash.sh
 
 flash "sidekiqz2" "DFU_ONLY"

@@ -9,7 +9,9 @@
 #                otherwise [if unspecified] pins will be ouput low
 #
 
-source config.sh
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
+source $SCRIPT_DIR/config.sh
 
 valid_ftdi_channel "$1" || {
 	echo_red "Invalid FTDI channel '$1'"

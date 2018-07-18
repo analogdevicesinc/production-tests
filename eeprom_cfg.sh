@@ -1,6 +1,8 @@
 #!/bin/bash
 
-source config.sh
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
+source $SCRIPT_DIR/config.sh
 
 eeprom_cfg $@ || exit 1
 

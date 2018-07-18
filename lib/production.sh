@@ -1,8 +1,8 @@
 #!/bin/bash
 
-source config.sh
-source lib/preflash.sh
-source lib/flash.sh
+source $SCRIPT_DIR/config.sh
+source $SCRIPT_DIR/lib/preflash.sh
+source $SCRIPT_DIR/lib/flash.sh
 
 #----------------------------------#
 # Functions section                #
@@ -64,13 +64,12 @@ production() {
 		echo_red "No target specified"
         	return 1
 	}
-
-	[ -f "config/$TARGET/postflash.sh" ] || {
-		echo_red "File 'config/$TARGET/postflash.sh' not found"
+	[ -f "$SCRIPT_DIR/config/$TARGET/postflash.sh" ] || {
+		echo_red "File '$SCRIPT_DIR/config/$TARGET/postflash.sh' not found"
 		return 1
 	}
 
-	source config/$TARGET/postflash.sh
+	source $SCRIPT_DIR/config/$TARGET/postflash.sh
 
 	# State variables; are set during state transitions
 	local DONE=0

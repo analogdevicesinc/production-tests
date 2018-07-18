@@ -4,7 +4,7 @@
 # Global definitions section       #
 #----------------------------------#
 
-source config.sh
+source $SCRIPT_DIR/config.sh
 
 #----------------------------------#
 # Functions section                #
@@ -49,7 +49,7 @@ flash() {
 		return 1
 	}
 
-	local releaseDir="$(readlink -f "release/$BOARD")"
+	local releaseDir="$SCRIPT_DIR/release/$BOARD"
 	local firmwareDfuFile="${BOARD}.dfu"
 
 	# Sanity check that we have all release files, before going forward
@@ -83,7 +83,7 @@ flash() {
 
 	echo_green "2. Running DFU utils step"
 
-	expect lib/cmd.exp "$TTYUSB" "$releaseDir" "$firmwareDfuFile" || {
+	expect $SCRIPT_DIR/lib/cmd.exp "$TTYUSB" "$releaseDir" "$firmwareDfuFile" || {
 		echo_blue "expect command failed"
 		force_terminate_programs
 		return 1

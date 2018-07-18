@@ -4,7 +4,7 @@
 # Global definitions section       #
 #----------------------------------#
 
-source config.sh
+source $SCRIPT_DIR/config.sh
 
 # For now, do a single measurement cycle (i.e. power-off board,
 # measure, power on USB1, measure, power on USB2 measure, etc
@@ -120,12 +120,12 @@ power_on_usb_2_and_measure() {
 pre_flash() {
 	BOARD="$1"
 
-	[ -f "config/$BOARD/values.sh" ] || {
+	[ -f "$SCRIPT_DIR/config/$BOARD/values.sh" ] || {
 		echo_red "File 'config/$BOARD/values.sh' does not exist"
 		return 1
 	}
 
-	source config/$BOARD/values.sh
+	source $SCRIPT_DIR/config/$BOARD/values.sh
 
 	force_terminate_programs
 

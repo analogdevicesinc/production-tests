@@ -4,7 +4,7 @@
 # Global definitions section       #
 #----------------------------------#
 
-source lib/utils.sh
+source $SCRIPT_DIR/lib/utils.sh
 
 #----------------------------------#
 # Functions section                #
