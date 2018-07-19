@@ -11,16 +11,16 @@ source $SCRIPT_DIR/lib/flash.sh
 show_leds() {
 	local leds
 
-	if [ "$DONE" == "1" ] ; then
-		leds="$leds $DONE_LED"
+	if [ "$PASSED" == "1" ] ; then
+		leds="$leds $PASSED_LED"
 	fi
 
 	if [ "$READY" == "1" ] ; then
 		leds="$leds $READY_LED"
 	fi
 
-	if [ "$ERROR" == "1" ] ; then
-		leds="$leds $ERROR_LED"
+	if [ "$FAILED" == "1" ] ; then
+		leds="$leds $FAILED_LED"
 	fi
 
 	if [ "$PROGRESS" == "1" ] ; then
@@ -37,20 +37,20 @@ show_ready_state() {
 }
 
 show_start_state() {
-	DONE=0
+	PASSED=0
 	READY=0
-	ERROR=0
+	FAILED=0
 	PROGRESS=1
 	show_leds
 }
 
 show_error_state() {
-	ERROR=1
+	FAILED=1
 	show_leds
 }
 
 need_to_read_eeprom() {
-	[ "$ERROR" == "1" ] || [ -z "$VREF" ] || [ -z "$VOFF" ] || [ -z "$VGAIN" ]
+	[ "$FAILED" == "1" ] || [ -z "$VREF" ] || [ -z "$VOFF" ] || [ -z "$VGAIN" ]
 }
 
 inc_fail_stats() {
@@ -89,8 +89,8 @@ production() {
 	source $SCRIPT_DIR/config/$TARGET/postflash.sh
 
 	# State variables; are set during state transitions
-	local DONE=0
-	local ERROR=0
+	local PASSED=0
+	local FAILED=0
 	local READY=0
 	local PROGRESS=0
 
@@ -202,6 +202,6 @@ production() {
 		}
 		mv -f $LOGFILE "$LOGDIR/${serial}.log"
 		inc_pass_stats "$serial"
-		DONE=1
+		PASSED=1
 	done
 }
