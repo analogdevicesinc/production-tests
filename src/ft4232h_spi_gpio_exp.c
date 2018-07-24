@@ -20,56 +20,10 @@
 #define MCP_GPIO	0x09
 #define MCP_OLAT	0x0a
 
-#if 0
-static int mcp23s08_read(spi_device *sdev, unsigned reg)
-{
-	uint8_t tx[2], rx[1];
-	int ret;
-
-	tx[0] = 0x40 | 0x01;
-	tx[1] = reg;
-	ret = spi_write(sdev, tx, sizeof(tx));
-	if (ret < 0)
-		return ret;
-
-	ret = spi_read(sdev, rx, sizeof(rx));
-	return (ret < 0) ? ret : rx[0];
-}
-#endif
-
-static int mcp23s08_write(spi_device *sdev, unsigned reg, unsigned val)
-{
-	uint8_t tx[3];
-
-	tx[0] = 0x40;
-	tx[1] = reg;
-	tx[2] = val;
-	return spi_write(sdev, tx, sizeof(tx));
-}
-
 void usage_spi_gpio_exp()
 {
 	fprintf(stderr, "\n\tFor SPI-GPIO-EXP mode, arguments are similar to Bitbang mode\n"
 			"\t\tbut they control the pins on the GPIO expander\n");
-}
-
-static int mcp23s08_init(spi_device *sdev)
-{
-	unsigned disable[] = { MCP_IPOL, MCP_GPINTEN };
-	unsigned pullups = 0; /* change this if needed */
-	int i, ret;
-
-	for (i = 0; i < ARRAY_SIZE(disable); i++) {
-		ret = mcp23s08_write(sdev, disable[i], 0);
-		if (ret < 0)
-			return ret;
-	}
-
-	ret = mcp23s08_write(sdev, MCP_GPPU, pullups);
-	if (ret < 0)
-		return ret;
-
-	return 0;
 }
 
 int handle_mpsse_spi_gpio_exp(const char *serial, int channel, char **argv,
@@ -80,8 +34,9 @@ int handle_mpsse_spi_gpio_exp(const char *serial, int channel, char **argv,
 	mpsse *mpsse;
 	int ret = EXIT_FAILURE;
 	int i;
-	unsigned output = 0;
-	unsigned direction = 0;
+	uint8_t output = 0;
+	uint8_t direction = 0;
+	uint8_t regs[11 + 2] = {};
 
 	for (i = from; i < to; i++) {
 		int pin1, pin = get_pin_val(argv[i]);
@@ -110,22 +65,13 @@ int handle_mpsse_spi_gpio_exp(const char *serial, int channel, char **argv,
 		fprintf(stderr, "Failed to initialize SPI\n");
 		goto out;
 	}
-	mdelay(10);
 
-	if (mcp23s08_init(&sdev) < 0) {
-		fprintf(stderr, "Failed to init MCP23S08\n");
-		goto out;
-	}
+	regs[0] = 0x40;
+	regs[2 + MCP_OLAT] = output;
+	regs[2 + MCP_IODIR] = direction;
 
-	if (mcp23s08_write(&sdev, MCP_OLAT, output) < 0) {
-		fprintf(stderr, "Failed to write output latch reg\n");
+	if (spi_write(&sdev, regs, sizeof(regs)) < 0)
 		goto out;
-	}
-
-	if (mcp23s08_write(&sdev, MCP_IODIR, direction) < 0) {
-		fprintf(stderr, "Failed to write output latch reg\n");
-		goto out;
-	}
 
 	ret = EXIT_SUCCESS;
 out:
