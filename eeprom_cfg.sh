@@ -8,6 +8,9 @@ eeprom_cfg $@ || exit 1
 
 if [ "$1" == "load" ] ; then
 	echo_green "Configuration loaded from EEPROM"
+	for cfg in VGAIN VOFF VREF ; do
+		eval "echo_green $cfg=\$$cfg"
+	done
 elif [ "$1" == "save" ] ; then
 	echo_green "Configuration saved to EEPROM"
 fi
