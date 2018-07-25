@@ -93,9 +93,28 @@ self_test() {
 		--serial "$FT4232H_SERIAL" --opts self-test
 }
 
+__populate_vranges() {
+	local device_or_vranges="$1"
+	[ -n "$device_or_vranges" ] || return 0
+
+	if [ -f "$SCRIPT_DIR/config/$device_or_vranges/values.sh" ] ; then
+		source "$SCRIPT_DIR/config/$device_or_vranges/values.sh"
+		device_or_vranges="$VOLTAGE_RANGES"
+	fi
+
+	if [ -n "$device_or_vranges" ] ; then
+		opts="${opts},vrange-each="
+		for idx in $(seq 0 15) ; do
+			local vrange="$(get_item_from_list $idx $device_or_vranges)"
+			opts="${opts}${vrange}:"
+		done
+	fi
+}
+
 measure_voltage() {
 	local channel="${1:-all}"
 	local samples="${2:-$NUM_SAMPLES}"
+	local device_or_vranges="$3"
 
 	[ -n "$VREF" ] && [ -n "$VGAIN" ] && [ -n "$VOFF" ] || {
 		eeprom_cfg load
@@ -111,6 +130,7 @@ measure_voltage() {
 	local opts="refinout=$VREF,no-samples=$samples"
 
 	opts="$opts,voffset=$VOFF,gain=$VGAIN,vchannel=$channel"
+	__populate_vranges "$device_or_vranges"
 
 	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode spi-adc --serial "$FT4232H_SERIAL" \
 		--channel B --opts "$opts"

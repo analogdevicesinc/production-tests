@@ -527,7 +527,7 @@ static int parse_ranges_each(const char *arg)
 	}
 	free(s);
 
-	if (i != 16) {
+	if (i < 16) {
 		fprintf(stderr, "Insuficient volt ranges provided; 16 are required\n");
 		return -1;
 	}
