@@ -11,3 +11,11 @@ BOARD_OFF_VMAX="N/A N/A N/A N/A N/A 0.50 N/A N/A N/A N/A N/A N/A N/A N/A N/A N/A
 # Board On - Voltage Ranges
 BOARD_ON_VMIN="0.235 0.456 N/A 3.20 5.90 4.50 1.70 3.20 1.30 0.95 -6.10 -3.40 N/A N/A N/A N/A"
 BOARD_ON_VMAX="0.244 0.466 N/A 3.45 6.10 5.50 1.90 3.40 1.40 1.05 -5.90 -3.20 N/A N/A N/A N/A"
+
+pre_measure() {
+	toggle_pins GPIO_EXP1 pin6 pin4
+}
+
+post_measure() {
+	toggle_pins GPIO_EXP1 pin4
+}

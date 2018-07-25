@@ -116,6 +116,12 @@ power_on_usb_2_and_measure() {
 	echo_green "   .Done - values are within range"
 }
 
+call_hook() {
+	if [ "$(type -t "$1")" == 'function' ] ; then
+		$1
+	fi
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -136,12 +142,16 @@ pre_flash() {
 		validate_range_values 16 $ranges || return 1
 	done
 
+	call_hook pre_measure
+
 	for measure_cnt in $(seq 1 $MEASUREMENT_CYCLES); do
 		echo_blue "Running measurement cycle $measure_cnt"
 		power_off_and_measure 10 || return 1
 		power_on_usb_1_and_measure 10 || return 1
 		power_on_usb_2_and_measure 10 || return 1
 	done
+
+	call_hook post_measure
 
 	return 0
 }
