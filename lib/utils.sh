@@ -93,6 +93,36 @@ self_test() {
 		--serial "$FT4232H_SERIAL" --opts self-test
 }
 
+have_eeprom_vars_loaded() {
+	local var
+	local value
+	for var in $EEPROM_VARS ; do
+		value="$(eval echo "\$$var")"
+		[ -n "$value" ] || return 1
+	done
+	return 0
+}
+
+show_eeprom_vars() {
+	local color="${1:-green}"
+	local var
+	local value
+	for var in $EEPROM_VARS ; do
+		value="$(eval echo "\$$var")"
+		echo_${color} "${var}=${value}"
+		# only a single VREF can be defined
+		if [ "$var" == "VREF" ] ; then
+			continue
+		fi
+		# VOFF & VGAIN can be specified differently per channel
+		for ch in 0A 1A 2A 3A 4A 5A 6A 7A 0B 1B 2B 3B 4B 5B 6B 7B ; do
+			local value="$(eval echo \${${var}${ch}})"
+			[ -n "$value" ] || continue
+			echo_green "${var}${ch}=${value}"
+		done
+	done
+}
+
 __populate_vranges() {
 	local device_or_vranges="$1"
 	[ -n "$device_or_vranges" ] || return 0
@@ -111,26 +141,48 @@ __populate_vranges() {
 	fi
 }
 
+__populate_voffsets() {
+	opts="${opts},voffset-each="
+	for ch in 0A 1A 2A 3A 4A 5A 6A 7A 0B 1B 2B 3B 4B 5B 6B 7B ; do
+		local value="$(eval echo \${VOFF${ch}})"
+		if [ -z "$value" ] ; then
+			value=$VOFF
+		fi
+		opts="${opts}${value}:"
+	done
+}
+
+__populate_vgains() {
+	opts="${opts},vgain-each="
+	for ch in 0A 1A 2A 3A 4A 5A 6A 7A 0B 1B 2B 3B 4B 5B 6B 7B ; do
+		local value="$(eval echo \${VGAIN${ch}})"
+		if [ -z "$value" ] ; then
+			value=$VGAIN
+		fi
+		opts="${opts}${value}:"
+	done
+}
+
 measure_voltage() {
 	local channel="${1:-all}"
 	local samples="${2:-$NUM_SAMPLES}"
 	local device_or_vranges="$3"
 
-	[ -n "$VREF" ] && [ -n "$VGAIN" ] && [ -n "$VOFF" ] || {
+	have_eeprom_vars_loaded || {
 		eeprom_cfg load
-		if [ -z "$VREF" ] || [ -z "$VGAIN" ] || [ -z "$VOFF" ] ; then
+		if ! have_eeprom_vars_loaded ; then
 			echo_red "Empty ADC setting(s)"
-			echo_red "VREF=$VREF"
-			echo_red "VGAIN=$VGAIN"
-			echo_red "VOFF=$VOFF"
+			show_eeprom_vars red
 			exit 1
 		fi
 	}
 
 	local opts="refinout=$VREF,no-samples=$samples"
 
-	opts="$opts,voffset-all=$VOFF,vgain-all=$VGAIN,vchannel=$channel"
+	opts="$opts,vchannel=$channel"
 	__populate_vranges "$device_or_vranges"
+	__populate_voffsets
+	__populate_vgains
 
 	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode spi-adc --serial "$FT4232H_SERIAL" \
 		--channel B --opts "$opts"
@@ -302,51 +354,78 @@ eeprom_rw() {
 	fi
 }
 
+is_valid_eeprom_cfg() {
+	local cfg="$1"
+	[ -n "$cfg" ] || return 1
+	for var in $EEPROM_VARS ; do
+		if [[ $cfg = ${var}=* ]] ; then
+			return 0
+		fi
+		# only a single VREF can be defined
+		if [ "$var" == "VREF" ] ; then
+			continue
+		fi
+		# VOFF & VGAIN can be specified differently per channel
+		for ch in 0A 1A 2A 3A 4A 5A 6A 7A 0B 1B 2B 3B 4B 5B 6B 7B ; do
+			if [[ $cfg = ${var}${ch}=* ]] ; then
+				return 0
+			fi
+		done
+	done
+	return 1
+}
+
 eeprom_cfg() {
 	local op="$1"
-	local PAGES="0 16 32"
-	local CFGS="VREF VOFF VGAIN"
 	local PAGE_SIZE=16
+	local page=0
 	local value
 
 	shift
 	if [ "$op" == "load" ] ; then
-		for page in $PAGES ; do
+		# try to read all the pages
+		for page in $(seq 0 16 496) ; do
 			value="$(eeprom_rw "read" "$page" "$PAGE_SIZE")"
 			[ "$?" == "0" ] || {
 				echo_red "Failed to read EEPROM"
 				return 1
 			}
-			[ -n "$value" ] || {
-				echo_red "No value store in EEPROM at page '$page'"
+			# stop reading after this marker
+			if [ "$value" == "<last_entry>" ] ; then
+				break
+			fi
+			is_valid_eeprom_cfg "$value" || {
+				echo_red "Invalid entry in EEPROM '$value'"
 				return 1
 			}
 			# evaluate the entries in the EEPROM as shell vars
 			eval "export $value" || return 1
-			[ "$EEPROM_VERBOSE" != "1" ] || echo_green "$value"
 		done
 		return 0
 	elif [ "$op" == "save" ] ; then
-		# export all arguments as variables
+		local values
+		# validate arguments
 		while [ -n "$1" ] ; do
-			eval "export $1"
-			shift
-		done
-		# check that all of them are non-empty
-		for cfg in $CFGS ; do
-			value="$(eval echo "\$$cfg")"
-			[ -n "$value" ] || {
-				echo_red "No value provided for '$cfg'"
+			is_valid_eeprom_cfg "$1" || {
+				echo "'$1' is an invalid EEPROM config setting"
 				return 1
 			}
+			values="$values $1"
+			shift
 		done
-		# Now write them to EEPROM
-		local page
-		for cfg in $CFGS ; do
-			value="$(eval echo "\$$cfg")"
-			eeprom_rw "write" "$page" "${cfg}=${value}" || return 1
+		# write values to EEPROM
+		for value in $values ; do
+			eeprom_rw "write" "$page" "$value" || return 1
 			let page='page + PAGE_SIZE'
+			# check if we've filled it up
+			if [ "$page" -gt "496" ] ; then
+				break
+			fi
 		done
+		# if it's not filled up, write a marker for when reading
+		if [ "$page" -lt 496 ] ; then
+			eeprom_rw "write" "$page" "<last_entry>" || return 1
+		fi
 		return 0
 	else
 		echo_red "Invalid EEPROM op '$op'"

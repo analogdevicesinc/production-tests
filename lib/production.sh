@@ -50,7 +50,7 @@ show_error_state() {
 }
 
 need_to_read_eeprom() {
-	[ "$FAILED" == "1" ] || [ -z "$VREF" ] || [ -z "$VOFF" ] || [ -z "$VGAIN" ]
+	[ "$FAILED" == "1" ] || ! have_eeprom_vars_loaded
 }
 
 inc_fail_stats() {
@@ -94,8 +94,6 @@ production() {
 	local READY=0
 	local PROGRESS=0
 
-	local EEPROM_VERBOSE=1
-
 	# This will store in a `log` directory the following files:
 	# * _results.log - each device that has passed or failed with S/N
 	#    they will only show up here if they got a S/N, so this assumes
@@ -129,6 +127,7 @@ production() {
 				sleep 3
 				continue
 			}
+			show_eeprom_vars
 		fi
 
 		show_ready_state || {

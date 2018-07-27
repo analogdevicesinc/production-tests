@@ -34,6 +34,8 @@ NUM_SAMPLES=1
 IIO_URI_MODE="-u ip:192.168.2.1"
 BOARD_ONLINE_TIMEOUT=20	# seconds
 
+EEPROM_VARS="VGAIN VOFF VREF"
+
 #----------------------------------#
 # Utils                            #
 #----------------------------------#
