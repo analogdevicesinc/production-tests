@@ -52,7 +52,7 @@ post_flash() {
 		return 1
 	}
 
-	scopy --script config/m2k/scopy.js || {
+	scopy --script $SCRIPT_DIR/config/m2k/scopy.js || {
 		terminate_any_lingering_scopies
 		echo_red "Scopy tests have failed..."
 		return 1

@@ -116,7 +116,7 @@ post_flash() {
 	}
 
 	echo_green "4. Testing Linux"
-	retry 4 expect config/pluto/linux.exp "$TTYUSB" || {
+	retry 4 expect $SCRIPT_DIR/config/pluto/linux.exp "$TTYUSB" || {
 		echo
 		echo_red "   Linux test failed"
 		return 1
