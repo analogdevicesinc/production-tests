@@ -21,22 +21,26 @@ enum {
 enum {
 	OPT_ADC_VCHANNEL,
 	OPT_ADC_REFINOUT,
-	OPT_ADC_VRANGE_EACH,
 	OPT_ADC_VRANGE_ALL,
+	OPT_ADC_VRANGE_EACH,
 	OPT_ADC_NO_SAMPLES,
-	OPT_ADC_VOFFSET,
-	OPT_ADC_GAIN,
+	OPT_ADC_VOFFSET_ALL,
+	OPT_ADC_VOFFSET_EACH,
+	OPT_ADC_VGAIN_ALL,
+	OPT_ADC_VGAIN_EACH,
 	OPT_ADC_SELFTEST,
 };
 
 static char *suboptions[] = {
 	[OPT_ADC_VCHANNEL]    = "vchannel",
 	[OPT_ADC_REFINOUT]    = "refinout",
-	[OPT_ADC_VRANGE_EACH] = "vrange-each",
 	[OPT_ADC_VRANGE_ALL]  = "vrange-all",
+	[OPT_ADC_VRANGE_EACH] = "vrange-each",
 	[OPT_ADC_NO_SAMPLES]  = "no-samples",
-	[OPT_ADC_VOFFSET]     = "voffset",
-	[OPT_ADC_GAIN]        = "gain",
+	[OPT_ADC_VOFFSET_ALL]  = "voffset-all",
+	[OPT_ADC_VOFFSET_EACH] = "voffset-each",
+	[OPT_ADC_VGAIN_ALL]  = "vgain-all",
+	[OPT_ADC_VGAIN_EACH]  = "vgain-each",
 	[OPT_ADC_SELFTEST]    = "self-test",
 
 	NULL,
@@ -69,10 +73,10 @@ struct spi_read_args {
 	int refinout;
 	int refinout_div;
 	int samples;
-	int voffset;
-	int voffset_div;
-	int gain;
-	int gain_div;
+	int voffset[16];
+	int voffset_div[16];
+	int vgain[16];
+	int vgain_div[16];
 	int self_test;
 };
 
@@ -149,11 +153,12 @@ static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_r
 	int volt_range_enum_val;
 	int64_t volt_range = 10;
 	int64_t volt_range_div = 1;
-	int64_t voffset_div = sargs->voffset_div;
+	int64_t voffset = sargs->voffset[ch];
+	int64_t voffset_div = sargs->voffset_div[ch];
 	int64_t refinout = sargs->refinout;
 	int64_t refinout_div = sargs->refinout_div;
-	int64_t gain = sargs->gain;
-	int64_t gain_div = sargs->gain_div;
+	int64_t gain = sargs->vgain[ch];
+	int64_t gain_div = sargs->vgain_div[ch];
 
 	if (ch > 7)
 		volt_range_enum_val = vb_ranges[ch - 8];
@@ -191,7 +196,7 @@ static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_r
 	          25); /* 10 is part of 2.5V ==> 25/10 ; we need to divide with 2.5V */
 
 	/* Apply offset */
-	voltage += (sargs->voffset * PRECISION_MULT) / voffset_div;
+	voltage += (voffset * PRECISION_MULT) / voffset_div;
 	voltage = (voltage * gain) / gain_div;
 
 	return voltage;
@@ -466,6 +471,49 @@ static int parse_voltage_arg(const char *arg, int *volt, int *div)
 	return 0;
 }
 
+static int parse_voltage_arg_all(const char *arg, int *volts, int *volts_divs)
+{
+	int volt, volt_div;
+	int i, ret;
+
+	ret = parse_voltage_arg(arg, &volt, &volt_div);
+	if (ret < 0)
+		return ret;
+
+	for (i = 0; i < 16; i++, volts++, volts_divs++) {
+		*volts = volt;
+		*volts_divs = volt_div;
+	}
+	return 0;
+}
+
+static int parse_voltage_arg_each(const char *arg, int *volts, int *volts_divs)
+{
+	int i, ret;
+	char *s, *p;
+
+	s = strdup(arg);
+	p = strtok(s, ":");
+	i = 0;
+	while (p != NULL) {
+		ret = parse_voltage_arg(p, volts, volts_divs);
+		if (ret < 0)
+			break;
+		p = strtok(NULL, ":");
+		i++;
+		volts++;
+		volts_divs++;
+        }
+	free(s);
+
+	if (i < 16) {
+		fprintf(stderr, "Insuficient voltages values provided; 16 are required\n");
+		return -1;
+	}
+
+	return 0;
+}
+
 static int convert_str_to_volt_range_enum(const char *arg)
 {
 	char buf[8];
@@ -542,12 +590,14 @@ void usage_spi_adc()
 			"\t\t\tto read a single channel. Or 'all' will read all voltages in one go.\n"
 			"\t\trefinout=<xxx> - has a defaul value of 2.5V ; can be specified between 2.495 - 2.505 V\n"
 			"\t\tvrange-all=<xxx> - to configure a single voltage range for all channels\n"
-			"\t\t\tValues are '2.5V', '5V' or '10V'"
+			"\t\t\tValues are '2.5V', '5V' or '10V'\n"
 			"\t\tvrange-each=<x:x:..:x> - to configure 16 voltage ranges, one for each channel;\n"
 			"\t\t\tmust be separated by colon (':')\n"
 			"\t\tno-samples - do multiple measurements and do an average\n"
-			"\t\tvoffset - voltage offset to apply\n "
-			"\t\tgain - voltage gain to apply\n"
+			"\t\tvoffset-all - voltage offset to apply to all channels\n "
+			"\t\tvoffset-each=<x:x:..:x> - voltage offset to apply to each channel\n "
+			"\t\tvgain-all - voltage gain to apply to all channels\n"
+			"\t\tvgain-each=<x:x:..:x> - voltage gain to apply to each channel\n"
 			"\t\tself-test - run a self-test of the ADC\n\n"
 			"\tThe tool supports applying an offset and gain to the measured voltage.\n"
 			"\tThe formula is 'V = (V + VOFFSET) * GAIN'\n"
@@ -556,14 +606,12 @@ void usage_spi_adc()
 
 int handle_mpsse_spi_adc(const char *serial, int channel, char *subopts)
 {
+	int i;
 	struct spi_read_args sargs = {
 		.vchannel_idx = 0,
 		.refinout = 25,
 		.refinout_div = 10,
 		.samples = 128,
-		.voffset_div = 1,
-		.gain = 1,
-		.gain_div = 1,
 		.self_test = 0,
 	};
 	char *value;
@@ -571,6 +619,13 @@ int handle_mpsse_spi_adc(const char *serial, int channel, char *subopts)
 	if (!subopts) {
 		fprintf(stderr, "No sub-options for SPI-EEPROM provided\n");
 		return EXIT_FAILURE;
+	}
+
+	/* init default sane values */
+	for (i = 0; i < 16; i++) {
+		sargs.voffset_div[i] = 1;
+		sargs.vgain[i] = 1;
+		sargs.vgain_div[i] = 1;
 	}
 
 	while (*subopts != '\0') {
@@ -594,16 +649,30 @@ int handle_mpsse_spi_adc(const char *serial, int channel, char *subopts)
 			case OPT_ADC_NO_SAMPLES:
 				sargs.samples = atoi(value);
 				break;
-			case OPT_ADC_GAIN:
-				if (parse_voltage_arg(value, &sargs.gain, &sargs.gain_div) < 0) {
-					fprintf(stderr, "Could not parse gain\n");
+			case OPT_ADC_VGAIN_ALL:
+				if (parse_voltage_arg_all(value, sargs.vgain, sargs.vgain_div) < 0) {
+					fprintf(stderr, "Could not parse gain value from 'vgain-all'\n");
 					usage_spi_adc();
 					return EXIT_FAILURE;
 				}
 				break;
-			case OPT_ADC_VOFFSET:
-				if (parse_voltage_arg(value, &sargs.voffset, &sargs.voffset_div) < 0) {
-					fprintf(stderr, "Could not parse refinout\n");
+			case OPT_ADC_VGAIN_EACH:
+				if (parse_voltage_arg_each(value, sargs.vgain, sargs.vgain_div) < 0) {
+					fprintf(stderr, "Could not parse gain values from 'vgain-each'\n");
+					usage_spi_adc();
+					return EXIT_FAILURE;
+				}
+				break;
+			case OPT_ADC_VOFFSET_ALL:
+				if (parse_voltage_arg_all(value, sargs.voffset, sargs.voffset_div) < 0) {
+					fprintf(stderr, "Could not parse offset value from 'voffset-all'\n");
+					usage_spi_adc();
+					return EXIT_FAILURE;
+				}
+				break;
+			case OPT_ADC_VOFFSET_EACH:
+				if (parse_voltage_arg_each(value, sargs.voffset, sargs.voffset_div) < 0) {
+					fprintf(stderr, "Could not parse offset values from 'voffset-each'\n");
 					usage_spi_adc();
 					return EXIT_FAILURE;
 				}

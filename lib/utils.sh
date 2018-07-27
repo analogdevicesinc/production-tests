@@ -129,7 +129,7 @@ measure_voltage() {
 
 	local opts="refinout=$VREF,no-samples=$samples"
 
-	opts="$opts,voffset=$VOFF,gain=$VGAIN,vchannel=$channel"
+	opts="$opts,voffset-all=$VOFF,vgain-all=$VGAIN,vchannel=$channel"
 	__populate_vranges "$device_or_vranges"
 
 	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode spi-adc --serial "$FT4232H_SERIAL" \
