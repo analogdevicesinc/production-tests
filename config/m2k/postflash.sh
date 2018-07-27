@@ -52,6 +52,14 @@ post_flash() {
 		return 1
 	}
 
+	echo_green "2. Testing Linux"
+	retry 4 expect $SCRIPT_DIR/config/m2k/linux.exp "$TTYUSB" || {
+		echo
+		echo_red "   Linux test failed"
+		return 1
+	}
+
+	echo_green "3. Testing Scopy"
 	scopy --script $SCRIPT_DIR/config/m2k/scopy.js || {
 		terminate_any_lingering_scopies
 		echo_red "Scopy tests have failed..."
