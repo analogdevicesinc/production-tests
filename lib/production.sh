@@ -134,7 +134,7 @@ production() {
 			echo_green "Loading settings from EEPROM"
 			eeprom_cfg load || {
 				echo_red "Failed to load settings from EEPROM..."
-				sleep 3
+				sleep 1
 				continue
 			}
 			show_eeprom_vars
@@ -142,7 +142,7 @@ production() {
 
 		show_ready_state || {
 			echo_red "Cannot enter READY state"
-			sleep 3
+			sleep 1
 			continue
 		}
 
@@ -151,7 +151,7 @@ production() {
 		wait_pins D "$START_BUTTON" || {
 			echo_red "Waiting for start button failed..."
 			show_error_state
-			sleep 3
+			sleep 1
 			continue
 		}
 
@@ -176,7 +176,7 @@ production() {
 			echo_red "Pre-flash step failed..."
 			show_error_state
 			inc_fail_stats
-			sleep 3
+			sleep 1
 			continue
 		}
 
@@ -184,7 +184,7 @@ production() {
 			echo_red "Flash step failed..."
 			show_error_state
 			inc_fail_stats
-			sleep 3
+			sleep 1
 			continue
 		}
 
@@ -197,7 +197,7 @@ production() {
 		[ -n "$serial" ] || {
 			echo_red "Could not get device serial number"
 			show_error_state
-			sleep 3
+			sleep 1
 			continue
 		}
 
@@ -206,7 +206,7 @@ production() {
 			show_error_state
 			mv -f $LOGFILE "$LOGDIR/${serial}.log"
 			inc_fail_stats "$serial"
-			sleep 3
+			sleep 1
 			continue
 		}
 		mv -f $LOGFILE "$LOGDIR/${serial}.log"
