@@ -240,7 +240,7 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 			return -1;
 		}
 
-		if (vchannel_idx > 7 && i == 1) {
+		if (i == 1) {
 			samples++;
 			continue;
 		}
