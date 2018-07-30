@@ -59,6 +59,7 @@ inc_fail_stats() {
 	echo "PASSED=$PASSED" > $STATSFILE
 	echo "FAILED=$FAILED" >> $STATSFILE
 	[ -z "$serial" ] || echo "FAILED $serial" >> $RESULTSFILE
+	console_ascii_failed
 }
 
 inc_pass_stats() {
@@ -67,6 +68,15 @@ inc_pass_stats() {
 	echo "PASSED=$PASSED" > $STATSFILE
 	echo "FAILED=$FAILED" >> $STATSFILE
 	[ -z "$serial" ] || echo "PASSED $serial" >> $RESULTSFILE
+	console_ascii_passed
+}
+
+console_ascii_passed() {
+	echo_green "$(cat $SCRIPT_DIR/lib/passed.ascii)"
+}
+
+console_ascii_failed() {
+	echo_red "$(cat $SCRIPT_DIR/lib/failed.ascii)"
 }
 
 #----------------------------------#
