@@ -95,6 +95,7 @@ self_test() {
 
 measure_voltage() {
 	local channel="${1:-all}"
+	local samples="${2:-$NUM_SAMPLES}"
 
 	[ -n "$VREF" ] && [ -n "$VGAIN" ] && [ -n "$VOFF" ] || {
 		eeprom_cfg load
@@ -107,7 +108,7 @@ measure_voltage() {
 		fi
 	}
 
-	local opts="refinout=$VREF,no-samples=$NUM_SAMPLES"
+	local opts="refinout=$VREF,no-samples=$samples"
 
 	opts="$opts,voffset=$VOFF,gain=$VGAIN,vchannel=$channel"
 
