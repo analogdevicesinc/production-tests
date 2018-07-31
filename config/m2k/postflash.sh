@@ -35,6 +35,7 @@ terminate_any_lingering() {
 
 terminate_any_lingering_stuff() {
 	terminate_any_lingering scopy
+	terminate_any_lingering wait_pins
 }
 
 wait_for_board() {

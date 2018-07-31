@@ -412,6 +412,9 @@ function _test_osc_trimmer_adjust(ch, positive)
 	var ok = false;
 	var ret;
 	var ch_type = "positive";
+	/* FIXME: change this to something else if needed */
+	var continue_button = "pin1";
+	var ipc_file = "/tmp/" + continue_button + "_pressed";
 
 	osc.internal_trigger = true;
 	osc.trigger_source = ch;
@@ -432,18 +435,19 @@ function _test_osc_trimmer_adjust(ch, positive)
 		osc.time_base = 0.0001;
 		osc.running = true;
 
-		while (input != "OK" && input != "ok") {
-			input = readFromConsole("Adjust the trimmers for channel " + ch + " " + ch_type + ", then type OK");
-		}
+		extern.start("rm -rf " + ipc_file);
+		/* Some simple stupid IPC */
+		extern.start("( ./wait_pins.sh D pin1 ; echo pressed > " +
+			ipc_file + " ) &");
 
-		if (input == "OK" || input == "ok") {
-			input = readFromConsole("Are you sure? (y/n)");
-			if (input == "Y" || input == "y") {
-				ok = true;
-			} else {
-				ok = false;
-			}
+		while (input.trim() != "pressed") {
+			input = extern.start("cat " + ipc_file);
+			msleep(200);
 		}
+		extern.start("rm -rf " + ipc_file);
+		ok = true;
+		input = "";
+
 		osc.running = false;
 		siggen.running = false;
 		_osc_change_gain_mode(ch, false);
