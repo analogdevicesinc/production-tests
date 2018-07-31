@@ -13,11 +13,11 @@ source $SCRIPT_DIR/config.sh
 get_config() {
 	local board="$1"
 	is_ft4232h && {
-		echo "config/${board}/ftdi4232.cfg"
+		echo "$SCRIPT_DIR/config/${board}/ftdi4232.cfg"
 		return
 	}
 	lsusb -v -d 0403:6014 &> /dev/null && {
-		echo "config/${board}/digilent.cfg"
+		echo "$SCRIPT_DIR/config/${board}/digilent.cfg"
 		return
 	}
 }
@@ -28,7 +28,7 @@ load_uboot() {
 		return 0
 	fi
 
-	openocd -f "$CABLE_CFG" -c "load_uboot $UBOOT_ELF_FILE" || {
+	openocd -f "$CABLE_CFG" -c "load_uboot $UBOOT_ELF_FILE" -s "$SCRIPT_DIR" || {
 		echo_blue "OpenOCD command failed"
 		force_terminate_programs
 		return 1
