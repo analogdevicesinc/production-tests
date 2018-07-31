@@ -10,10 +10,31 @@ source $SCRIPT_DIR/config.sh
 # Functions section                #
 #----------------------------------#
 
-terminate_any_lingering_scopies() {
-	for pid in $(pgrep scopy) ; do
-		kill -9 $pid
+terminate_pgrep() {
+	for pid in $(pgrep $1) ; do
+		kill -9 "$pid"
 	done
+}
+
+terminate_any_lingering() {
+	local pname="$1" # full or partial process name
+	local pids
+	terminate_pgrep $pname
+	pids="$(pgrep $pname)"
+	while [ -n "$pids" ] ; do
+		terminate_pgrep $pname
+		pids="$(pgrep $pname)"
+		for pid in $pids ; do
+			local ppid="$(ps -o ppid= $pid)"
+			[ -n "$ppid" ] || continue
+			# try to terminate parent pid in case zombie process
+			kill -9 "$ppid"
+		done
+	done
+}
+
+terminate_any_lingering_stuff() {
+	terminate_any_lingering scopy
 }
 
 wait_for_board() {
@@ -32,7 +53,7 @@ wait_for_board() {
 
 post_flash() {
 	force_terminate_programs
-	terminate_any_lingering_scopies
+	terminate_any_lingering_stuff
 
 	# This is a small workaround to avoid power-cycling the board
 	# when running this script; it means that someone else took care of
@@ -47,7 +68,7 @@ post_flash() {
 
 	echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
 	wait_for_board || {
-		terminate_any_lingering_scopies
+		terminate_any_lingering_stuff
 		echo_red "Board did not come online"
 		return 1
 	}
@@ -61,12 +82,12 @@ post_flash() {
 
 	echo_green "3. Testing Scopy"
 	scopy --script $SCRIPT_DIR/config/m2k/scopy.js || {
-		terminate_any_lingering_scopies
+		terminate_any_lingering_stuff
 		echo_red "Scopy tests have failed..."
 		return 1
 	}
 
-	terminate_any_lingering_scopies
+	terminate_any_lingering_stuff
 
 	echo
 	echo_green "PASSED ALL TESTS"
