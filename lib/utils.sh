@@ -43,17 +43,25 @@ valid_ftdi_channel() {
 	return 1
 }
 
+pin_ctrl() {
+	local lockfile="/tmp/pin_ctrl_lock"
+	(
+		flock -e 200
+		$SCRIPT_DIR/work/ft4232h_pin_ctrl $@
+	) 200>$lockfile
+}
+
 toggle_pins() {
 	local channel="$(toupper $1)"
 	valid_ftdi_channel "$channel" || return 1
 	shift
 	if [ "$channel" == "GPIO_EXP1" ] ; then
-		$SCRIPT_DIR/work/ft4232h_pin_ctrl --channel B \
+		pin_ctrl --channel B \
 			--serial "$FT4232H_SERIAL" \
 			--mode spi-gpio-exp $@
 		return $?
 	fi
-	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode bitbang \
+	pin_ctrl --mode bitbang \
 		--serial "$FT4232H_SERIAL" \
 		--channel "$channel" $@
 }
@@ -62,7 +70,7 @@ wait_pins() {
 	local channel="$1"
 	valid_ftdi_channel "$channel" || return 1
 	shift
-	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode wait-gpio \
+	pin_ctrl --mode wait-gpio \
 		--serial "$FT4232H_SERIAL" \
 		--channel "$channel" $@
 }
@@ -184,7 +192,7 @@ measure_voltage() {
 	__populate_voffsets
 	__populate_vgains
 
-	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode spi-adc --serial "$FT4232H_SERIAL" \
+	pin_ctrl --mode spi-adc --serial "$FT4232H_SERIAL" \
 		--channel B --opts "$opts"
 }
 
@@ -342,11 +350,11 @@ eeprom_rw() {
 	local cnt_or_data="$3"
 
 	if [ "$op" == "read" ] ; then
-		$SCRIPT_DIR/work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" \
+		pin_ctrl --serial "$FT4232H_SERIAL" \
 			--channel B --mode spi-eeprom \
 			--opts addr="$addr",read="$cnt_or_data",cs=D:0
 	elif [ "$op" == "write" ] ; then
-		$SCRIPT_DIR/work/ft4232h_pin_ctrl --serial "$FT4232H_SERIAL" \
+		pin_ctrl --serial "$FT4232H_SERIAL" \
 			--channel B --mode spi-eeprom \
 			--opts addr="$addr",write="$cnt_or_data",cs=D:0
 	else
