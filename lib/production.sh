@@ -123,12 +123,6 @@ production() {
 	echo_green "Initializing FTDI pins to default state"
 	init_pins
 
-	# send STDERR to STDOUT
-	exec 2>&1
-
-	# file descriptor 4 prints to STDOUT and to LOGFILE
-	exec 4> >(while read a; do echo $a; echo $a >>$LOGFILE; done)
-
 	while true ; do
 
 		if need_to_read_eeprom ; then
@@ -171,7 +165,8 @@ production() {
 			rm -f "$LOGFILE"
 		fi
 
-		exec >&4
+		exec &> >(tee -a "$LOGFILE")
+		sleep 0.1 # wait for redirection to happen
 
 		pre_flash "$TARGET" || {
 			echo_red "Pre-flash step failed..."
