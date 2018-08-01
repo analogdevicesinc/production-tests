@@ -24,6 +24,7 @@ enum {
 	OPT_ADC_VRANGE_ALL,
 	OPT_ADC_VRANGE_EACH,
 	OPT_ADC_NO_SAMPLES,
+	OPT_ADC_NO_SAMPLES_AVG,
 	OPT_ADC_VOFFSET_ALL,
 	OPT_ADC_VOFFSET_EACH,
 	OPT_ADC_VGAIN_ALL,
@@ -37,6 +38,7 @@ static char *suboptions[] = {
 	[OPT_ADC_VRANGE_ALL]  = "vrange-all",
 	[OPT_ADC_VRANGE_EACH] = "vrange-each",
 	[OPT_ADC_NO_SAMPLES]  = "no-samples",
+	[OPT_ADC_NO_SAMPLES_AVG] = "no-samples-avg",
 	[OPT_ADC_VOFFSET_ALL]  = "voffset-all",
 	[OPT_ADC_VOFFSET_EACH] = "voffset-each",
 	[OPT_ADC_VGAIN_ALL]  = "vgain-all",
@@ -73,6 +75,7 @@ struct spi_read_args {
 	int refinout;
 	int refinout_div;
 	int samples;
+	int do_samples_avg;
 	int voffset[16];
 	int voffset_div[16];
 	int vgain[16];
@@ -202,13 +205,27 @@ static int32_t adc_transfer_function(int64_t voltage, int ch, const struct spi_r
 	return voltage;
 }
 
+static void print_voltage(int64_t voltage, int ch,
+		const struct spi_read_args *sargs, char endc)
+{
+	int64_t voltage_abs;
+
+	voltage = adc_transfer_function(voltage, ch, sargs);
+	voltage_abs = voltage < 0 ? -voltage : voltage;
+
+	printf("%s%d."PRECISION_FMT"%c", voltage < 0 ? "-" : "",
+		(int32_t)(voltage_abs / PRECISION_MULT),
+		(int32_t)(voltage_abs % PRECISION_MULT),
+		endc);
+}
+
 static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args *sargs)
 {
 	int vchannel_idx = sargs->vchannel_idx;
 	uint16_t vchannel_mask = vchannel_masks[vchannel_idx].i;
 	uint16_t vchannel_clr_mask;
 	uint8_t buf[8] = {}; /* 2 bytes VA, 2 bytes VB */
-	int64_t voltage, voltage_abs;
+	int64_t voltage;
 	int i;
 	int samples = sargs->samples;
 
@@ -235,6 +252,7 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 
 	voltage = 0;
 	for (i = 0; i < samples; i++) {
+		int64_t voltage1;
 		if (do_conversion(dev, buf, sizeof(buf)) < 0) {
 			fprintf(stderr, "Error while doing conversion\n");
 			return -1;
@@ -247,17 +265,21 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 
 		if (vchannel_idx > 7) {
 			int b_idx = (i == 0) ? 2 : 4;
-			voltage += voltage_from_buf(&buf[b_idx]);
+			voltage1 = voltage_from_buf(&buf[b_idx]);
 		} else
-			voltage += voltage_from_buf(&buf[0]);
-	}
-	voltage = voltage / (int64_t)sargs->samples;
-	voltage = adc_transfer_function(voltage, vchannel_idx, sargs);
-	voltage_abs = voltage < 0 ? -voltage : voltage;
+			voltage1 = voltage_from_buf(&buf[0]);
 
-	printf("%s%d."PRECISION_FMT"\n", voltage < 0 ? "-" : "",
-		(int32_t)(voltage_abs / PRECISION_MULT),
-		(int32_t)(voltage_abs % PRECISION_MULT));
+		if (sargs->do_samples_avg)
+			voltage += voltage1;
+		else
+			print_voltage(voltage1, vchannel_idx, sargs, '\n');
+	}
+
+	if (sargs->do_samples_avg) {
+		voltage = voltage / (int64_t)sargs->samples;
+		print_voltage(voltage, vchannel_idx, sargs, '\n');
+	}
+
 	return 0;
 }
 
@@ -266,7 +288,6 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 	uint8_t buf[8 * 8] = {}; /* (2 bytes VA, 2 bytes VB) x 8 */
 	int i, j;
 	int64_t voltages[16] = {};
-	int64_t voltage_abs;
 	int samples = sargs->samples;
 
 	/* We setup the sequencer ; it can a pair of VA & VB at the same time */
@@ -287,6 +308,7 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 
 	/* Collect samples of voltages */
 	for (i = 0; i < samples; i++) {
+		int64_t voltages1[16];
 		if (do_conversion(dev, buf, sizeof(buf)) < 0) {
 			fprintf(stderr, "Error while doing conversion\n");
 			return -1;
@@ -299,22 +321,27 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 
 		for (j = 0; j < 8; j++) {
 			int b_idx = (j * 4) + ((i == 0) ? 2 : 4);
-			voltages[j] += voltage_from_buf(&buf[j * 4]);		/* VA voltages */
-			voltages[j + 8] += voltage_from_buf(&buf[b_idx]);	/* VB voltages */
+			voltages1[j] = voltage_from_buf(&buf[j * 4]);		/* VA voltages */
+			voltages1[j + 8] = voltage_from_buf(&buf[b_idx]);	/* VB voltages */
+		}
+
+		if (sargs->do_samples_avg) {
+			for (j = 0; j < ARRAY_SIZE(voltages1); j++)
+				voltages[j] += voltages1[j];
+		} else {
+			for (j = 0; j < ARRAY_SIZE(voltages1); j++)
+				print_voltage(voltages1[j], j, sargs, ' ');
+			printf("\n");
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(voltages); i++) {
-		voltages[i] = voltages[i] / (int64_t)sargs->samples;
-		voltages[i] = adc_transfer_function(voltages[i], i, sargs);
-		voltage_abs = voltages[i] < 0 ? -voltages[i] : voltages[i];
-		printf("%s%d."PRECISION_FMT" ",
-			voltages[i] < 0 ? "-" : "",
-			(int32_t)(voltage_abs / PRECISION_MULT),
-			(int32_t)(voltage_abs % PRECISION_MULT));
+	if (sargs->do_samples_avg) {
+		for (i = 0; i < ARRAY_SIZE(voltages); i++) {
+			voltages[i] = voltages[i] / (int64_t)sargs->samples;
+			print_voltage(voltages[i], i, sargs, ' ');
+		}
+		printf("\n");
 	}
-
-	printf("\n");
 	return 0;
 }
 
@@ -593,7 +620,8 @@ void usage_spi_adc()
 			"\t\t\tValues are '2.5V', '5V' or '10V'\n"
 			"\t\tvrange-each=<x:x:..:x> - to configure 16 voltage ranges, one for each channel;\n"
 			"\t\t\tmust be separated by colon (':')\n"
-			"\t\tno-samples - do multiple measurements and do an average\n"
+			"\t\tno-samples - do multiple measurements and display them\n"
+			"\t\tno-samples-avg - do multiple measurements and average them\n"
 			"\t\tvoffset-all - voltage offset to apply to all channels\n "
 			"\t\tvoffset-each=<x:x:..:x> - voltage offset to apply to each channel\n "
 			"\t\tvgain-all - voltage gain to apply to all channels\n"
@@ -648,6 +676,10 @@ int handle_mpsse_spi_adc(const char *serial, int channel, char *subopts)
 				break;
 			case OPT_ADC_NO_SAMPLES:
 				sargs.samples = atoi(value);
+				break;
+			case OPT_ADC_NO_SAMPLES_AVG:
+				sargs.samples = atoi(value);
+				sargs.do_samples_avg = 1;
 				break;
 			case OPT_ADC_VGAIN_ALL:
 				if (parse_voltage_arg_all(value, sargs.vgain, sargs.vgain_div) < 0) {
