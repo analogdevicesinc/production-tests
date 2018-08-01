@@ -91,6 +91,7 @@ production() {
 		echo_red "No target specified"
         	return 1
 	}
+	cd "$SCRIPT_DIR"
 	[ -f "$SCRIPT_DIR/config/$TARGET/postflash.sh" ] || {
 		echo_red "File '$SCRIPT_DIR/config/$TARGET/postflash.sh' not found"
 		return 1
