@@ -39,13 +39,22 @@ terminate_any_lingering_stuff() {
 }
 
 wait_for_board() {
+	local online="${1:-online}"
 	local serial
 	for iter in $(seq $BOARD_ONLINE_TIMEOUT) ; do
 		serial=$(iio_attr -C $IIO_URI_MODE hw_serial 2> /dev/null | cut -d ' ' -f2)
-		[ -z "$serial" ] || return 0
+		if [ "$online" == "offline" ] ; then
+			[ -n "$serial" ] || return 0
+		else
+			[ -z "$serial" ] || return 0
+		fi
 		sleep 1
 	done
 	return 1
+}
+
+reboot_via_ssh() {
+	sshpass -panalog ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oCheckHostIP=no root@192.168.2.1 /sbin/reboot
 }
 
 #----------------------------------#
@@ -81,8 +90,15 @@ post_flash() {
 		return 1
 	}
 
-	echo_green "3. Testing Scopy"
-	scopy --script $SCRIPT_DIR/config/m2k/scopy.js || {
+	echo_green "3. Testing Scopy -- Part 1"
+	scopy --nogui --script $SCRIPT_DIR/config/m2k/scopy1.js || {
+		terminate_any_lingering_stuff
+		echo_red "Scopy tests have failed..."
+		return 1
+	}
+
+	echo_green "4. Testing Scopy -- Part 2"
+	scopy --script $SCRIPT_DIR/config/m2k/scopy2.js || {
 		terminate_any_lingering_stuff
 		echo_red "Scopy tests have failed..."
 		return 1
