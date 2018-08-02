@@ -9,7 +9,7 @@ var MIN_LOW_GAIN = 9.75;
 var ADC_CONST_ERR_THRESHOLD = 0.03;
 var ADC_BANDWIDTH_THRESHOLD = 7;
 var WORKING_DIR = ".";
-var M2KCALIB_INI = "/media/jig/M2k/m2k-calib.ini";
+var M2KCALIB_INI = "/tmp/m2k-calib-factory.ini";
 
 /*********************************************************************************************************
 *	STEP 5
@@ -246,8 +246,13 @@ function _calibrate_pos_power_supply()
 	
 	while (next_step > 0) {
 		// call some shell script which returns the ADC value
-		value = extern.start("./measure.sh V5B");
+		value = extern.start("./m2k_power_calib_meas.sh V5B pos").trim();
+		log("pos " + step + " result: " + value);
+		if (value == '' || value == "failed" || isNaN(value))
+			return false;
 		ok = manual_calib.setParam(value);
+		if (!ok)
+			return false;
 		next_step = manual_calib.next();
 		step++;
 		res += value + " ";
@@ -256,8 +261,9 @@ function _calibrate_pos_power_supply()
 	if (next_step < 0) {
 		next_calib = manual_calib.finish();
 	}
-	res = "DONE - pos supply " + res;
+	res = "DONE - pos supply - voltages: " + res;
 	log(res);
+	return true;
 }
 
 function _calibrate_neg_power_supply()
@@ -270,8 +276,13 @@ function _calibrate_neg_power_supply()
 	
 	while (next_step > 0) {
 		// call some shell script which returns the ADC value
-		value = extern.start("./measure.sh V6B");
+		value = extern.start("./m2k_power_calib_meas.sh V6B neg").trim();
+		log("neg " + step + " result: " + value);
+		if (value == '' || value == "failed" || isNaN(value))
+			return false;
 		ok = manual_calib.setParam(value);
+		if (!ok)
+			return false;
 		next_step = manual_calib.next();
 		step++;
 		res += value + " ";
@@ -280,15 +291,22 @@ function _calibrate_neg_power_supply()
 	if (next_step < 0) {
 		next_calib = manual_calib.finish();
 	}
-	res = "DONE - neg supply " + res;
+	res = "DONE - neg supply - voltages: " + res;
 	log(res);
+	return true;
 }
 
 function step_7()
 {
+	var ret;
 	log(createStepHeader(7));
-	_calibrate_pos_power_supply();
-	_calibrate_neg_power_supply();
+	ret = _calibrate_pos_power_supply();
+	if (!ret)
+		return false;
+	log("\n");
+	ret = _calibrate_neg_power_supply();
+	if (!ret)
+		return false;
 	manual_calib.start(2);
 	manual_calib.saveCalibration(M2KCALIB_INI);
 	log("Saved calibration parameters to file");
