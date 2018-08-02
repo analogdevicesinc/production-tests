@@ -9,7 +9,8 @@ var MIN_LOW_GAIN = 9.75;
 var ADC_CONST_ERR_THRESHOLD = 0.03;
 var ADC_BANDWIDTH_THRESHOLD = 7;
 var WORKING_DIR = ".";
-var M2KCALIB_INI = "/tmp/m2k-calib-factory.ini";
+var M2KCALIB_INI = "m2k-calib-factory.ini";
+var M2KCALIB_INI_LOCAL = "/tmp/" + M2KCALIB_INI;
 
 /*********************************************************************************************************
 *	STEP 5
@@ -308,7 +309,14 @@ function step_7()
 	if (!ret)
 		return false;
 	manual_calib.start(2);
-	manual_calib.saveCalibration(M2KCALIB_INI);
+	manual_calib.saveCalibration(M2KCALIB_INI_LOCAL);
+	ret = extern.start("./scp.sh " + M2KCALIB_INI_LOCAL + " root@192.168.2.1:/mnt_jffs2/" + M2KCALIB_INI + " analog").trim();
+	if (ret != "ok") {
+		extern.start("rm -f " + M2KCALIB_INI_LOCAL);
+		log("Failed to save calibration file to M2k: " + ret);
+		return false;
+	}
+	extern.start("rm -f " + M2KCALIB_INI_LOCAL);
 	log("Saved calibration parameters to file");
 	return true;
 }
