@@ -325,6 +325,8 @@ function main()
 {
 	var i;
 
+	launcher.maximized = true;
+
 	if (!connect())      
 		return Error()
 
