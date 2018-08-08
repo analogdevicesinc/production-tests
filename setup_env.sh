@@ -9,6 +9,8 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/lib/utils.sh
 
+SUPPORTED_BOARDS="pluto m2k"
+
 PATH="$SCRIPT_DIR/work/openocd-0.10.0/installed/bin:$PATH"
 
 UDEV_RULES_FILE="50-ftdi-test.rules"
@@ -169,10 +171,46 @@ build_scopy() {
 	popd
 }
 
+write_autostart_config() {
+	local autostart_path="$HOME/.config/autostart"
+
+	# FIXME: see about generalizing this to other desktops [Gnome, MATE, LXDE, etc]
+	cat > $autostart_path/test-jig-tool.desktop <<-EOF
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.9.4
+Type=Application
+Name=test-jig-tool
+Comment=test-jig-tool
+Exec=sudo xfce4-terminal --fullscreen --hide-borders --hide-scrollbar --hide-menubar -x $SCRIPT_DIR/production_${BOARD}.sh
+OnlyShowIn=XFCE;
+StartupNotify=false
+Terminal=false
+Hidden=false
+	EOF
+
+}
+
+board_is_supported() {
+	local board="$1"
+	[ -n "$board" ] || return 1
+	for b in $SUPPORTED_BOARDS ; do
+		[ "$b" != "$board" ] || return 0
+	done
+	return 1
+}
 
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
+
+BOARD="$1"
+
+board_is_supported "$BOARD" || {
+	echo_red "Board '$BOARD' is not supported by this script"
+	echo_red "   Supported boards are '$SUPPORTED_BOARDS'"
+	exit 1
+}
 
 pushd $SCRIPT_DIR
 
@@ -195,8 +233,8 @@ check_udev_on_system
 
 sync_udev_rules_file
 
-for board in pluto m2k ; do
-	./update_${board}_release.sh
-done
+./update_${BOARD}_release.sh
+
+write_autostart_config
 
 popd
