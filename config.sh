@@ -36,6 +36,8 @@ BOARD_ONLINE_TIMEOUT=20	# seconds
 
 EEPROM_VARS="VGAIN VOFF VREF"
 
+JIG_NAME="jig1"
+
 #----------------------------------#
 # Utils                            #
 #----------------------------------#
