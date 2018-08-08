@@ -159,8 +159,7 @@ build_scopy() {
 	mkdir -p work
 	[ -d work/scopy ] || \
 		git clone \
-			https://github.com/commodo/scopy \
-			-b fix-build-linux \
+			https://github.com/analogdevicesinc/scopy \
 			work/scopy
 	pushd work/scopy
 
