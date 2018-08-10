@@ -182,7 +182,7 @@ Version=0.9.4
 Type=Application
 Name=test-jig-tool
 Comment=test-jig-tool
-Exec=sudo xfce4-terminal --fullscreen --hide-borders --hide-scrollbar --hide-menubar -x $SCRIPT_DIR/production_${BOARD}.sh
+Exec=sudo xfce4-terminal --font="DejaVu Sans Mono 16" --fullscreen --hide-borders --hide-scrollbar --hide-menubar -x $SCRIPT_DIR/production_${BOARD}.sh
 OnlyShowIn=XFCE;
 StartupNotify=false
 Terminal=false
