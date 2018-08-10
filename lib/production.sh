@@ -125,6 +125,8 @@ production() {
 
 	while true ; do
 
+		toggle_pins A
+
 		if need_to_read_eeprom ; then
 			echo_green "Loading settings from EEPROM"
 			eeprom_cfg load || {
