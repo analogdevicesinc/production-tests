@@ -99,6 +99,8 @@ function step_9()
 {
 	log(createStepHeader(9));
 	var result, ret;
+	_osc_change_gain_mode(0, true);
+	_osc_change_gain_mode(1, true);
 	/* CH 0 Positive*/
 	// call some shell script which switches something
 	osc.channels[0].setColor(230,6,6);
