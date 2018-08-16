@@ -172,16 +172,16 @@ production() {
 
 		pre_flash "$TARGET" || {
 			echo_red "Pre-flash step failed..."
-			show_error_state
 			inc_fail_stats
+			show_error_state
 			sleep 1
 			continue
 		}
 
 		retry 4 flash "$TARGET" || {
 			echo_red "Flash step failed..."
-			show_error_state
 			inc_fail_stats
+			show_error_state
 			sleep 1
 			continue
 		}
@@ -201,9 +201,9 @@ production() {
 
 		post_flash "dont_power_cycle_on_start" || {
 			echo_red "Post-flash step failed..."
-			show_error_state
 			mv -f $LOGFILE "$LOGDIR/${serial}.log"
 			inc_fail_stats "$serial"
+			show_error_state
 			sleep 1
 			continue
 		}
