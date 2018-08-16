@@ -104,7 +104,7 @@ function step_9()
 	/* CH 0 Positive*/
 	// call some shell script which switches something
 	osc.channels[0].setColor(230,6,6);
-	result = _test_osc_trimmer_adjust(0, false);
+	result = _test_osc_trimmer_adjust(0, true);
 	if (!result) {
 		//handle this
 		return false;
@@ -113,7 +113,7 @@ function step_9()
 	/* CH 0 Negative*/
 	// call some shell script which switches something
 	osc.channels[0].setColor(13,218,54);
-	result = _test_osc_trimmer_adjust(0, true);
+	result = _test_osc_trimmer_adjust(0, false);
 	if (!result) {
 		//handle this
 		return false;
