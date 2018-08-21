@@ -234,11 +234,6 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 	else
 		vchannel_clr_mask = 0x0f;
 
-	if (ad7616_write_mask(dev, AD7616_REG_CONFIG, BURST_EN, 0) < 0) {
-		fprintf(stderr, "Unable to disable burst mode\n");
-		return -1;
-	}
-
 	/* Select channel to read from */
 	if (ad7616_write_mask(dev, AD7616_REG_CHANNEL, vchannel_clr_mask, vchannel_mask) < 0) {
 		fprintf(stderr, "Unable to select voltage channel 0x%04x\n", (0x1f & vchannel_mask));
