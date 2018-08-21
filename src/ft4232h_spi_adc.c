@@ -141,7 +141,7 @@ static int do_conversion(ad7616_dev *dev, uint8_t *buf, int buf_len)
 
 static inline int dummy_conversion(ad7616_dev *dev)
 {
-	uint8_t buf[4 * 32];
+	uint8_t buf[4];
 	return do_conversion(dev, buf, sizeof(buf));
 }
 
