@@ -141,7 +141,7 @@ static int do_conversion(ad7616_dev *dev, uint8_t *buf, int buf_len)
 
 static inline int dummy_conversion(ad7616_dev *dev)
 {
-	uint8_t buf[4];
+	uint8_t buf[4] = {};
 	return do_conversion(dev, buf, sizeof(buf));
 }
 
@@ -224,7 +224,7 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 	int vchannel_idx = sargs->vchannel_idx;
 	uint16_t vchannel_mask = vchannel_masks[vchannel_idx].i;
 	uint16_t vchannel_clr_mask;
-	uint8_t buf[8] = {}; /* 2 bytes VA, 2 bytes VB */
+	uint8_t buf[4]; /* 2 bytes VA, 2 bytes VB */
 	int64_t voltage;
 	int i;
 	int samples = sargs->samples;
@@ -248,19 +248,14 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 	voltage = 0;
 	for (i = 0; i < samples; i++) {
 		int64_t voltage1;
+		memset(buf, 0, sizeof(buf));
 		if (do_conversion(dev, buf, sizeof(buf)) < 0) {
 			fprintf(stderr, "Error while doing conversion\n");
 			return -1;
 		}
 
-		if (i == 1) {
-			samples++;
-			continue;
-		}
-
 		if (vchannel_idx > 7) {
-			int b_idx = (i == 0) ? 2 : 4;
-			voltage1 = voltage_from_buf(&buf[b_idx]);
+			voltage1 = voltage_from_buf(&buf[2]);
 		} else
 			voltage1 = voltage_from_buf(&buf[0]);
 
@@ -280,7 +275,7 @@ static int handle_single_conversion(ad7616_dev *dev, const struct spi_read_args 
 
 static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *sargs)
 {
-	uint8_t buf[8 * 8] = {}; /* (2 bytes VA, 2 bytes VB) x 8 */
+	uint8_t buf[4 * 8]; /* (2 bytes VA, 2 bytes VB) x 8 */
 	int i, j;
 	int64_t voltages[16] = {};
 	int samples = sargs->samples;
@@ -304,18 +299,14 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 	/* Collect samples of voltages */
 	for (i = 0; i < samples; i++) {
 		int64_t voltages1[16];
+		memset(buf, 0, sizeof(buf));
 		if (do_conversion(dev, buf, sizeof(buf)) < 0) {
 			fprintf(stderr, "Error while doing conversion\n");
 			return -1;
 		}
 
-		if (i == 1) {
-			samples++;
-			continue;
-		}
-
 		for (j = 0; j < 8; j++) {
-			int b_idx = (j * 4) + ((i == 0) ? 2 : 4);
+			int b_idx = (j * 4) + 2;
 			voltages1[j] = voltage_from_buf(&buf[j * 4]);		/* VA voltages */
 			voltages1[j + 8] = voltage_from_buf(&buf[b_idx]);	/* VB voltages */
 		}
@@ -344,7 +335,7 @@ static int handle_self_test(ad7616_dev *dev, struct spi_read_args *sargs)
 {
 	static uint8_t channel_a[] = { 0xaa, 0xaa };
 	static uint8_t channel_b[] = { 0x55, 0x55 };
-	uint8_t buf[4] = {}; /* 2 bytes VA, 2 bytes VB */
+	uint8_t buf[4]; /* 2 bytes VA, 2 bytes VB */
 	int ret = 0, i, j;
 	uint16_t data, diag_chan = (0xb << 4) | 0xb;
 
@@ -371,6 +362,7 @@ static int handle_self_test(ad7616_dev *dev, struct spi_read_args *sargs)
 	}
 
 	for (j = 0; j < sargs->samples; j++) {
+		memset(buf, 0, sizeof(buf));
 		if (do_conversion(dev, buf, sizeof(buf)) < 0) {
 			fprintf(stderr, "Error while doing conversion\n");
 			ret = -1;
