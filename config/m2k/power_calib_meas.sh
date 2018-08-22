@@ -29,7 +29,6 @@ check_neg_range() {
 m2k_power_calib_meas() {
 	local ch="$1"
 	local pos="${2:-pos}"
-	local SAMPLES=128
 	local meas
 	local timeout=20
 
@@ -38,9 +37,9 @@ m2k_power_calib_meas() {
 		return 1
 	fi
 
-	meas=$(measure_voltage_democratic "$ch" "$SAMPLES" m2k 64)
+	meas=$(measure_voltage "$ch" 1 m2k)
 	while ! check_${pos}_range "$meas" && [ "$timeout" -gt 0 ] ; do
-		meas=$(measure_voltage_democratic "$ch" "$SAMPLES" m2k 64)
+		meas=$(measure_voltage "$ch" 1 m2k)
 		let timeout='timeout - 1'
 	done
 
