@@ -176,7 +176,6 @@ measure_voltage() {
 	local channel="${1:-all}"
 	local samples="${2:-$NUM_SAMPLES}"
 	local device_or_vranges="$3"
-	local avg="$4"
 
 	have_eeprom_vars_loaded || {
 		eeprom_cfg load
@@ -187,12 +186,7 @@ measure_voltage() {
 		fi
 	}
 
-	local opts="refinout=$VREF"
-	if [ "$avg" == "avg" ] ; then
-		opts="$opts,no-samples-avg=$samples"
-	else
-		opts="$opts,no-samples=$samples"
-	fi
+	local opts="refinout=$VREF,no-samples=$samples"
 
 	opts="$opts,vchannel=$channel"
 	__populate_vranges "$device_or_vranges"
@@ -201,24 +195,6 @@ measure_voltage() {
 
 	pin_ctrl --mode spi-adc --serial "$FT4232H_SERIAL" \
 		--channel B --opts "$opts"
-}
-
-measure_voltage_democratic() {
-	local samples="${2:-$NUM_SAMPLES}"
-	local min_cnt="$4"
-	local meas=$(measure_voltage "$1" "$2" "$3" "" | sort | uniq -c | sort -nr | head -1)
-
-	if [ "$1" == "all" ] ; then
-		return 1
-	fi
-
-	local cnt="$(get_item_from_list 0 $meas)"
- 	local val="$(get_item_from_list 1 $meas)"
-	if [ -z "$min_cnt" ] || [ "$cnt" -ge "$min_cnt" ] ; then
-		echo "$val"
-		return 0
-	fi
-	return 1
 }
 
 is_valid_number() {
