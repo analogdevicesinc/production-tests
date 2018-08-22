@@ -126,7 +126,7 @@ int32_t ad7616_spi_read(ad7616_dev *dev, uint8_t reg_addr, uint16_t *reg_data)
 	buf[1] = 0x00;
 	ret = spi_write(&dev->spi_dev, buf, 2);
 
-	buf[0] = 0x00 | ((reg_addr & 0x3F) << 1);
+	buf[0] = 0x00;
 	buf[1] = 0x00;
 	ret = spi_read(&dev->spi_dev, buf, 2);
 	*reg_data = ((buf[0] & 0x01) << 8) | buf[1];

@@ -69,6 +69,7 @@ static int eeprom_read_rdsr(spi_device *dev, struct spi_eeprom_args *eargs)
 	if (spi_write(dev, sr, sizeof(sr)) < 0)
 		return -1;
 
+	memset(sr, 0, sizeof(sr));
 	if (spi_read(dev, sr, sizeof(sr)) < 0)
 		return -1;
 
