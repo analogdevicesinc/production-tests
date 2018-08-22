@@ -9,7 +9,7 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/config.sh
 
-self_test || {
+self_test $@ || {
 	echo_red "Self test failed"
 	exit 1
 }

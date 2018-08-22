@@ -97,8 +97,9 @@ enable_usb_port_2() {
 }
 
 self_test() {
+	local samples="${1:-1}"
 	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode spi-adc --channel B \
-		--serial "$FT4232H_SERIAL" --opts self-test
+		--serial "$FT4232H_SERIAL" --opts "self-test,no-samples=$samples"
 }
 
 have_eeprom_vars_loaded() {

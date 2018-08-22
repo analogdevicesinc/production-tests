@@ -340,12 +340,12 @@ static int handle_burst_conversion(ad7616_dev *dev, const struct spi_read_args *
 	return 0;
 }
 
-static int handle_self_test(ad7616_dev *dev)
+static int handle_self_test(ad7616_dev *dev, struct spi_read_args *sargs)
 {
 	static uint8_t channel_a[] = { 0xaa, 0xaa };
 	static uint8_t channel_b[] = { 0x55, 0x55 };
 	uint8_t buf[4] = {}; /* 2 bytes VA, 2 bytes VB */
-	int ret = 0, i;
+	int ret = 0, i, j;
 	uint16_t data, diag_chan = (0xb << 4) | 0xb;
 
 	/* Write diagnostic value for communication test */
@@ -370,24 +370,29 @@ static int handle_self_test(ad7616_dev *dev)
 		return -1;
 	}
 
-	if (do_conversion(dev, buf, sizeof(buf)) < 0) {
-		fprintf(stderr, "Error while doing conversion\n");
-		return -1;
-	}
+	for (j = 0; j < sargs->samples; j++) {
+		if (do_conversion(dev, buf, sizeof(buf)) < 0) {
+			fprintf(stderr, "Error while doing conversion\n");
+			ret = -1;
+			break;
+		}
 
-	for (i = 0; i < sizeof(buf); i++)
-		printf("%02X ", buf[i]);
+		for (i = 0; i < sizeof(buf); i++)
+			printf("%02X ", buf[i]);
 
-	printf("\n");
+		printf("\n");
 
-	if (memcmp(&buf[0], channel_a, sizeof(channel_a))) {
-		fprintf(stderr, "Channel A values differ from expected 0xAAAA\n");
-		ret = -1;
-	}
+		if (memcmp(&buf[0], channel_a, sizeof(channel_a))) {
+			fprintf(stderr, "Channel A values differ from expected 0xAAAA\n");
+			ret = -1;
+			break;
+		}
 
-	if (memcmp(&buf[2], channel_b, sizeof(channel_b))) {
-		fprintf(stderr, "Channel B values differ from expected 0x5555\n");
-		ret = -1;
+		if (memcmp(&buf[2], channel_b, sizeof(channel_b))) {
+			fprintf(stderr, "Channel B values differ from expected 0x5555\n");
+			ret = -1;
+			break;
+		}
 	}
 
 	if (ret == 0) {
@@ -428,7 +433,7 @@ static int handle_mpsse_spi_with_args(const char *serial, int channel,
 	}
 
 	if (sargs->self_test) {
-		ret = handle_self_test(dev);
+		ret = handle_self_test(dev, sargs);
 		goto out;
 	}
 
