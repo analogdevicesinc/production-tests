@@ -223,6 +223,27 @@ board_is_supported() {
 	return 1
 }
 
+xfce4_power_manager_settings() {
+	local pm_sett="/xfce4-power-manager/blank-on-ac=0
+		/xfce4-power-manager/blank-on-battery=0
+		/xfce4-power-manager/brightness-switch=0
+		/xfce4-power-manager/brightness-switch-restore-on-exit=1
+		/xfce4-power-manager/dpms-enabled=false
+		/xfce4-power-manager/dpms-on-ac-off=60
+		/xfce4-power-manager/dpms-on-ac-sleep=20
+		/xfce4-power-manager/dpms-on-battery-off=30
+		/xfce4-power-manager/dpms-on-battery-sleep=15
+		/xfce4-power-manager/lock-screen-suspend-hibernate=true
+		/xfce4-power-manager/logind-handle-lid-switch=false
+		/xfce4-power-manager/power-button-action=4
+		/xfce4-power-manager/show-panel-label=0"
+	for sett in $pm_sett ; do
+		local key="$(echo $sett | cut -d'=' -f1)"
+		local val="$(echo $sett | cut -d'=' -f2)"
+		xfconf-query -c xfce4-power-manager -p $key -s $val
+	done
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -236,6 +257,8 @@ board_is_supported "$BOARD" || {
 }
 
 pushd $SCRIPT_DIR
+
+xfce4_power_manager_settings
 
 apt_install_prereqs
 
