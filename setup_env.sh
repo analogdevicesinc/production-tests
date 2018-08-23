@@ -244,6 +244,15 @@ xfce4_power_manager_settings() {
 	done
 }
 
+disable_sudo_passwd() {
+	sudo_required
+	sudo -s <<-EOF
+		if ! grep -q $USER /etc/sudoers ; then
+			echo "$USER	ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
+		fi
+	EOF
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -257,6 +266,8 @@ board_is_supported "$BOARD" || {
 }
 
 pushd $SCRIPT_DIR
+
+disable_sudo_passwd
 
 xfce4_power_manager_settings
 
