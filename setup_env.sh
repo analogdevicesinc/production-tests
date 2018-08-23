@@ -173,6 +173,17 @@ build_scopy() {
 
 write_autostart_config() {
 	local autostart_path="$HOME/.config/autostart"
+	local configs_disable="blueman light-locker polkit-gnome-authentication-agent-1"
+
+	configs_disable="$configs_disable print-applet pulseaudio snap-userd-autostart"
+	configs_disable="$configs_disable spice-vdagent update-notifier user-dirs-update-gtk xdg-user-dirs"
+
+	for cfg in $configs_disable ; do
+		cat > $autostart_path/$cfg.desktop <<-EOF
+[Desktop Entry]
+Hidden=true
+		EOF
+	done
 
 	# FIXME: see about generalizing this to other desktops [Gnome, MATE, LXDE, etc]
 	cat > $autostart_path/test-jig-tool.desktop <<-EOF
