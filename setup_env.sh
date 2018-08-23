@@ -253,6 +253,28 @@ disable_sudo_passwd() {
 	EOF
 }
 
+setup_thunar_volman() {
+	local configs="/autobrowse/enabled=false
+		/autoburn/enabled=false
+		/autoipod/enabled=false
+		/autokeyboard/enabled=false
+		/automount-drives/enabled=true
+		/automount-media/enabled=true
+		/automouse/enabled=false
+		/autoopen/enabled=false
+		/autophoto/enabled=false
+		/autoplay-audio-cds/enabled=false
+		/autoplay-video-cds/enabled=false
+		/autoprinter/enabled=false
+		/autorun/enabled=false
+		/autotablet/enabled=false"
+	for sett in $configs ; do
+		local key="$(echo $sett | cut -d'=' -f1)"
+		local val="$(echo $sett | cut -d'=' -f2)"
+		xfconf-query -c thunar-volman -p $key -s $val
+	done
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
