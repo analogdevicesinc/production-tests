@@ -295,6 +295,8 @@ disable_sudo_passwd
 
 xfce4_power_manager_settings
 
+setup_thunar_volman
+
 apt_install_prereqs
 
 openocd_is_minimum_required || {
