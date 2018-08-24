@@ -178,6 +178,8 @@ write_autostart_config() {
 	configs_disable="$configs_disable print-applet pulseaudio snap-userd-autostart"
 	configs_disable="$configs_disable spice-vdagent update-notifier user-dirs-update-gtk xdg-user-dirs"
 
+	mkdir -p $autostart_path
+
 	for cfg in $configs_disable ; do
 		cat > $autostart_path/$cfg.desktop <<-EOF
 [Desktop Entry]
