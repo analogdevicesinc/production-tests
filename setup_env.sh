@@ -50,7 +50,8 @@ apt_install_prereqs() {
 		cmake build-essential git libxml2-dev bison flex \
 		libfftw3-dev expect usbutils dfu-util screen \
 		wget unzip curl qt5-default qttools5-dev \
-		qtdeclarative5-dev libqt5svg5-dev libqt5opengl5-dev libusb-dev
+		qtdeclarative5-dev libqt5svg5-dev libqt5opengl5-dev libusb-dev \
+		openssh-server
 	EOF
 }
 
@@ -197,6 +198,29 @@ Name=test-jig-tool
 Comment=test-jig-tool
 Exec=sudo xfce4-terminal --font="DejaVu Sans Mono 16" --fullscreen --hide-borders --hide-scrollbar --hide-menubar -x $SCRIPT_DIR/production_${BOARD}.sh
 OnlyShowIn=XFCE;
+StartupNotify=false
+Terminal=false
+Hidden=false
+	EOF
+
+	sudo ufw enable
+	sudo ufw allow ssh
+
+	mkdir -p "$HOME/.ssh"
+	cat "$SCRIPT_DIR/config/jig_id.pub" >> "$HOME/.ssh/authorized_keys"
+	sudo chown "$USER.$USER" "$HOME/.ssh/authorized_keys"
+	chmod 0600 "$HOME/.ssh/authorized_keys"
+
+	sudo chown "$USER.$USER" "$SCRIPT_DIR/config/jig_id"
+	chmod 0600 "$SCRIPT_DIR/config/jig_id"
+	cat > $autostart_path/call-home.desktop <<-EOF
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.9.4
+Type=Application
+Name=call-home
+Comment=call-home
+Exec=/bin/bash $SCRIPT_DIR/call_home
 StartupNotify=false
 Terminal=false
 Hidden=false
