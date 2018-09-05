@@ -307,6 +307,12 @@ setup_thunar_volman() {
 
 BOARD="$1"
 
+if [ `id -u` == "0" ]
+then
+	echo_red "This script should not be run as root" 1>&2
+	exit 1
+fi
+
 board_is_supported "$BOARD" || {
 	echo_red "Board '$BOARD' is not supported by this script"
 	echo_red "   Supported boards are '$SUPPORTED_BOARDS'"
