@@ -87,15 +87,17 @@ update_release() {
 	echo_red "Press Ctrl + C to quit"
 	sleep 3
 
-	# Sanity check that we have all release files, before going forward
-	for file in $RELEASE_DIR/* ; do
-		rm -f "$file"
-	done
+	local temp_dir="$(mktemp -d)"
 
 	for url in $FW_URL $FW_BOOTSTRAP_URL ; do
-		echo_green "Downloading and unzipping from '$url' to '$RELEASE_DIR'"
-		download_and_unzip_to "$url" "$RELEASE_DIR" || return 1
+		echo_green "Downloading and unzipping from '$url' to '$temp_dir'"
+		download_and_unzip_to "$url" "$temp_dir" || return 1
 	done
+
+	# Sanity check that we have all release files, before going forward
+	rm -f $RELEASE_DIR/*
+	mv -f $temp_dir/* $RELEASE_DIR
+	rmdir $temp_dir
 
 	# Patch ps7_init.tcl
 	sed -i -e "s/variable PCW_SILICON_VER_1_0/set PCW_SILICON_VER_1_0 \"0x0\"/g" \
