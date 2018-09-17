@@ -11,12 +11,6 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/lib/update_release.sh
 
-get_latest_release() {
-	curl --silent "https://api.github.com/repos/$1/releases/latest" |
-	grep '"tag_name":' |
-	sed -E 's/.*"([^"]+)".*/\1/'
-}
-
 #----------------------------------#
 # Main section                     #
 #----------------------------------#

@@ -43,6 +43,12 @@ download_and_unzip_to() {
 	return 0
 }
 
+get_latest_release() {
+	curl --silent "https://api.github.com/repos/$1/releases/latest" |
+	grep '"tag_name":' |
+	sed -E 's/.*"([^"]+)".*/\1/'
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
