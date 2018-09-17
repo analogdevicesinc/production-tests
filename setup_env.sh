@@ -8,6 +8,7 @@ set -e
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/lib/utils.sh
+source $SCRIPT_DIR/lib/update_release.sh
 
 SUPPORTED_BOARDS="pluto m2k"
 
@@ -121,12 +122,29 @@ build_ft4232h_tool() {
 	gcc $c_files -o "work/$tool" $cflags $ldflags
 }
 
-build_libiio() {
+__download_github_common() {
+	local gh_prj="$1"
 	mkdir -p work
-	[ -d work/libiio ] || \
-		git clone \
-			https://github.com/analogdevicesinc/libiio \
-			work/libiio
+
+	local ver=$(get_latest_release analogdevicesinc/$gh_prj)
+	[ -d work/$gh_prj ] || {
+		if [ -z "$ver" ] ; then
+			echo_red "Could not get $gh_prj release tag; cloning repo"
+			git clone https://github.com/analogdevicesinc/$gh_prj work/$gh_prj
+		else
+			echo_green "Using latest released version '$ver' of '$gh_prj'"
+			download_and_unzip_to "https://github.com/analogdevicesinc/$gh_prj/archive/${ver}.zip" "work" || {
+				echo_red "Could not download $gh_prj..."
+				exit 1
+			}
+			mv -f work/${gh_prj}* work/$gh_prj
+		fi
+	}
+}
+
+build_libiio() {
+	__download_github_common libiio
+
 	pushd work/libiio
 	mkdir -p build
 	pushd build
@@ -159,11 +177,8 @@ build_plutosdr_scripts() {
 }
 
 build_scopy() {
-	mkdir -p work
-	[ -d work/scopy ] || \
-		git clone \
-			https://github.com/analogdevicesinc/scopy \
-			work/scopy
+	__download_github_common scopy
+
 	pushd work/scopy
 
 	./CI/travis/before_install_linux.sh
