@@ -51,7 +51,8 @@ apt_install_prereqs() {
 		cmake build-essential git libxml2-dev bison flex \
 		libfftw3-dev expect usbutils dfu-util screen \
 		wget unzip curl qt5-default qttools5-dev \
-		qtdeclarative5-dev libqt5svg5-dev libqt5opengl5-dev libusb-dev \
+		qtdeclarative5-dev libqt5svg5-dev libqt5opengl5-dev \
+		libusb-dev libusb-1.0-0-dev \
 		openssh-server
 	EOF
 }
@@ -159,8 +160,6 @@ build_libiio() {
 build_plutosdr_scripts() {
 	local cflags="-I../libiio -Wall -Wextra"
 	local ldflags="-L../libiio/build -lfftw3 -lpthread -liio -lm"
-
-	mkdir -p work
 
 	build_libiio
 
