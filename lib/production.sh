@@ -55,18 +55,18 @@ need_to_read_eeprom() {
 
 inc_fail_stats() {
 	local serial="$1"
-	let FAILED='FAILED + 1'
-	echo "PASSED=$PASSED" > $STATSFILE
-	echo "FAILED=$FAILED" >> $STATSFILE
+	let FAILED='FAILED_CNT + 1'
+	echo "PASSED_CNT=$PASSED_CNT" > $STATSFILE
+	echo "FAILED_CNT=$FAILED_CNT" >> $STATSFILE
 	[ -z "$serial" ] || echo "FAILED $serial" >> $RESULTSFILE
 	console_ascii_failed
 }
 
 inc_pass_stats() {
 	local serial="$1"
-	let PASSED='PASSED + 1'
-	echo "PASSED=$PASSED" > $STATSFILE
-	echo "FAILED=$FAILED" >> $STATSFILE
+	let PASSED_CNT='PASSED_CNT + 1'
+	echo "PASSED_CNT=$PASSED_CNT" > $STATSFILE
+	echo "FAILED_CNT=$FAILED_CNT" >> $STATSFILE
 	[ -z "$serial" ] || echo "PASSED $serial" >> $RESULTSFILE
 	console_ascii_passed
 }
@@ -85,7 +85,6 @@ console_ascii_failed() {
 
 production() {
 	local TARGET="$1"
-	local PASSED FAILED
 
 	[ -n "$TARGET" ] || {
 		echo_red "No target specified"
@@ -159,8 +158,8 @@ production() {
 		if [ -f "$STATSFILE" ] ; then
 			source $STATSFILE
 		fi
-		[ -n "$PASSED" ] || PASSED=0
-		[ -n "$FAILED" ] || FAILED=0
+		[ -n "$PASSED_CNT" ] || PASSED_CNT=0
+		[ -n "$FAILED_CNT" ] || FAILED_CNT=0
 
 		if [ -f "$LOGFILE" ] ; then
 			cat "$LOGFILE" >> "$ERRORSFILE"
