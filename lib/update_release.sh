@@ -67,10 +67,10 @@ update_release() {
 		return 1
 	}
 
-	local FIRMWARE_DFU_FILE="$2"
+	local VERSION="$2"
 
-	[ -n "$FIRMWARE_DFU_FILE" ] || {
-		echo_red "No firmware DFU filename provided"
+	[ -n "$VERSION" ] || {
+		echo_red "No version provided"
 		return 1
 	}
 
@@ -104,6 +104,7 @@ update_release() {
 	rm -f $RELEASE_DIR/*
 	mv -f $temp_dir/* $RELEASE_DIR
 	rmdir $temp_dir
+	echo "$VERSION" > "$RELEASE_DIR/version"
 
 	# Patch ps7_init.tcl
 	sed -i -e "s/variable PCW_SILICON_VER_1_0/set PCW_SILICON_VER_1_0 \"0x0\"/g" \

@@ -38,4 +38,4 @@ RELEASE_DIR="$SCRIPT_DIR/release/m2k"
 FW_URL="https://github.com/analogdevicesinc/m2k-fw/releases/download/${VERSION_TO_UPDATE}/m2k-fw-${VERSION_TO_UPDATE}.zip"
 FW_BOOTSTRAP_URL="https://github.com/analogdevicesinc/m2k-fw/releases/download/${VERSION_TO_UPDATE}/m2k-jtag-bootstrap-${VERSION_TO_UPDATE}.zip"
 
-update_release "$RELEASE_DIR" "m2k.dfu" "$FW_URL" "$FW_BOOTSTRAP_URL"
+update_release "$RELEASE_DIR" "$VERSION_TO_UPDATE" "$FW_URL" "$FW_BOOTSTRAP_URL"

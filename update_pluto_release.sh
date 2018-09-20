@@ -39,4 +39,4 @@ FW_URL="https://github.com/analogdevicesinc/plutosdr-fw/releases/download/${VERS
 FW_BOOTSTRAP_URL="https://github.com/analogdevicesinc/plutosdr-fw/releases/download/${VERSION_TO_UPDATE}/plutosdr-jtag-bootstrap-${VERSION_TO_UPDATE}.zip"
 
 
-update_release "$RELEASE_DIR" "pluto.dfu" "$FW_URL" "$FW_BOOTSTRAP_URL"
+update_release "$RELEASE_DIR" "$VERSION_TO_UPDATE" "$FW_URL" "$FW_BOOTSTRAP_URL"
