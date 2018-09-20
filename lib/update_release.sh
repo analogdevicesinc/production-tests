@@ -57,7 +57,7 @@ update_release() {
 
 	check_system_requirements || return 1
 
-	RELEASE_DIR="$1"
+	local RELEASE_DIR="$1"
 
 	# make sure the path is absolute
 	RELEASE_DIR="$(readlink -f $RELEASE_DIR)"
@@ -67,21 +67,21 @@ update_release() {
 		return 1
 	}
 
-	FIRMWARE_DFU_FILE="$2"
+	local FIRMWARE_DFU_FILE="$2"
 
 	[ -n "$FIRMWARE_DFU_FILE" ] || {
 		echo_red "No firmware DFU filename provided"
 		return 1
 	}
 
-	FW_URL="$3"
+	local FW_URL="$3"
 
 	[ -n "$FW_URL" ] || {
 		echo_red "No download URL provided for firmware package"
 		return 1
 	}
 
-	FW_BOOTSTRAP_URL="$4"
+	local FW_BOOTSTRAP_URL="$4"
 
 	[ -n "$FW_BOOTSTRAP_URL" ] || {
 		echo_red "No download URL provided for jtag bootstrap package"
