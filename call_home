@@ -7,7 +7,7 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 while [ 1 ]
 do
-	ssh -o StrictHostKeyChecking=no -p 2222 -i "$SCRIPT_DIR/config/jig_id" -nNR $REVERSE_SSH_PORT:localhost:22 jig@testjig.hopto.org
+	ssh -o StrictHostKeyChecking=no -p 2222 -i "$SCRIPT_DIR/config/jig_id" -nNR $REVERSE_SSH_PORT:localhost:22 jig@testjig.hopto.org &> /dev/null
 	sleep 60
 done
 
