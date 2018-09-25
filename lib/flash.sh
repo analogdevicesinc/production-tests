@@ -5,6 +5,7 @@
 #----------------------------------#
 
 source $SCRIPT_DIR/config.sh
+source $SCRIPT_DIR/lib/update_release.sh
 
 #----------------------------------#
 # Functions section                #
@@ -49,16 +50,10 @@ flash() {
 		return 1
 	}
 
-	local releaseDir="$SCRIPT_DIR/release/$BOARD"
-	local firmwareDfuFile="${BOARD}.dfu"
-
-	# Sanity check that we have all release files, before going forward
-	for file in $firmwareDfuFile $COMMON_RELEASE_FILES ; do
-		[ -f "$releaseDir/$file" ] || {
-			echo_red "File not found: '$releaseDir/$file'"
-			return 1
-		}
-	done
+	have_all_firmware_files "$BOARD" || {
+		echo_red "Not all firmware files are present..."
+		return 1
+	}
 
 	local UBOOT_ELF_FILE="$releaseDir/u-boot.elf"
 

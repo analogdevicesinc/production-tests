@@ -3,6 +3,7 @@
 source $SCRIPT_DIR/config.sh
 source $SCRIPT_DIR/lib/preflash.sh
 source $SCRIPT_DIR/lib/flash.sh
+source $SCRIPT_DIR/lib/update_release.sh
 
 #----------------------------------#
 # Functions section                #
@@ -96,6 +97,20 @@ wait_for_eeprom_vars() {
 	fi
 }
 
+wait_for_firmware_files() {
+	local target="$1"
+	local ver_file="$SCRIPT_DIR/release/$target/version"
+	FW_VERSION="$(cat $ver_file)"
+	if ! have_all_firmware_files "$target" || [ -z "$FW_VERSION" ] ; then
+		echo_red "Firmware files not found, please add them to continue..."
+		while ! have_all_firmware_files "$target" || [ ! -f "$ver_file" ]
+		do
+			sleep 1
+		done
+	fi
+	FW_VERSION="$(cat $ver_file)"
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -107,6 +122,8 @@ production() {
 		echo_red "No target specified"
         	return 1
 	}
+	local target_upper=$(toupper "$TARGET")
+
 	cd "$SCRIPT_DIR"
 	[ -f "$SCRIPT_DIR/config/$TARGET/postflash.sh" ] || {
 		echo_red "File '$SCRIPT_DIR/config/$TARGET/postflash.sh' not found"
@@ -142,6 +159,9 @@ production() {
 	while true ; do
 
 		toggle_pins A
+
+		wait_for_firmware_files "$TARGET"
+		echo_green "${target_upper} firmware version: ${FW_VERSION}"
 
 		wait_for_eeprom_vars
 

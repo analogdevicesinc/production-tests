@@ -49,6 +49,21 @@ get_latest_release() {
 	sed -E 's/.*"([^"]+)".*/\1/'
 }
 
+have_all_firmware_files() {
+	local target="$1"
+
+	local releaseDir="$SCRIPT_DIR/release/$target"
+	local firmwareDfuFile="${target}.dfu"
+
+	for file in $firmwareDfuFile $COMMON_RELEASE_FILES ; do
+		[ -f "$releaseDir/$file" ] || {
+			echo_red "File not found: '$releaseDir/$file'"
+			return 1
+		}
+	done
+	return 0
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
