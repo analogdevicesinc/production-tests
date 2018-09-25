@@ -52,7 +52,7 @@ apt_install_prereqs() {
 		libfftw3-dev expect usbutils dfu-util screen \
 		wget unzip curl qt5-default qttools5-dev \
 		qtdeclarative5-dev libqt5svg5-dev libqt5opengl5-dev \
-		libusb-dev libusb-1.0-0-dev \
+		libusb-dev libusb-1.0-0-dev htpdate \
 		openssh-server
 	EOF
 }
@@ -355,6 +355,8 @@ xfce4_power_manager_settings
 setup_thunar_volman
 
 apt_install_prereqs
+
+sudo /etc/init.d/htpdate restart
 
 openocd_is_minimum_required || {
 	echo_red "OpenOCD needs to be at least version 0.10.0"
