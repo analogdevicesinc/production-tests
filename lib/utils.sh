@@ -470,3 +470,37 @@ scopy() {
 get_hwserial() {
 	LD_LIBRARY_PATH=$SCRIPT_DIR/work/libiio/build iio_attr -C $IIO_URI_MODE hw_serial 2> /dev/null | cut -d' ' -f2
 }
+
+__get_phys_netdevs() {
+	for dev in /sys/class/net/*/device ; do echo $dev | cut -d'/' -f5 ; done
+}
+
+jigname() {
+	local nm="$(cat /etc/hostname 2> /dev/null)"
+	[ -n "$nm" ] || nm="jig1"
+	local pi_serial="$(cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2)"
+	if [ -n "$pi_serial" ] ; then
+		echo "${nm}-${pi_serial}"
+		return
+	fi
+	local dev="$(__get_phys_netdevs | head -1)"
+	if [ -z "$dev" ] ; then
+		echo $nm
+		return
+	fi
+	local addr=$(cat /sys/class/net/$dev/address | sed  's/://g')
+	if [ -n "$addr" ] ; then
+		echo "${nm}-${addr}"
+		return
+	fi
+	echo $nm
+}
+
+save_logfiles_to() {
+	local log_dir="$1"
+	local savefile="$2"
+
+	local tmpfile="$(mktemp)"
+	tar -C "$log_dir" -zcvf "$tmpfile" .
+	mv -f "$tmpfile" "$savefile"
+}

@@ -36,11 +36,6 @@ BOARD_ONLINE_TIMEOUT=20	# seconds
 
 EEPROM_VARS="VGAIN VOFF VREF"
 
-JIG_NAME="$(cat /etc/hostname 2> /dev/null)"
-if [ -z "$JIG_NAME" ] ; then
-	JIG_NAME="jig1"
-fi
-
 #----------------------------------#
 # Utils                            #
 #----------------------------------#

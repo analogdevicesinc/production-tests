@@ -2,23 +2,22 @@
 
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
-source $SCRIPT_DIR/config.sh
+source $SCRIPT_DIR/lib/utils.sh
 
-[ -n "$JIG_NAME" ] || {
-	echo_red "No name for test-jig define; define one in config.sh"
-	exit 1
-}
+JIG_NAME="$(jigname)"
 
 while true ; do
 
 	# take the first `autosave_logs` folder
 	dir=$(sudo find /media -type d -name autosave_logs | head -1)
 	[ -z "$dir" ] || {
-		savefile="${dir}/${JIG_NAME}.$(date +%Y-%m-%d).tar.gz"
-		tmpfile="/tmp/${JIG_NAME}.$(date +%Y-%m-%d).tar.gz"
-		tar -C "$SCRIPT_DIR/log" -zcvf "$tmpfile" .
-		mv -f "$tmpfile" "$savefile"
-		sync
+		FILENAME="${dir}/${JIG_NAME}.$(date +%Y-%m-%d_%H-%M).tar.gz"
+		save_logfiles_to "$SCRIPT_DIR/log" "$FILENAME" &> /dev/null
+		pushd ${dir} &> /dev/null
+		# keep only 5 files
+		rm -f $(ls -1t . | tail -n +6)
+		popd &> /dev/null
+		sync &> /dev/null
 		sleep 60
 	}
 
