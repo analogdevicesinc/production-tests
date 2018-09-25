@@ -252,6 +252,19 @@ StartupNotify=false
 Terminal=false
 Hidden=false
 	EOF
+
+	cat > $autostart_path/auto-upload-logs.desktop <<-EOF
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.9.4
+Type=Application
+Name=auto-save-logs
+Comment=auto-save-logs
+Exec=/bin/bash $SCRIPT_DIR/autoupload_logs.sh
+StartupNotify=false
+Terminal=false
+Hidden=false
+	EOF
 }
 
 board_is_supported() {
