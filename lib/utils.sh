@@ -396,7 +396,8 @@ eeprom_cfg() {
 		for page in $(seq 0 16 496) ; do
 			value="$(eeprom_rw "read" "$page" "$PAGE_SIZE")"
 			[ "$?" == "0" ] || {
-				echo_red "Failed to read EEPROM"
+				[ -n "$DONT_SHOW_EEPROM_MESSAGES" ] || \
+					echo_red "Failed to read EEPROM"
 				return 1
 			}
 			# stop reading after this marker
@@ -404,7 +405,8 @@ eeprom_cfg() {
 				break
 			fi
 			is_valid_eeprom_cfg "$value" || {
-				echo_red "Invalid entry in EEPROM '$value'"
+				[ -n "$DONT_SHOW_EEPROM_MESSAGES" ] || \
+					echo_red "Invalid entry in EEPROM '$value'"
 				return 1
 			}
 			# evaluate the entries in the EEPROM as shell vars
@@ -416,7 +418,8 @@ eeprom_cfg() {
 		# validate arguments
 		while [ -n "$1" ] ; do
 			is_valid_eeprom_cfg "$1" || {
-				echo "'$1' is an invalid EEPROM config setting"
+				[ -n "$DONT_SHOW_EEPROM_MESSAGES" ] || \
+					echo_red "'$1' is an invalid EEPROM config setting"
 				return 1
 			}
 			values="$values $1"
@@ -437,8 +440,9 @@ eeprom_cfg() {
 		fi
 		return 0
 	else
-		echo_red "Invalid EEPROM op '$op'"
-		return 0
+		[ -n "$DONT_SHOW_EEPROM_MESSAGES" ] || \
+			echo_red "Invalid EEPROM op '$op'"
+		return 1
 	fi
 }
 

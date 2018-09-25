@@ -79,6 +79,23 @@ console_ascii_failed() {
 	echo_red "$(cat $SCRIPT_DIR/lib/failed.ascii)"
 }
 
+wait_for_eeprom_vars() {
+	DONT_SHOW_EEPROM_MESSAGES=1
+	if need_to_read_eeprom ; then
+		echo_green "Loading settings from EEPROM"
+		eeprom_cfg load || {
+			echo_red "Failed to load settings from EEPROM."
+			echo_red "Plug in a board with EEPROM vars configured to continue..."
+			echo
+		}
+		while ! eeprom_cfg load &> /dev/null ; do
+			sleep 1
+			continue
+		done
+		show_eeprom_vars
+	fi
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -126,15 +143,7 @@ production() {
 
 		toggle_pins A
 
-		if need_to_read_eeprom ; then
-			echo_green "Loading settings from EEPROM"
-			eeprom_cfg load || {
-				echo_red "Failed to load settings from EEPROM..."
-				sleep 1
-				continue
-			}
-			show_eeprom_vars
-		fi
+		wait_for_eeprom_vars
 
 		show_ready_state || {
 			echo_red "Cannot enter READY state"
