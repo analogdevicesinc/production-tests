@@ -55,7 +55,7 @@ flash() {
 		return 1
 	}
 
-	local releaseDir="$SCRIPT_DIR/release/$target"
+	local releaseDir="$SCRIPT_DIR/release/${BOARD}"
 	local firmwareDfuFile="${BOARD}.dfu"
 	local UBOOT_ELF_FILE="$releaseDir/u-boot.elf"
 
