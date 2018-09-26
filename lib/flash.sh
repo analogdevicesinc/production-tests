@@ -55,6 +55,8 @@ flash() {
 		return 1
 	}
 
+	local releaseDir="$SCRIPT_DIR/release/$target"
+	local firmwareDfuFile="${BOARD}.dfu"
 	local UBOOT_ELF_FILE="$releaseDir/u-boot.elf"
 
 	if [ ! -e "/dev/$TTYUSB" ] ; then
