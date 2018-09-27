@@ -10,6 +10,7 @@ echo_blue()  { printf "\033[1;34m$*\033[m\n"; }
 
 retry() {
 	local retries="$1"
+	local r1="$retries"
 	shift
 	while [ "$retries" -gt 0 ] ; do
 		# run the commands
@@ -19,7 +20,7 @@ retry() {
 		sleep 1
 		let retries='retries - 1'
 	done
-	echo_red "Command failed after $retries retries: $@"
+	echo_red "Command failed after $r1 retries: $@"
 	return 1
 }
 
