@@ -72,8 +72,10 @@ flash() {
 	force_terminate_programs
 
 	# Disable board first; OpenOCD will enable it
-	disable_all_usb_ports
-	power_cycle_sleep
+	if is_ft4232h ; then
+		disable_all_usb_ports
+		power_cycle_sleep
+	fi
 
 	echo_green "1. Loading uboot '$UBOOT_ELF_FILE'"
 	load_uboot
