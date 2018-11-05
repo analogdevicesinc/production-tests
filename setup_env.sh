@@ -344,6 +344,17 @@ setup_thunar_volman() {
 	done
 }
 
+disable_lxde_automount() {
+	[ -d "$HOME/.config/pcmanfm" ] || return 0
+
+	pushd "$HOME/.config/pcmanfm/"
+	for cfg_file in $(find . -name pcmanfm.conf) ; do
+		sed 's/autorun=1/autorun=0/g' -i $cfg_file
+	done
+
+	popd
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -369,6 +380,8 @@ disable_sudo_passwd
 xfce4_power_manager_settings
 
 setup_thunar_volman
+
+disable_lxde_automount
 
 apt_install_prereqs
 
