@@ -176,6 +176,10 @@ build_plutosdr_scripts() {
 }
 
 build_scopy() {
+	if [ "${BOARD}" != "m2k" ] ; then
+		return 0
+	fi
+
 	__download_github_common scopy
 
 	pushd work/scopy
