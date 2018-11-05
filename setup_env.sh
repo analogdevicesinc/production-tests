@@ -276,6 +276,14 @@ board_is_supported() {
 	return 1
 }
 
+xfconf_has_cap() {
+	type xfconf-query &> /dev/null || return 1
+	if xfconf-query -l | grep -q xfce4-power-manager ; then
+		return 0
+	fi
+	return 1
+}
+
 xfce4_power_manager_settings() {
 	local pm_sett="/xfce4-power-manager/blank-on-ac=0
 		/xfce4-power-manager/blank-on-battery=0
@@ -290,6 +298,7 @@ xfce4_power_manager_settings() {
 		/xfce4-power-manager/logind-handle-lid-switch=false
 		/xfce4-power-manager/power-button-action=4
 		/xfce4-power-manager/show-panel-label=0"
+	xfconf_has_cap xfce4-power-manager || return 0
 	for sett in $pm_sett ; do
 		local key="$(echo $sett | cut -d'=' -f1)"
 		local val="$(echo $sett | cut -d'=' -f2)"
@@ -321,6 +330,7 @@ setup_thunar_volman() {
 		/autoprinter/enabled=false
 		/autorun/enabled=false
 		/autotablet/enabled=false"
+	xfconf_has_cap thunar-volman || return 0
 	for sett in $configs ; do
 		local key="$(echo $sett | cut -d'=' -f1)"
 		local val="$(echo $sett | cut -d'=' -f2)"
