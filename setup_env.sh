@@ -215,7 +215,7 @@ Type=Application
 Name=test-jig-tool
 Comment=test-jig-tool
 Exec=sudo xfce4-terminal --font="DejaVu Sans Mono 16" --fullscreen --hide-borders --hide-scrollbar --hide-menubar -x $SCRIPT_DIR/production_${BOARD}.sh
-OnlyShowIn=XFCE;
+OnlyShowIn=XFCE;LXDE
 StartupNotify=false
 Terminal=false
 Hidden=false
