@@ -221,8 +221,10 @@ Terminal=false
 Hidden=false
 	EOF
 
-	sudo ufw enable
-	sudo ufw allow ssh
+	if type ufw &> /dev/null ; then
+		sudo ufw enable
+		sudo ufw allow ssh
+	fi
 
 	mkdir -p "$HOME/.ssh"
 	cat "$SCRIPT_DIR/config/jig_id.pub" >> "$HOME/.ssh/authorized_keys"
