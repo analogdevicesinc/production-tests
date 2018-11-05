@@ -52,7 +52,7 @@ apt_install_prereqs() {
 		libfftw3-dev expect usbutils dfu-util screen \
 		wget unzip curl qt5-default qttools5-dev \
 		qtdeclarative5-dev libqt5svg5-dev libqt5opengl5-dev \
-		libusb-dev libusb-1.0-0-dev htpdate \
+		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal \
 		openssh-server
 	EOF
 }
