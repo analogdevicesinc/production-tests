@@ -130,6 +130,7 @@ production() {
 		return 1
 	}
 
+	source $SCRIPT_DIR/config/$TARGET/jig_pins_config
 	source $SCRIPT_DIR/config/$TARGET/postflash.sh
 
 	# State variables; are set during state transitions

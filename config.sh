@@ -11,18 +11,6 @@ PATH="$SCRIPT_DIR/work/openocd-0.10.0/installed/bin:$SCRIPT_DIR/work/libiio/buil
 # HOST x86 Config
 TTYUSB=ttyTest-A1
 
-# RPI Config
-#havegpio=1
-#GDB=gdb
-#TTYUSB=ttyS0
-
-START_BUTTON=pin1
-
-PASSED_LED=pin3
-FAILED_LED=pin4
-READY_LED=pin5
-PROGRESS_LED=pin2
-
 POWER_CYCLE_DELAY=2
 
 FT4232H_SERIAL="Test-Slot-A"
