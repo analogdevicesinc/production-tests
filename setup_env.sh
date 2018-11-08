@@ -355,6 +355,30 @@ disable_lxde_automount() {
 	popd
 }
 
+setup_pi_hdmi_display() {
+	[ "$BOARD" == "pluto" ] || return 0
+
+	[ -f /boot/config.txt ] || return 0
+
+	local tmp=$(mktemp)
+	cat >> $tmp <<-EOF
+# --- added by setup_env.sh
+hdmi_force_hotplug=1
+hdmi_group=2
+hdmi_mode=87
+hdmi_cvt=800 480 60 6 0 0 0
+hdmi_drive=1
+max_usb_current=1
+# --- end setup_env.sh
+	EOF
+
+	sudo -s <<-EOF
+		sed -i -e "/^# --- added by setup_env.sh/,/^# --- end setup_env.sh/d" /boot/config.txt
+		cat $tmp >> /boot/config.txt
+		rm -f $tmp
+	EOF
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -407,5 +431,7 @@ sync_udev_rules_file
 ./update_${BOARD}_release.sh
 
 write_autostart_config
+
+setup_pi_hdmi_display
 
 popd
