@@ -206,6 +206,11 @@ Hidden=true
 		EOF
 	done
 
+	local font_size="16"
+	if [ "$BOARD" == "pluto" ] ; then
+		font_size=14
+	fi
+
 	# FIXME: see about generalizing this to other desktops [Gnome, MATE, LXDE, etc]
 	cat > $autostart_path/test-jig-tool.desktop <<-EOF
 [Desktop Entry]
@@ -214,7 +219,7 @@ Version=0.9.4
 Type=Application
 Name=test-jig-tool
 Comment=test-jig-tool
-Exec=sudo xfce4-terminal --font="DejaVu Sans Mono 16" --fullscreen --hide-borders --hide-scrollbar --hide-menubar -x $SCRIPT_DIR/production_${BOARD}.sh
+Exec=sudo xfce4-terminal --font="DejaVu Sans Mono $font_size" --fullscreen --hide-borders --hide-scrollbar --hide-menubar -x $SCRIPT_DIR/production_${BOARD}.sh
 OnlyShowIn=XFCE;LXDE
 StartupNotify=false
 Terminal=false
