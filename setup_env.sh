@@ -50,8 +50,7 @@ apt_install_prereqs() {
 	apt-get -y install libftdi-dev bc sshpass openocd \
 		cmake build-essential git libxml2-dev bison flex \
 		libfftw3-dev expect usbutils dfu-util screen \
-		wget unzip curl qt5-default qttools5-dev \
-		qtdeclarative5-dev libqt5svg5-dev libqt5opengl5-dev \
+		wget unzip curl \
 		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal \
 		openssh-server
 	EOF
