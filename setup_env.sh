@@ -397,6 +397,14 @@ xserver-command=X -s 0 -dpms
 	EOF
 }
 
+setup_raspi_config() {
+	sudo -s <<-EOF
+		if type raspi-config &> /dev/null ; then
+			raspi-config nonint do_ssh 0 # enable SSH
+		fi
+	EOF
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -418,6 +426,8 @@ board_is_supported "$BOARD" || {
 pushd $SCRIPT_DIR
 
 disable_sudo_passwd
+
+setup_raspi_config
 
 xfce4_power_manager_settings
 
