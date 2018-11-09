@@ -379,6 +379,24 @@ max_usb_current=1
 	EOF
 }
 
+disable_pi_screen_blanking() {
+	local pi_serial="$(pi_serial)"
+	[ -n "$pi_serial" ] || return 0
+
+	local tmp=$(mktemp)
+	cat >> $tmp <<-EOF
+# --- added by setup_env.sh
+[SeatDefaults]
+xserver-command=X -s 0 -dpms
+# --- end setup_env.sh
+	EOF
+
+	sudo -s <<-EOF
+		sed -i -e "/^# --- added by setup_env.sh/,/^# --- end setup_env.sh/d" /etc/lightdm/lightdm.conf
+		cat $tmp >> /etc/lightdm/lightdm.conf
+	EOF
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -433,5 +451,7 @@ sync_udev_rules_file
 write_autostart_config
 
 setup_pi_hdmi_display
+
+disable_pi_screen_blanking
 
 popd

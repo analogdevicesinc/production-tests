@@ -480,10 +480,14 @@ __get_phys_netdevs() {
 	for dev in /sys/class/net/*/device ; do echo $dev | cut -d'/' -f5 ; done
 }
 
+pi_serial() {
+	cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2
+}
+
 jigname() {
 	local nm="$(cat /etc/hostname 2> /dev/null)"
 	[ -n "$nm" ] || nm="jig1"
-	local pi_serial="$(cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2)"
+	local pi_serial="$(pi_serial)"
 	if [ -n "$pi_serial" ] ; then
 		echo "${nm}-${pi_serial}"
 		return
