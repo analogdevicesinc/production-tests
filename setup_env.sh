@@ -63,7 +63,7 @@ build_openocd_0_10_0() {
 	mkdir -p work
 	wget "$url" -O work/openocd-0.10.0.tar.gz
 
-	apt-get -y install libjim-dev
+	sudo apt-get -y install libjim-dev
 
 	pushd work/
 	tar -xvf openocd-0.10.0.tar.gz
