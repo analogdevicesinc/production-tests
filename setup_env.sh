@@ -405,6 +405,17 @@ setup_raspi_config() {
 	EOF
 }
 
+misc_profile_cleanup() {
+	touch $HOME/.hushlogin # tell login to not print system info
+	sudo -s <<-EOF
+		# Kind of hacky, but it works ; this will remove the warnings
+		# about the SSH password & Wi-Fi on console login
+		[ ! -f /etc/profile.d/sshpwd.sh ] || echo -n > /etc/profile.d/sshpwd.sh
+		[ ! -f /etc/profile.d/wifi-country.sh ] || echo -n > /etc/profile.d/wifi-country.sh
+		[ ! -f /etc/xdg/lxsession/LXDE-pi/sshpwd.sh ] || echo -n > /etc/xdg/lxsession/LXDE-pi/sshpwd.sh
+	EOF
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -426,6 +437,8 @@ board_is_supported "$BOARD" || {
 pushd $SCRIPT_DIR
 
 disable_sudo_passwd
+
+misc_profile_cleanup
 
 setup_raspi_config
 
