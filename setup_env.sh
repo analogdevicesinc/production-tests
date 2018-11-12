@@ -359,7 +359,7 @@ disable_lxde_automount() {
 	popd
 }
 
-setup_pi_hdmi_display() {
+setup_pi_boot_config() {
 	[ "$BOARD" == "pluto" ] || return 0
 
 	[ -f /boot/config.txt ] || return 0
@@ -373,6 +373,9 @@ hdmi_mode=87
 hdmi_cvt=800 480 60 6 0 0 0
 hdmi_drive=1
 max_usb_current=1
+
+dtoverlay=pi3-disable-wifi
+dtoverlay=pi3-disable-bt
 # --- end setup_env.sh
 	EOF
 
@@ -477,7 +480,7 @@ sync_udev_rules_file
 
 write_autostart_config
 
-setup_pi_hdmi_display
+setup_pi_boot_config
 
 disable_pi_screen_blanking
 
