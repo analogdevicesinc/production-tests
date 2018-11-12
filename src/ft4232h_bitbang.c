@@ -100,10 +100,12 @@ int handle_mpsse_wait_gpio(const char *serial, int channel, char **argv,
 		return EXIT_FAILURE;
 
 	while ((ret = ftdi_read_pins(&ftdi, &pin_val)) >= 0) {
+		uint8_t pin_val1 = pin_val;
 		pin_val = (~pin_val) & pin_msk;
 		/* we need to negate `pin_val` ; we get stuff that's active low */
 		if (pin_val) {
 			printf("Button pressed 0x%02x\n", pin_val);
+			printf("Pin states 0x%02x\n", pin_val1);
 			break;
 		}
 		mdelay(100);
