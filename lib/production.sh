@@ -159,6 +159,16 @@ production() {
 
 	while true ; do
 
+		mkdir -p $LOGDIR
+
+		if [ -f "$LOGFILE" ] ; then
+			cat "$LOGFILE" >> "$ERRORSFILE"
+			rm -f "$LOGFILE"
+		fi
+
+		exec &> >(tee -a "$LOGFILE")
+		sleep 0.1 # wait for redirection to happen
+
 		toggle_pins A
 
 		wait_for_firmware_files "$TARGET"
@@ -183,21 +193,11 @@ production() {
 
 		show_start_state
 
-		mkdir -p $LOGDIR
-
 		if [ -f "$STATSFILE" ] ; then
 			source $STATSFILE
 		fi
 		[ -n "$PASSED_CNT" ] || PASSED_CNT=0
 		[ -n "$FAILED_CNT" ] || FAILED_CNT=0
-
-		if [ -f "$LOGFILE" ] ; then
-			cat "$LOGFILE" >> "$ERRORSFILE"
-			rm -f "$LOGFILE"
-		fi
-
-		exec &> >(tee -a "$LOGFILE")
-		sleep 0.1 # wait for redirection to happen
 
 		pre_flash "$TARGET" || {
 			echo_red "Pre-flash step failed..."
