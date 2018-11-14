@@ -56,7 +56,7 @@ need_to_read_eeprom() {
 
 inc_fail_stats() {
 	local serial="$1"
-	let FAILED='FAILED_CNT + 1'
+	let FAILED_CNT='FAILED_CNT + 1'
 	echo "PASSED_CNT=$PASSED_CNT" > $STATSFILE
 	echo "FAILED_CNT=$FAILED_CNT" >> $STATSFILE
 	[ -z "$serial" ] || echo "FAILED $serial" >> $RESULTSFILE
