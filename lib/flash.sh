@@ -59,16 +59,6 @@ flash() {
 	local firmwareDfuFile="${BOARD}.dfu"
 	local UBOOT_ELF_FILE="$releaseDir/u-boot.elf"
 
-	if [ ! -e "/dev/$TTYUSB" ] ; then
-		for board in pluto m2k ; do
-			if [ "$BOARD" == "$board" ] ; then
-				echo_red "'/dev/$TTYUSB' does not exist ; board '$BOARD' requires it"
-				return 1
-			fi
-		done
-		TTYUSB="SKIP_TTYUSB"
-	fi
-
 	force_terminate_programs
 
 	# Disable board first; OpenOCD will enable it
@@ -82,7 +72,7 @@ flash() {
 
 	echo_green "2. Running DFU utils step"
 
-	expect $SCRIPT_DIR/lib/cmd.exp "$TTYUSB" "$releaseDir" "$firmwareDfuFile" || {
+	expect $SCRIPT_DIR/lib/flash.exp "$releaseDir" "$firmwareDfuFile" || {
 		echo_blue "expect command failed"
 		force_terminate_programs
 		return 1

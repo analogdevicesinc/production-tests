@@ -1,60 +1,8 @@
 #!/usr/bin/expect
 
 
-set ttyUSB [lindex $argv 0]
-set releaseDir [lindex $argv 1]
-set firmwareDfuFile [lindex $argv 2]
-
-proc send_screen_quit_cmd {} {
-    # Send Ctrl-A to screen
-    send "\x01"
-    send ":quit\r"
-}
-
-proc wait_for_line_on_serial {ttyUSB line} {
-    if { "$ttyUSB" == "SKIP_TTYUSB" } {
-        puts "Skipping serial device check ; waiting 5 seconds"
-        after 5000
-        return false
-    }
-    send "screen /dev/$ttyUSB 115200\r"
-    while 1 {
-        expect {
-            "$line" {
-                break
-            }
-            timeout {
-                send_error "Failed to check u-boot env save done\n"
-                exit 1
-            }
-        }
-    }
-    return true
-}
-
-proc wait_for_device_prompt {ttyUSB} {
-    if { "$ttyUSB" == "SKIP_TTYUSB" } {
-        puts "Skipping serial device check ; waiting 5 seconds"
-        after 5000
-        return false
-    }
-    send "screen /dev/$ttyUSB 115200\r"
-    while 1 {
-        expect {
-            "Pluto> " {
-                break
-            }
-            "M2k> " {
-                break
-            }
-            timeout {
-                send_error "Failed to check u-boot env save done\n"
-                exit 1
-            }
-        }
-    }
-    return true
-}
+set releaseDir [lindex $argv 0]
+set firmwareDfuFile [lindex $argv 1]
 
 proc wait_for_dfu_mode {} {
     set timeout 1
@@ -137,11 +85,6 @@ while 1 {
             exit 1
         }
     }
-}
-
-if { 0 } {
-    wait_for_device_prompt $ttyUSB
-    send_screen_quit_cmd
 }
 
 exit 0
