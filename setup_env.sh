@@ -39,7 +39,7 @@ sudo_required() {
 	}
 }
 
-apt_install_prereqs() {
+setup_apt_install_prereqs() {
 	type apt-get &> /dev/null || {
 		echo "No 'apt-get' found; cannot install dependencies"
 		return 0
@@ -53,6 +53,7 @@ apt_install_prereqs() {
 		wget unzip curl \
 		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal \
 		openssh-server
+	/etc/init.d/htpdate restart
 	EOF
 }
 
@@ -76,6 +77,15 @@ build_openocd_0_10_0() {
 	popd
 }
 
+setup_openocd() {
+	openocd_is_minimum_required || {
+		echo_red "OpenOCD needs to be at least version 0.10.0"
+		# if  we have apt-get, we can try to build it and install deps too
+		type apt-get &> /dev/null || exit 1
+		build_openocd_0_10_0
+	}
+}
+
 check_udev_on_system() {
 	[ -d "/etc/udev/rules.d" ] || {
 		echo "Your system does not have a '/etc/udev/rules.d'"
@@ -91,8 +101,9 @@ check_udev_on_system() {
 }
 
 # sync udev rules file
-sync_udev_rules_file() {
+setup_sync_udev_rules_file() {
 	sudo_required
+	check_udev_on_system || exit 1
 	sudo -s <<-EOF
 		echo -n "$UDEV_SECTION" > "/etc/udev/rules.d/$UDEV_RULES_FILE"
 		echo "$UDEV_SECTION_PINS" >> "/etc/udev/rules.d/$UDEV_RULES_FILE"
@@ -103,7 +114,7 @@ sync_udev_rules_file() {
 }
 
 
-build_ft4232h_tool() {
+setup_ft4232h_tool() {
 	local tool="ft4232h_pin_ctrl"
 	local tool_c="${tool}.c ad7616.c platform_drivers.c"
 	local c_files
@@ -156,9 +167,14 @@ build_libiio() {
 	popd
 }
 
-build_plutosdr_scripts() {
+setup_plutosdr_scripts() {
 	local cflags="-I../libiio -Wall -Wextra"
 	local ldflags="-L../libiio/build -lfftw3 -lpthread -liio -lm"
+
+	if [ "${BOARD}" != "pluto" ] ; then
+		echo_blue "Not installing plutosdr_scripts ; board needs to be 'pluto'"
+		return 0
+	fi
 
 	build_libiio
 
@@ -174,8 +190,9 @@ build_plutosdr_scripts() {
 	popd
 }
 
-build_scopy() {
+setup_scopy() {
 	if [ "${BOARD}" != "m2k" ] ; then
+		echo_blue "Not installing scopy ; board needs to be 'm2k'"
 		return 0
 	fi
 
@@ -189,7 +206,7 @@ build_scopy() {
 	popd
 }
 
-write_autostart_config() {
+setup_write_autostart_config() {
 	local autostart_path="$HOME/.config/autostart"
 	local configs_disable="blueman light-locker polkit-gnome-authentication-agent-1"
 
@@ -294,7 +311,7 @@ xfconf_has_cap() {
 	return 1
 }
 
-xfce4_power_manager_settings() {
+setup_xfce4_power_manager_settings() {
 	local pm_sett="/xfce4-power-manager/blank-on-ac=0
 		/xfce4-power-manager/blank-on-battery=0
 		/xfce4-power-manager/brightness-switch=0
@@ -316,7 +333,7 @@ xfce4_power_manager_settings() {
 	done
 }
 
-disable_sudo_passwd() {
+setup_disable_sudo_passwd() {
 	sudo_required
 	sudo -s <<-EOF
 		if ! grep -q $USER /etc/sudoers ; then
@@ -348,7 +365,7 @@ setup_thunar_volman() {
 	done
 }
 
-disable_lxde_automount() {
+setup_disable_lxde_automount() {
 	[ -d "$HOME/.config/pcmanfm" ] || return 0
 
 	pushd "$HOME/.config/pcmanfm/"
@@ -386,7 +403,7 @@ dtoverlay=pi3-disable-bt
 	EOF
 }
 
-disable_pi_screen_blanking() {
+setup_disable_pi_screen_blanking() {
 	local pi_serial="$(pi_serial)"
 	[ -n "$pi_serial" ] || return 0
 
@@ -412,7 +429,7 @@ setup_raspi_config() {
 	EOF
 }
 
-misc_profile_cleanup() {
+setup_misc_profile_cleanup() {
 	touch $HOME/.hushlogin # tell login to not print system info
 	sudo -s <<-EOF
 		# Kind of hacky, but it works ; this will remove the warnings
@@ -423,11 +440,16 @@ misc_profile_cleanup() {
 	EOF
 }
 
+setup_release_files() {
+	./update_${BOARD}_release.sh
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
 
 BOARD="$1"
+TARGET="$2"
 
 if [ `id -u` == "0" ]
 then
@@ -443,45 +465,24 @@ board_is_supported "$BOARD" || {
 
 pushd $SCRIPT_DIR
 
-disable_sudo_passwd
+STEPS="disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
+STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs openocd ft4232h_tool"
+STEPS="$STEPS scopy plutosdr_scripts sync_udev_rules_file release_files write_autostart_config"
+STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
 
-misc_profile_cleanup
+RAN_ONCE=0
+for step in $STEPS ; do
+	if [ "$TARGET" == "$step" ] || [ "$TARGET" == "jig" ] ; then
+		setup_$step
+		RAN_ONCE=1
+	fi
+done
 
-setup_raspi_config
-
-xfce4_power_manager_settings
-
-setup_thunar_volman
-
-disable_lxde_automount
-
-apt_install_prereqs
-
-sudo /etc/init.d/htpdate restart
-
-openocd_is_minimum_required || {
-	echo_red "OpenOCD needs to be at least version 0.10.0"
-	# if  we have apt-get, we can try to build it and install deps too
-	type apt-get &> /dev/null || exit 1
-	build_openocd_0_10_0
-}
-
-build_ft4232h_tool
-
-build_scopy
-
-build_plutosdr_scripts
-
-check_udev_on_system
-
-sync_udev_rules_file
-
-./update_${BOARD}_release.sh
-
-write_autostart_config
-
-setup_pi_boot_config
-
-disable_pi_screen_blanking
+if [ "$RAN_ONCE" == "0" ] ; then
+	echo_red "Invalid build target '$TARGET'; valid targets are 'jig' or:"
+	for step in $STEPS ; do
+		echo_red "    $step"
+	done
+fi
 
 popd
