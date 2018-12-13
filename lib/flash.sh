@@ -29,7 +29,13 @@ load_uboot() {
 		return 0
 	fi
 
-	openocd -f "$CABLE_CFG" -c "load_uboot $UBOOT_ELF_FILE" -s "$SCRIPT_DIR" || {
+	if is_ft4232h ; then
+		local bmode=1
+	else
+		local bmode=0
+	fi
+
+	openocd -f "$CABLE_CFG" -c "load_uboot $UBOOT_ELF_FILE $bmode" -s "$SCRIPT_DIR" || {
 		echo_blue "OpenOCD command failed"
 		force_terminate_programs
 		return 1
