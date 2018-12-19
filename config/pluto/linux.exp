@@ -82,11 +82,7 @@ while 1 {
 
 ############### Check ADM1177 ################
 
-#send "cat /sys/bus/iio/devices/iio\:device0/in_voltage0_raw\r"
-
-# Need to split this up to make sure I can use " in the send string
-send {awk "BEGIN{print $(cat /sys/bus/iio/devices/iio\:device0/in_voltage0_raw) * $(cat /sys/bus/iio/devices/iio\:device0/in_voltage0_scale)}"}
-send "\r"
+send "awk \"BEGIN{print \$(cat /sys/bus/iio/devices/iio\\:device0/in_voltage0_raw) * \$(cat /sys/bus/iio/devices/iio\\:device0/in_voltage0_scale)}\"\r"
 
 # result is in mV, look for 4500 to 5200
 
@@ -113,9 +109,7 @@ while 1 {
     }
 }
 
-#send "cat /sys/bus/iio/devices/iio\:device0/in_current0_raw\r"
-send {awk "BEGIN{print $(cat /sys/bus/iio/devices/iio\:device0/in_current0_raw) * $(cat /sys/bus/iio/devices/iio\:device0/in_current0_scale)}"}
-send "\r"
+send "awk \"BEGIN{print \$(cat /sys/bus/iio/devices/iio\\:device0/in_current0_raw) * \$(cat /sys/bus/iio/devices/iio\\:device0/in_current0_scale)}\"\r"
 
 # result is in mA
 
