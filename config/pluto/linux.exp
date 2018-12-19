@@ -10,6 +10,27 @@ proc send_screen_quit_cmd {} {
     send ":quit\r"
 }
 
+proc wait_for_prompt { wait_cmd } {
+	set multiPrompt {[#$] }
+
+	while 1 {
+		expect {
+		-re $multiPrompt {
+			break
+		}
+		timeout {
+		    send_error "Failed to get Linux prompt after '$wait_cmd'\n"
+		    exit 1
+		}
+	    }
+	}
+}
+
+proc send_wait_for_prompt { cmd } {
+	send $cmd
+	wait_for_prompt $cmd
+}
+
 ############### Check Host Side ################
 
 spawn bash
@@ -36,17 +57,7 @@ set multiPrompt {[#$] }
 
 set timeout 10
 
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after ssh\n"
-            exit 1
-        }
-    }
-}
+wait_for_prompt "ssh"
 
 ############### Check IIO device probing ################
 
@@ -130,116 +141,29 @@ while 1 {
 
 ############### Setup the extra environment ################
 
-send "echo /dev/mtd0 0xff000 0x1000 0x1000 > /var/fw_env.conf\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "echo /dev/mtd0 0xff000 0x1000 0x1000 > /var/fw_env.conf\r"
 
 #### Initially the extra env has a bad CRC - make sure we remove the defaults
 
-send "echo bootcmd > /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "echo bootcmd > /var/fw.scr\r"
 
-send "echo baudrate >> /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "echo baudrate >> /var/fw.scr\r"
 
-send "echo bootdelay >> /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "echo bootdelay >> /var/fw.scr\r"
 
-send "cat /etc/serial| xargs echo serial >> /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "cat /etc/serial| xargs echo serial >> /var/fw.scr\r"
 
-send "cat /etc/serial | xargs echo PlutoSDR_by_Analog_Devices_Inc! | sha1sum | cut -f 0 -d ' ' > pkey; cat pkey | xargs echo productkey >> /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "cat /etc/serial | xargs echo PlutoSDR_by_Analog_Devices_Inc! | sha1sum | cut -f 0 -d ' ' > pkey; cat pkey | xargs echo productkey >> /var/fw.scr\r"
 
 ############### Compute and set actual frequency here ################
 
-send "echo -n 'ad936x_ext_refclk <' >> /var/fw.scr;"
-send "echo -n $\(cat /sys/bus/iio/devices/iio:device1/xo_correction\) >> /var/fw.scr;"
-send "echo '>' >> /var/fw.scr\r"
+set cmd "echo -n 'ad936x_ext_refclk <' >> /var/fw.scr;"
+set cmd "$cmd echo -n $\(cat /sys/bus/iio/devices/iio:device1/xo_correction\) >> /var/fw.scr;"
+set cmd "$cmd echo '>' >> /var/fw.scr\r"
 
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt $cmd
 
-send "fw_setenv -c /var/fw_env.conf -s /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "fw_setenv -c /var/fw_env.conf -s /var/fw.scr\r"
 
 set timeout 20
 
