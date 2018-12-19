@@ -5,17 +5,17 @@ set releaseDir [lindex $argv 0]
 set firmwareDfuFile [lindex $argv 1]
 
 proc wait_for_dfu_mode {} {
-    set timeout 1
-    for {set i 0} {$i < 10} {incr i} {
-        send "sudo dfu-util --list\r"
-        expect {
-            "Found DFU:" {
-                return true
-            }
-        }
-    }
-    send_error "Device did not enter DFU mode (in 10 seconds)\n"
-    exit 1
+	set timeout 1
+	for {set i 0} {$i < 10} {incr i} {
+		send "sudo dfu-util --list\r"
+		expect {
+		"Found DFU:" {
+			return true
+		}
+		}
+	}
+	send_error "Device did not enter DFU mode (in 10 seconds)\n"
+	exit 1
 }
 
 set timeout 20
@@ -26,7 +26,6 @@ wait_for_dfu_mode
 set timeout 20
 
 send "sudo dfu-util -D $releaseDir/boot.dfu -a boot.dfu\r"
-
 expect {
 	"Done!" {
 		send_user "boot.dfu OK\r"
@@ -75,16 +74,13 @@ expect {
 after 1000
 
 send "sudo dfu-util -e -a firmware.dfu\r"
-while 1 {
-    expect {
-        "Device returned transfer size 4096" {
-            break
-        }
-        timeout {
-            send_error "dfu detach failed\n"
-            exit 1
-        }
-    }
+expect {
+	"Device returned transfer size 4096" {
+	}
+	timeout {
+		send_error "dfu detach failed\n"
+		exit 1
+	}
 }
 
 exit 0
