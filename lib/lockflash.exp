@@ -1,0 +1,40 @@
+#!/usr/bin/expect
+
+source [file dirname [info script]]/lib.exp
+
+set ttyUSB [lindex $argv 0]
+set uboot_prompt [lindex $argv 1]
+set linux_prompt [lindex $argv 2]
+
+set timeout 20
+
+spawn sshpass -panalog ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oCheckHostIP=no root@192.168.2.1
+
+wait_for_prompt "ssh"
+
+send "device_reboot break\r"
+
+if [ catch "spawn screen /dev/$ttyUSB 115200\r" reason ] {
+        send_error "failed to spawn screen : $reason\n"
+        exit 1
+}
+
+wait_for_text $uboot_prompt
+
+### Protect SF Flash now
+
+send "sf probe; sf protect lock 0 0x100000\r"
+
+wait_for_text "SF: Locked"
+
+wait_for_text $uboot_prompt
+
+send "reset\r"
+
+wait_for_text $linux_prompt
+
+send_screen_quit_cmd
+close
+
+exit 0
+

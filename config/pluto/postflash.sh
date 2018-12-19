@@ -20,6 +20,18 @@ wait_for_board() {
 	return 1
 }
 
+powercycle_board() {
+	disable_all_usb_ports
+	power_cycle_sleep
+	enable_all_usb_ports
+	power_cycle_sleep
+}
+
+powercycle_board_wait() {
+	powercycle_board
+	wait_for_board
+}
+
 xo_calibration() {
 	local xo
 	./cal_ad9361 $IIO_URI_MODE -s 1048576 -b 1048576 -e 2000000000 || return 1
@@ -116,9 +128,16 @@ post_flash() {
 	}
 
 	echo_green "4. Testing Linux"
-	retry 4 expect $SCRIPT_DIR/config/pluto/linux.exp "$TTYUSB" || {
+	retry 4 expect $SCRIPT_DIR/config/pluto/linux.exp || {
 		echo
 		echo_red "   Linux test failed"
+		return 1
+	}
+
+	echo_green "5. Locking flash"
+	retry 4 expect $SCRIPT_DIR/config/pluto/lockflash.exp "$TTYUSB" "Pluto>" "pluto login:" || {
+		echo
+		echo_red "   Locking flash failed"
 		return 1
 	}
 

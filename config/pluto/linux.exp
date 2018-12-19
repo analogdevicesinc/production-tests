@@ -78,34 +78,6 @@ send_wait_for_prompt $cmd
 
 send_wait_for_prompt "fw_setenv -c /var/fw_env.conf -s /var/fw.scr\r"
 
-set timeout 20
-
-send "device_reboot break\r"
-sleep 1
-close
-
-if [ catch "spawn screen /dev/$ttyUSB 115200\r" reason ] {
-        send_error "failed to spawn screen : $reason\n"
-        exit 1
-}
-
-wait_for_text "Pluto>"
-
-### Protect SF Flash now
-
-send "sf probe; sf protect lock 0 0x100000\r"
-
-wait_for_text "SF: Locked"
-
-wait_for_text "Pluto>"
-
-send "reset\r"
-sleep 0.5
-
-wait_for_text "pluto login:"
-
-send_screen_quit_cmd
 close
 
 exit 0
-
