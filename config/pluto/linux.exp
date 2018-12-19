@@ -11,31 +11,25 @@ proc send_screen_quit_cmd {} {
 }
 
 proc wait_for_text { wait_txt } {
-	while 1 {
-		expect {
+	expect {
 		$wait_txt {
-			break
 		}
 		timeout {
 		    send_error "Failed while waiting for '$wait_txt'\n"
 		    exit 1
 		}
-	    }
 	}
 }
 
 proc wait_for_prompt { wait_cmd } {
 	set multiPrompt {[#$] }
 
-	while 1 {
-		expect {
+	expect {
 		-re $multiPrompt {
-			break
 		}
 		timeout {
 		    send_error "Failed to get Linux prompt after '$wait_cmd'\n"
 		    exit 1
-		}
 		}
 	}
 }
@@ -46,8 +40,7 @@ proc send_wait_for_prompt { cmd } {
 }
 
 proc wait_for_value_in_range { min max units } {
-	while 1 {
-		expect {
+	expect {
 		-re "\[0-9]{3,4}" {
 			set in $expect_out(0,string)
 
@@ -60,13 +53,10 @@ proc wait_for_value_in_range { min max units } {
 				send_error "Value ($in) above limit $max $units\n"
 				exit 1
 			}
-
-			break
 		}
 		timeout {
 			send_error "Failed to read value in range '$min - $max $units'\n"
 			exit 1
-		}
 		}
 	}
 }
@@ -94,16 +84,13 @@ wait_for_prompt "ssh"
 send "grep '' /sys/bus/iio/devices/iio\:device*/name | wc -l\r"
 # Expect 5
 
-while 1 {
-	expect {
+expect {
 	-re "5.*$multiPrompt" {
-		break
 	}
         timeout {
 	    send_error "Failed to find 5 IIO devices\n"
             exit 1
         }
-    }
 }
 
 ############### Check ADM1177 ################
