@@ -10,6 +10,20 @@ proc send_screen_quit_cmd {} {
     send ":quit\r"
 }
 
+proc wait_for_text { wait_txt } {
+	while 1 {
+		expect {
+		$wait_txt {
+			break
+		}
+		timeout {
+		    send_error "Failed while waiting for '$wait_txt'\n"
+		    exit 1
+		}
+	    }
+	}
+}
+
 proc wait_for_prompt { wait_cmd } {
 	set multiPrompt {[#$] }
 
@@ -36,18 +50,8 @@ proc send_wait_for_prompt { cmd } {
 spawn bash
 
 send "iio_info -s\r"
-while 1 {
-    expect {
-        "0456:b673" {
-            break
-        }
-        timeout {
-            send_error "Failed to find IIO USB device\n"
-            exit 1
-        }
-    }
-}
 
+wait_for_text "0456:b673"
 
 ########## Done Check Host Side ################
 
@@ -176,60 +180,20 @@ if [ catch "spawn screen /dev/$ttyUSB 115200\r" reason ] {
         exit 1
 }
 
-while 1 {
-    expect {
-        "Pluto> " {
-            break
-        }
-        timeout {
-	    send_error "Failed to see u-boot prompt\n"
-            exit 1
-        }
-    }
-}
+wait_for_text "Pluto>"
 
 ### Protect SF Flash now
 
 send "sf probe; sf protect lock 0 0x100000\r"
 
-while 1 {
-    expect {
-        "SF: Locked" {
-            break
-        }
-        timeout {
-	    send_error "Failed to LOCK flash\n"
-            exit 1
-        }
-    }
-}
+wait_for_text "SF: Locked"
 
-while 1 {
-    expect {
-        "Pluto>" {
-            break
-        }
-        timeout {
-	    send_error "Failed to see u-boot prompt\n"
-            exit 1
-        }
-    }
-}
+wait_for_text "Pluto>"
 
 send "reset\r"
 sleep 0.5
 
-while 1 {
-    expect {
-        "pluto login:" {
-                break
-        }
-        timeout {
-                send_error "timeout waiting for pluto login\n"
-                exit 1
-        }
-    }
-}
+wait_for_text "pluto login:"
 
 send_screen_quit_cmd
 close
