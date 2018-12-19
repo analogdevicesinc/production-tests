@@ -10,6 +10,13 @@ source $SCRIPT_DIR/config.sh
 # Functions section                #
 #----------------------------------#
 
+powercycle_board() {
+	disable_all_usb_ports
+	power_cycle_sleep
+	enable_all_usb_ports
+	power_cycle_sleep
+}
+
 wait_for_board() {
 	local serial
 	for iter in $(seq $BOARD_ONLINE_TIMEOUT) ; do
@@ -21,6 +28,7 @@ wait_for_board() {
 }
 
 powercycle_board() {
+	force_terminate_programs
 	disable_all_usb_ports
 	power_cycle_sleep
 	enable_all_usb_ports
@@ -103,10 +111,7 @@ post_flash() {
 	# this before calling the script
 	if [ "$1" != "dont_power_cycle_on_start" ] ; then
 		echo_green "0. Power cycling the board"
-		disable_all_usb_ports
-		power_cycle_sleep
-		enable_all_usb_ports
-		power_cycle_sleep
+		powercycle_board
 	fi
 
 	echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
@@ -135,7 +140,8 @@ post_flash() {
 	}
 
 	echo_green "5. Locking flash"
-	retry 4 expect $SCRIPT_DIR/config/pluto/lockflash.exp "$TTYUSB" "Pluto>" "pluto login:" || {
+	retry_and_run_on_fail 4 powercycle_board_wait \
+		expect $SCRIPT_DIR/lib/lockflash.exp "$TTYUSB" "Pluto>" "pluto login:" || {
 		echo
 		echo_red "   Locking flash failed"
 		return 1
