@@ -147,6 +147,8 @@ post_flash() {
 		return 1
 	}
 
+	force_terminate_programs
+
 	echo
 	echo_green "PASSED ALL TESTS"
 	return 0
