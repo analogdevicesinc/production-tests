@@ -527,3 +527,13 @@ save_logfiles_to() {
 	tar -C "$log_dir" -zcvf "$tmpfile" .
 	mv -f "$tmpfile" "$savefile"
 }
+
+check_and_reboot() {
+	local logfile="$1"
+	[ -n "$REBOOT_BUTTON" ] || return 1
+	if type __check_and_reboot &> /dev/null ; then
+		__check_and_reboot $logfile
+		return $?
+	fi
+	return 1
+}

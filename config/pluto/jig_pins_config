@@ -1,6 +1,16 @@
 START_BUTTON="pin6 pin7"
+REBOOT_BUTTON="pin1"
 
 PASSED_LED=pin5
 FAILED_LED=pin3
 READY_LED=pin2
 PROGRESS_LED=pin4
+
+__check_and_reboot() {
+	local logfile=$1
+	if grep -q "Button pressed 0x02" $logfile ; then
+		reboot
+		return 0
+	fi
+	return 1
+}
