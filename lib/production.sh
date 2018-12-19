@@ -117,6 +117,7 @@ wait_for_firmware_files() {
 
 production() {
 	local TARGET="$1"
+	local mode="$2"
 
 	[ -n "$TARGET" ] || {
 		echo_red "No target specified"
@@ -159,6 +160,11 @@ production() {
 
 	while true ; do
 
+		if [ "$mode" == "single" ] ; then
+			[ "$PASSED" == "1" ] && return 0
+			[ "$FAILED" == "1" ] && return 1
+		fi
+
 		mkdir -p $LOGDIR
 
 		if [ -f "$LOGFILE" ] ; then
@@ -184,7 +190,8 @@ production() {
 
 		echo_green "Waiting for start button"
 
-		wait_pins D "$START_BUTTON" || {
+		[ "$mode" == "single" ] || \
+			wait_pins D "$START_BUTTON" || {
 			echo_red "Waiting for start button failed..."
 			show_error_state
 			sleep 1
