@@ -48,6 +48,7 @@ show_start_state() {
 show_error_state() {
 	FAILED=1
 	show_leds
+	console_ascii_failed
 }
 
 need_to_read_eeprom() {
@@ -60,7 +61,6 @@ inc_fail_stats() {
 	echo "PASSED_CNT=$PASSED_CNT" > $STATSFILE
 	echo "FAILED_CNT=$FAILED_CNT" >> $STATSFILE
 	[ -z "$serial" ] || echo "FAILED $serial" >> $RESULTSFILE
-	console_ascii_failed
 }
 
 inc_pass_stats() {
@@ -232,6 +232,7 @@ production() {
 		done
 		[ -n "$serial" ] || {
 			echo_red "Could not get device serial number"
+			inc_fail_stats
 			show_error_state
 			sleep 1
 			continue
