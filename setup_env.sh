@@ -113,17 +113,8 @@ setup_sync_udev_rules_file() {
 	return $?
 }
 
-
-setup_ft4232h_tool() {
-	local tool="ft4232h_pin_ctrl"
-	local tool_c="${tool}.c ad7616.c platform_drivers.c"
+__common_build_tool() {
 	local c_files
-	local cflags="-I./src -Werror -Wall"
-	local ldflags="-lftdi"
-
-	tool_c="${tool_c} ft4232h_bitbang.c ft4232h_spi_adc.c ft4232h_spi_eeprom.c"
-	tool_c="${tool_c} ft4232h_spi_gpio_exp.c"
-
 	mkdir -p work
 
 	for c_file in $tool_c ; do
@@ -131,6 +122,18 @@ setup_ft4232h_tool() {
 		c_files="$c_files work/$c_file"
 	done
 	gcc $c_files -o "work/$tool" $cflags $ldflags
+}
+
+setup_ft4232h_tool() {
+	local tool="ft4232h_pin_ctrl"
+	local tool_c="${tool}.c ad7616.c platform_drivers.c"
+	local cflags="-I./src -Werror -Wall"
+	local ldflags="-lftdi"
+
+	tool_c="${tool_c} ft4232h_bitbang.c ft4232h_spi_adc.c ft4232h_spi_eeprom.c"
+	tool_c="${tool_c} ft4232h_spi_gpio_exp.c"
+
+	__common_build_tool
 }
 
 __download_github_common() {
@@ -444,6 +447,15 @@ setup_release_files() {
 	./update_${BOARD}_release.sh
 }
 
+setup_usbreset_tool() {
+	local tool="usbreset"
+	local tool_c="${tool}.c"
+	local cflags="-I./src -Werror -Wall"
+	local ldflags=""
+
+	__common_build_tool
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -468,7 +480,7 @@ pushd $SCRIPT_DIR
 STEPS="disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs openocd ft4232h_tool"
 STEPS="$STEPS scopy plutosdr_scripts sync_udev_rules_file release_files write_autostart_config"
-STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
+STEPS="$STEPS pi_boot_config disable_pi_screen_blanking usbreset_tool"
 
 RAN_ONCE=0
 for step in $STEPS ; do

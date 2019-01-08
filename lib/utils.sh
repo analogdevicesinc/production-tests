@@ -537,3 +537,46 @@ check_and_reboot() {
 	fi
 	return 1
 }
+
+__usbreset() {
+	local lsusb_entry="$1"
+	local bus="$(get_item_from_list 1 $lsusb_entry)"
+	local dev="$(get_item_from_list 3 $lsusb_entry | sed 's/://g')"
+
+	$SCRIPT_DIR/work/usbreset /dev/bus/usb/$bus/$dev
+}
+
+__usbreset_all() {
+	local entry
+	lsusb | while read -r entry ; do
+		__usbreset "$entry"
+	done
+}
+
+usbreset() {
+	local vid="$1"
+	local did="$2"
+
+	[ -n "$vid" ] || {
+		echo_red "No USB vendor ID provided"
+		return 1
+	}
+
+	if [ "$vid" == "all" ] ; then
+		__usbreset_all
+		return $?
+	fi
+
+	[ -n "$did" ] || {
+		echo_red "No USB device ID provided"
+		return 1
+	}
+
+	local entry="$(lsusb -d ${vid}:${did})"
+	[ -n "$entry" ] || {
+		echo_blue "No USB device ${vid}:${did} found"
+		return 1
+	}
+
+	__usbreset "$entry"
+}
