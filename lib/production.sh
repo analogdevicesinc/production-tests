@@ -45,10 +45,14 @@ show_start_state() {
 	show_leds
 }
 
-show_error_state() {
+handle_error_state() {
 	FAILED=1
 	show_leds
 	console_ascii_failed
+	for svc in networking dhcpcd ; do
+		[ -f /etc/init.d/$svc ] || continue
+		/etc/init.d/$svc restart
+	done
 }
 
 need_to_read_eeprom() {
@@ -193,7 +197,7 @@ production() {
 		[ "$mode" == "single" ] || \
 			wait_pins D "$START_BUTTON $REBOOT_BUTTON" || {
 			echo_red "Waiting for start button failed..."
-			show_error_state
+			handle_error_state
 			sleep 1
 			continue
 		}
@@ -211,7 +215,7 @@ production() {
 		pre_flash "$TARGET" || {
 			echo_red "Pre-flash step failed..."
 			inc_fail_stats
-			show_error_state
+			handle_error_state
 			sleep 1
 			continue
 		}
@@ -219,7 +223,7 @@ production() {
 		retry 4 flash "$TARGET" || {
 			echo_red "Flash step failed..."
 			inc_fail_stats
-			show_error_state
+			handle_error_state
 			sleep 1
 			continue
 		}
@@ -233,7 +237,7 @@ production() {
 		[ -n "$serial" ] || {
 			echo_red "Could not get device serial number"
 			inc_fail_stats
-			show_error_state
+			handle_error_state
 			sleep 1
 			continue
 		}
@@ -242,7 +246,7 @@ production() {
 			echo_red "Post-flash step failed..."
 			mv -f $LOGFILE "$LOGDIR/${serial}.log"
 			inc_fail_stats "$serial"
-			show_error_state
+			handle_error_state
 			sleep 1
 			continue
 		}
