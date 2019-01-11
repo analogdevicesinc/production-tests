@@ -106,13 +106,8 @@ tx_margin() {
 post_flash() {
 	force_terminate_programs
 
-	# This is a small workaround to avoid power-cycling the board
-	# when running this script; it means that someone else took care of
-	# this before calling the script
-	if [ "$1" != "dont_power_cycle_on_start" ] ; then
-		echo_green "0. Power cycling the board"
-		powercycle_board
-	fi
+	echo_green "0. Enabling USB data port"
+	enable_usb_data_port
 
 	echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
 	wait_for_board || {

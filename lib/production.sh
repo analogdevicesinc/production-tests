@@ -49,6 +49,7 @@ handle_error_state() {
 	FAILED=1
 	show_leds
 	console_ascii_failed
+	disable_all_usb_ports
 	for svc in networking dhcpcd ; do
 		[ -f /etc/init.d/$svc ] || continue
 		/etc/init.d/$svc restart
@@ -242,7 +243,7 @@ production() {
 			continue
 		}
 
-		post_flash "dont_power_cycle_on_start" || {
+		post_flash || {
 			echo_red "Post-flash step failed..."
 			mv -f $LOGFILE "$LOGDIR/${serial}.log"
 			inc_fail_stats "$serial"
@@ -250,6 +251,7 @@ production() {
 			sleep 1
 			continue
 		}
+		disable_all_usb_ports
 		mv -f $LOGFILE "$LOGDIR/${serial}.log"
 		inc_pass_stats "$serial"
 		PASSED=1
