@@ -102,11 +102,11 @@ enable_all_usb_ports() {
 	toggle_pins A pin5 pin6
 }
 
-enable_usb_port_1() {
+enable_usb_data_port() {
 	toggle_pins A pin5
 }
 
-enable_usb_port_2() {
+enable_usb_power_port() {
 	toggle_pins A pin6
 }
 

@@ -96,10 +96,10 @@ power_off_and_measure() {
 
 power_on_usb_1_and_measure() {
 	local retries="${1:-4}"
-	echo_green "   Measuring voltages with USB port 1 enabled"
+	echo_green "   Measuring voltages with USB port 1 enabled (Data cable)"
 	disable_all_usb_ports
 	power_cycle_sleep
-	enable_usb_port_1
+	enable_usb_data_port
 	power_cycle_sleep
 	retry "$retries" check_voltage_ranges "BOARD_ON" || return 1
 	echo_green "   .Done - values are within range"
@@ -107,10 +107,10 @@ power_on_usb_1_and_measure() {
 
 power_on_usb_2_and_measure() {
 	local retries="${1:-4}"
-	echo_green "   Measuring voltages with USB port 2 enabled"
+	echo_green "   Measuring voltages with USB port 2 enabled (Power cable)"
 	disable_all_usb_ports
 	power_cycle_sleep
-	enable_usb_port_2
+	enable_usb_power_port
 	power_cycle_sleep
 	retry "$retries" check_voltage_ranges "BOARD_ON" || return 1
 	echo_green "   .Done - values are within range"
