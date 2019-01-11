@@ -46,8 +46,10 @@ show_start_state() {
 }
 
 handle_error_state() {
+	local serial="$1"
 	FAILED=1
 	show_leds
+	inc_fail_stats "$serial"
 	console_ascii_failed
 	disable_all_usb_ports
 	for svc in networking dhcpcd ; do
@@ -215,7 +217,6 @@ production() {
 
 		pre_flash "$TARGET" || {
 			echo_red "Pre-flash step failed..."
-			inc_fail_stats
 			handle_error_state
 			sleep 1
 			continue
@@ -223,7 +224,6 @@ production() {
 
 		retry 4 flash "$TARGET" || {
 			echo_red "Flash step failed..."
-			inc_fail_stats
 			handle_error_state
 			sleep 1
 			continue
@@ -237,7 +237,6 @@ production() {
 		done
 		[ -n "$serial" ] || {
 			echo_red "Could not get device serial number"
-			inc_fail_stats
 			handle_error_state
 			sleep 1
 			continue
@@ -246,8 +245,7 @@ production() {
 		post_flash || {
 			echo_red "Post-flash step failed..."
 			mv -f $LOGFILE "$LOGDIR/${serial}.log"
-			inc_fail_stats "$serial"
-			handle_error_state
+			handle_error_state "$serial"
 			sleep 1
 			continue
 		}
