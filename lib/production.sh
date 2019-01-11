@@ -229,19 +229,6 @@ production() {
 			continue
 		}
 
-		local serial
-		for _ in $(seq 1 20) ; do
-			serial=$(get_hwserial)
-			[ -z "$serial" ] || break
-			sleep 1
-		done
-		[ -n "$serial" ] || {
-			echo_red "Could not get device serial number"
-			handle_error_state
-			sleep 1
-			continue
-		}
-
 		post_flash || {
 			echo_red "Post-flash step failed..."
 			mv -f $LOGFILE "$LOGDIR/${serial}.log"
