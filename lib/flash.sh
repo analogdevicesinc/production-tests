@@ -90,6 +90,7 @@ flash() {
 	if is_ft4232h ; then
 		echo_green "3. Done ; cutting power to the board"
 		disable_all_usb_ports
+		power_cycle_sleep
 	else
 		echo_green "3. Done ; you can now powercycle the board"
 	fi
