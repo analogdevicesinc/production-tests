@@ -52,7 +52,7 @@ setup_apt_install_prereqs() {
 		libfftw3-dev expect usbutils dfu-util screen \
 		wget unzip curl \
 		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal \
-		openssh-server
+		openssh-server gpg
 	/etc/init.d/htpdate restart
 	EOF
 }
@@ -456,6 +456,16 @@ setup_usbreset_tool() {
 	__common_build_tool
 }
 
+setup_zerotier_vpn() {
+	if ! curl -s 'https://pgp.mit.edu/pks/lookup?op=get&search=0x1657198823E52A61' | gpg --import ; then
+		return 1
+	fi
+	local z="$(curl -s https://install.zerotier.com/ | gpg)"
+	[ -z "$z" ] || return 1
+	echo "$z" | sudo bash
+	sudo zerotier-cli join d3ecf5726dcec114
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -481,6 +491,7 @@ STEPS="disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs openocd ft4232h_tool"
 STEPS="$STEPS scopy plutosdr_scripts sync_udev_rules_file write_autostart_config"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking usbreset_tool release_files"
+STEPS="$STEPS zerotier_vpn"
 
 RAN_ONCE=0
 for step in $STEPS ; do
