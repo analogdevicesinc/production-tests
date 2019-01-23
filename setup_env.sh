@@ -457,12 +457,7 @@ setup_usbreset_tool() {
 }
 
 setup_zerotier_vpn() {
-	if ! curl -s 'https://pgp.mit.edu/pks/lookup?op=get&search=0x1657198823E52A61' | gpg --import ; then
-		return 1
-	fi
-	local z="$(curl -s https://install.zerotier.com/ | gpg)"
-	[ -n "$z" ] || return 1
-	echo "$z" | sudo bash
+	curl -s https://install.zerotier.com/ | sudo bash
 	sudo zerotier-cli join d3ecf5726dcec114
 }
 
