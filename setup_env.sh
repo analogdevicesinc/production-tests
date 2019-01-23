@@ -461,7 +461,7 @@ setup_zerotier_vpn() {
 		return 1
 	fi
 	local z="$(curl -s https://install.zerotier.com/ | gpg)"
-	[ -z "$z" ] || return 1
+	[ -n "$z" ] || return 1
 	echo "$z" | sudo bash
 	sudo zerotier-cli join d3ecf5726dcec114
 }
