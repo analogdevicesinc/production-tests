@@ -187,6 +187,8 @@ production() {
 		wait_for_firmware_files "$TARGET"
 		echo_green "${target_upper} firmware version: ${FW_VERSION}"
 
+		sync
+
 		wait_for_eeprom_vars
 
 		show_ready_state || {
