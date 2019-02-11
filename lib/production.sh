@@ -168,6 +168,7 @@ production() {
 	# Remove temp log file start (if it exists)
 	rm -f "$LOGFILE"
 
+	mkdir -p $LOGDIR
 	exec &> >(tee -a "$LOGFILE")
 
 	echo_green "Initializing FTDI pins to default state"
