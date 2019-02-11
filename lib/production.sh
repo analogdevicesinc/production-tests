@@ -56,6 +56,12 @@ handle_error_state() {
 		[ -f /etc/init.d/$svc ] || continue
 		/etc/init.d/$svc restart
 	done
+	if [ -n "$serial" ] ; then
+		cat "$LOGFILE" > "$LOGDIR/failed_${serial}_${RUN_TIMESTAMP}.log"
+	else
+		cat "$LOGFILE" > "${ERRORSFILE}_${RUN_TIMESTAMP}"
+	fi
+	cat /dev/null > "$LOGFILE"
 }
 
 need_to_read_eeprom() {
@@ -75,7 +81,7 @@ inc_pass_stats() {
 	let PASSED_CNT='PASSED_CNT + 1'
 	echo "PASSED_CNT=$PASSED_CNT" > $STATSFILE
 	echo "FAILED_CNT=$FAILED_CNT" >> $STATSFILE
-	[ -z "$serial" ] || echo "PASSED $serial" >> $RESULTSFILE
+	echo "PASSED $serial" >> $RESULTSFILE
 	console_ascii_passed
 }
 
@@ -162,6 +168,8 @@ production() {
 	# Remove temp log file start (if it exists)
 	rm -f "$LOGFILE"
 
+	exec &> >(tee -a "$LOGFILE")
+
 	echo_green "Initializing FTDI pins to default state"
 	init_pins
 
@@ -173,14 +181,6 @@ production() {
 		fi
 
 		mkdir -p $LOGDIR
-
-		if [ -f "$LOGFILE" ] ; then
-			cat "$LOGFILE" >> "$ERRORSFILE"
-			rm -f "$LOGFILE"
-		fi
-
-		exec &> >(tee -a "$LOGFILE")
-		sleep 0.1 # wait for redirection to happen
 
 		toggle_pins A
 
@@ -206,6 +206,7 @@ production() {
 			sleep 1
 			continue
 		}
+		RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
 
 		! check_and_reboot "$LOGFILE" || break
 
@@ -233,14 +234,14 @@ production() {
 
 		post_flash || {
 			echo_red "Post-flash step failed..."
-			mv -f $LOGFILE "$LOGDIR/${serial}.log"
 			handle_error_state "$serial"
 			sleep 1
 			continue
 		}
 		disable_all_usb_ports
-		mv -f $LOGFILE "$LOGDIR/${serial}.log"
 		inc_pass_stats "$serial"
+		cat "$LOGFILE" > "$LOGDIR/passed_${serial}_${RUN_TIMESTAMP}.log"
+		cat /dev/null > "$LOGFILE"
 		PASSED=1
 	done
 }
