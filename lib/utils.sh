@@ -486,8 +486,26 @@ scopy() {
 	LD_LIBRARY_PATH=$SCRIPT_DIR/work/scopy/deps/staging/lib $SCRIPT_DIR/work/scopy/build/scopy $@
 }
 
-get_hwserial() {
+__get_hwserial() {
 	LD_LIBRARY_PATH=$SCRIPT_DIR/work/libiio/build iio_attr -C $IIO_URI_MODE hw_serial 2> /dev/null | cut -d' ' -f2
+}
+
+get_hwserial() {
+	local timeout="$1"
+	if [ -z "$timeout" ] ; then
+		__get_hwserial
+	else
+		local serial
+		for _ in $(seq 1 $timeout) ; do
+			serial=$(__get_hwserial)
+			[ -z "$serial" ] || {
+				echo "$serial"
+				break
+			}
+			sleep 1
+		done
+	fi
+	return 1
 }
 
 __get_phys_netdevs() {

@@ -233,15 +233,16 @@ production() {
 			continue
 		}
 
+		# post_flash must export the `BOARD_SERIAL` variable
 		post_flash || {
 			echo_red "Post-flash step failed..."
-			handle_error_state "$serial"
+			handle_error_state "$BOARD_SERIAL"
 			sleep 1
 			continue
 		}
 		disable_all_usb_ports
-		inc_pass_stats "$serial"
-		cat "$LOGFILE" > "$LOGDIR/passed_${serial}_${RUN_TIMESTAMP}.log"
+		inc_pass_stats "$BOARD_SERIAL"
+		cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
 		cat /dev/null > "$LOGFILE"
 		PASSED=1
 	done

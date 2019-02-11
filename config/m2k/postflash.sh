@@ -75,6 +75,13 @@ post_flash() {
 		return 1
 	}
 
+	BOARD_SERIAL=$(get_hwserial 20)
+	[ -n "$BOARD_SERIAL" ] || {
+		echo_red "Could not get device serial number"
+		return 1
+	}
+	export BOARD_SERIAL
+
 	echo_green "2. Testing Linux"
 	retry 4 expect $SCRIPT_DIR/config/m2k/linux.exp "$TTYUSB" || {
 		echo

@@ -115,6 +115,13 @@ post_flash() {
 		return 1
 	}
 
+	BOARD_SERIAL=$(get_hwserial 20)
+	[ -n "$BOARD_SERIAL" ] || {
+		echo_red "Could not get device serial number"
+		return 1
+	}
+	export BOARD_SERIAL
+
 	echo_green "2. XO Calibration"
 	retry 4 xo_calibration || {
 		echo_red "  XO Calibration failed"
