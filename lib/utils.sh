@@ -1,6 +1,16 @@
 #!/bin/bash
 
 #----------------------------------#
+# Global definitions section       #
+#----------------------------------#
+
+LD_LIBRARY_PATH="$SCRIPT_DIR/work/scopy/deps/staging/lib:$SCRIPT_DIR/work/libiio/build"
+export LD_LIBRARY_PATH
+
+PATH="$SCRIPT_DIR/work/scopy/build/scopy:$SCRIPT_DIR/work/:$PATH"
+export PATH
+
+#----------------------------------#
 # Functions section                #
 #----------------------------------#
 
@@ -61,7 +71,7 @@ pin_ctrl() {
 	local lockfile="/tmp/pin_ctrl_lock"
 	(
 		flock -e 200
-		$SCRIPT_DIR/work/ft4232h_pin_ctrl $@
+		ft4232h_pin_ctrl $@
 	) 200>$lockfile
 }
 
@@ -112,7 +122,7 @@ enable_usb_power_port() {
 
 self_test() {
 	local samples="${1:-1}"
-	$SCRIPT_DIR/work/ft4232h_pin_ctrl --mode spi-adc --channel B \
+	ft4232h_pin_ctrl --mode spi-adc --channel B \
 		--serial "$FT4232H_SERIAL" --opts "self-test,no-samples=$samples"
 }
 
@@ -482,12 +492,8 @@ ref_measure_ctl() {
 	fi
 }
 
-scopy() {
-	LD_LIBRARY_PATH=$SCRIPT_DIR/work/scopy/deps/staging/lib $SCRIPT_DIR/work/scopy/build/scopy $@
-}
-
 __get_hwserial() {
-	LD_LIBRARY_PATH=$SCRIPT_DIR/work/libiio/build iio_attr -C $IIO_URI_MODE hw_serial 2> /dev/null | cut -d' ' -f2
+	iio_attr -C $IIO_URI_MODE hw_serial 2> /dev/null | cut -d' ' -f2
 }
 
 get_hwserial() {

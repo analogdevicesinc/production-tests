@@ -461,6 +461,17 @@ setup_zerotier_vpn() {
 	sudo zerotier-cli join d3ecf5726dcec114
 }
 
+setup_bashrc_update() {
+	sed -i -e "/^# --- added by setup_env.sh/,/^# --- end setup_env.sh/d" "$HOME/.bashrc"
+
+	cat >> $HOME/.bashrc <<-EOF
+# --- added by setup_env.sh
+export SCRIPT_DIR="$SCRIPT_DIR"
+source "$SCRIPT_DIR/config.sh"
+# --- end setup_env.sh
+	EOF
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -482,7 +493,7 @@ board_is_supported "$BOARD" || {
 
 pushd $SCRIPT_DIR
 
-STEPS="disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
+STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs openocd ft4232h_tool"
 STEPS="$STEPS scopy plutosdr_scripts sync_udev_rules_file write_autostart_config"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking usbreset_tool release_files"
