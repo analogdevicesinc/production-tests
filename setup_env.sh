@@ -467,7 +467,7 @@ setup_bashrc_update() {
 	cat >> $HOME/.bashrc <<-EOF
 # --- added by setup_env.sh
 export SCRIPT_DIR="$SCRIPT_DIR"
-source "$SCRIPT_DIR/config.sh"
+source "$SCRIPT_DIR/vars.sh"
 # --- end setup_env.sh
 	EOF
 }
