@@ -9,7 +9,7 @@ JIG_NAME="$(jigname)"
 while true ; do
 
 	# take the first `autosave_logs` folder
-	dir=$(sudo find /media -type d -name autosave_logs | head -1)
+	dir=$(sudo find /media -type d -name SAVE_LOGS | head -1)
 	[ -z "$dir" ] || {
 		FILENAME="${dir}/${JIG_NAME}.$(date +%Y-%m-%d_%H-%M).tar.gz"
 		save_logfiles_to "$SCRIPT_DIR/log" "$FILENAME" &> /dev/null

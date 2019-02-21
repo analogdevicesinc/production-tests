@@ -5,10 +5,10 @@ source $SCRIPT_DIR/config.sh
 check_pos_range() {
 	local meas="$1"
 	[ -n "$meas" ] || return 1
-	if value_in_range "$meas" "0.085" "0.115" ; then
+	if value_in_range "$meas" "0.050" "0.150" ; then
 		return 0
 	fi
-	if value_in_range "$meas" "4.4" "4.6" ; then
+	if value_in_range "$meas" "4.3" "4.7" ; then
 		return 0
 	fi
 	return 1
@@ -17,10 +17,10 @@ check_pos_range() {
 check_neg_range() {
 	local meas="$1"
 	[ -n "$meas" ] || return 1
-	if value_in_range "$meas" "-0.115" "0.085" ; then
+	if value_in_range "$meas" "-0.150" "-0.050" ; then
 		return 0
 	fi
-	if value_in_range "$meas" "-4.6" "-4.4" ; then
+	if value_in_range "$meas" "-4.7" "-4.3" ; then
 		return 0
 	fi
 	return 1
