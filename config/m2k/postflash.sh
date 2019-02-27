@@ -86,7 +86,7 @@ post_flash() {
 	}
 
 	echo_green "3.1. Ejecting M2K to apply calibration parameters..."
-	umount "$TTYUSB" || {
+	umount "/media/jig/M2k" || {
 		terminate_any_lingering_stuff
 		echo_red "Scopy tests have failed..."
 		return 1

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Terminal=true
+Name=Print PlutoSDR Label
+Icon=utilities-terminal
+Exec=sh -c "cd \$HOME/plutosdr-m2k-production-test-V2/print; python pgui-pluto.py"
+Categories=Application;
