@@ -85,6 +85,20 @@ post_flash() {
 		return 1
 	}
 
+	echo_green "3.1. Ejecting M2K to apply calibration parameters..."
+	umount "$TTYUSB" || {
+		terminate_any_lingering_stuff
+		echo_red "Scopy tests have failed..."
+		return 1
+	}
+
+	echo_green "3.2. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
+	wait_for_board || {
+		terminate_any_lingering_stuff
+		echo_red "Board did not come online"
+		return 1
+	}
+
 	echo_green "4. Testing Scopy -- Part 2"
 	scopy --script $SCRIPT_DIR/config/m2k/scopy2.js || {
 		terminate_any_lingering_stuff

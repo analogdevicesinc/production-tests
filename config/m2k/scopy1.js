@@ -246,7 +246,7 @@ function _calibrate_pos_power_supply()
 	
 	while (next_step > 0) {
 		// call some shell script which returns the ADC value
-		value = extern.start("./m2k_power_calib_meas.sh V5B pos").trim();
+		value = extern.start("./m2k_power_calib_meas.sh V5B pos false").trim();
 		log("pos " + step + " result: " + value);
 		if (value == '' || value == "failed" || isNaN(value))
 			return false;
@@ -276,7 +276,7 @@ function _calibrate_neg_power_supply()
 	
 	while (next_step > 0) {
 		// call some shell script which returns the ADC value
-		value = extern.start("./m2k_power_calib_meas.sh V6B neg").trim();
+		value = extern.start("./m2k_power_calib_meas.sh V6B neg false").trim();
 		log("neg " + step + " result: " + value);
 		if (value == '' || value == "failed" || isNaN(value))
 			return false;
@@ -513,7 +513,7 @@ function main()
 	if (SHOW_START_END_TIME)
 		log("Script started on: " + get_now_s() + '\n');
 
-	for (i = 5; i <= 8; i++) {
+	for (i = 5; i <= 7; i++) {
 		if (!runTest(i)) {
 			return Error();
 		}
