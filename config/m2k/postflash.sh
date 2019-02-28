@@ -38,21 +38,6 @@ terminate_any_lingering_stuff() {
 	terminate_any_lingering wait_pins
 }
 
-wait_for_board() {
-	local online="${1:-online}"
-	local serial
-	for iter in $(seq $BOARD_ONLINE_TIMEOUT) ; do
-		serial=$(iio_attr -C $IIO_URI_MODE hw_serial 2> /dev/null | cut -d ' ' -f2)
-		if [ "$online" == "offline" ] ; then
-			[ -n "$serial" ] || return 0
-		else
-			[ -z "$serial" ] || return 0
-		fi
-		sleep 1
-	done
-	return 1
-}
-
 reboot_via_ssh() {
 	sshpass -panalog ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oCheckHostIP=no root@192.168.2.1 /sbin/reboot
 }
@@ -73,7 +58,7 @@ post_flash() {
 	enable_all_usb_ports
 
 	echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
-	wait_for_board || {
+	wait_for_board_online || {
 		terminate_any_lingering_stuff
 		echo_red "Board did not come online"
 		return 1

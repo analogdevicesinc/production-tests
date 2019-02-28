@@ -10,16 +10,6 @@ source $SCRIPT_DIR/config.sh
 # Functions section                #
 #----------------------------------#
 
-wait_for_board() {
-	local serial
-	for iter in $(seq $BOARD_ONLINE_TIMEOUT) ; do
-		serial=$(iio_attr -C $IIO_URI_MODE hw_serial 2> /dev/null | cut -d ' ' -f2)
-		[ -z "$serial" ] || return 0
-		sleep 1
-	done
-	return 1
-}
-
 powercycle_board() {
 	force_terminate_programs
 	disable_all_usb_ports
@@ -30,7 +20,7 @@ powercycle_board() {
 
 powercycle_board_wait() {
 	powercycle_board
-	wait_for_board
+	wait_for_board_online
 }
 
 xo_calibration() {
