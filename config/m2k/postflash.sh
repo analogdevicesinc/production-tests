@@ -65,8 +65,12 @@ post_flash() {
 	force_terminate_programs
 	terminate_any_lingering_stuff
 
-        echo_green "0. Enabling USB data port"
-        enable_usb_data_port
+	# FIXME: see why this doesn't work
+	#echo_green "0. Enabling USB data port"
+	#enable_usb_data_port
+
+	echo_green "0. Enabling all USB ports"
+	enable_all_usb_ports
 
 	echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
 	wait_for_board || {
