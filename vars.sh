@@ -7,7 +7,7 @@
 COMMON_RELEASE_FILES="boot.dfu u-boot.elf uboot-env.dfu ps7_init.tcl"
 LD_LIBRARY_PATH="$SCRIPT_DIR/work/scopy/deps/staging/lib:$SCRIPT_DIR/work/libiio/build"
 PATH="$SCRIPT_DIR/work/openocd-0.10.0/installed/bin:$SCRIPT_DIR/work/libiio/build/tests:$SCRIPT_DIR/work/plutosdr_scripts:$PATH"
-PATH="$SCRIPT_DIR/work/scopy/build/scopy:$SCRIPT_DIR/work/:$PATH"
+PATH="$SCRIPT_DIR/work/scopy/build:$SCRIPT_DIR/work/:$PATH"
 
 export LD_LIBRARY_PATH
 export PATH
