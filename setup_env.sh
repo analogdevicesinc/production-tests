@@ -201,6 +201,8 @@ setup_scopy() {
 		return 0
 	fi
 
+	[ ! -d work/scopy ] || return 0
+
 	__download_github_common scopy
 
 	pushd work/scopy
