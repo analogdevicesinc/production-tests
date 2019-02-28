@@ -10,13 +10,6 @@ source $SCRIPT_DIR/config.sh
 # Functions section                #
 #----------------------------------#
 
-powercycle_board() {
-	disable_all_usb_ports
-	power_cycle_sleep
-	enable_all_usb_ports
-	power_cycle_sleep
-}
-
 wait_for_board() {
 	local serial
 	for iter in $(seq $BOARD_ONLINE_TIMEOUT) ; do
