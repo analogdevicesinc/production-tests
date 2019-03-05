@@ -25,7 +25,7 @@ SERIAL=$(grep -A 1 "<td>Serial</td>" ${disk}/info.html | \
 SERIAL1=$(echo $SERIAL | head -c 13)
 SERIAL2=$(echo $SERIAL | sed -e s/^${SERIAL1}//)
 
-TMAC=$(grep -A 1 "<td>MAC Address (PLUTO)</td>" ${disk}/info.html | \
+TMAC=$(grep -A 1 "<td>MAC Address (PlutoSDR)</td>" ${disk}/info.html | \
 tail -1 | \
 sed -e 's/^.*<td>//' -e 's/<\/td>//' | \
 tr [a-z] [A-Z})
