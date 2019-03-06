@@ -42,6 +42,22 @@ reboot_via_ssh() {
 	sshpass -panalog ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oCheckHostIP=no root@192.168.2.1 /sbin/reboot
 }
 
+remove_mount_folder() {
+	rm -rf /media/jig/M2k
+}
+
+eject_m2k() {
+	umount "/media/jig/M2k" || {
+		remove_mount_folder
+	}
+
+	reboot_via_ssh || {
+		terminate_any_lingering_stuff
+		echo_red "Scopy tests have failed..."
+		return 1
+	}
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -86,7 +102,7 @@ post_flash() {
 	}
 
 	echo_green "3.1. Ejecting M2K to apply calibration parameters..."
-	umount "/media/jig/M2k" || {
+	eject_m2k || {
 		terminate_any_lingering_stuff
 		echo_red "Scopy tests have failed..."
 		return 1
