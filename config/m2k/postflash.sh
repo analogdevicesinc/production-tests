@@ -93,6 +93,12 @@ post_flash() {
 	}
 
 	echo_green "3.2. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
+	wait_for_board_offline || {
+		terminate_any_lingering_stuff
+		echo_red "Board is still online"
+		return 1
+	}
+
 	wait_for_board_online || {
 		terminate_any_lingering_stuff
 		echo_red "Board did not come online"
