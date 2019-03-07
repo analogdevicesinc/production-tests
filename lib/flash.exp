@@ -5,9 +5,9 @@ set releaseDir [lindex $argv 0]
 set firmwareDfuFile [lindex $argv 1]
 
 proc wait_for_dfu_mode {} {
-	set timeout 1
-	for {set i 0} {$i < 10} {incr i} {
-		send "sudo dfu-util --list\r"
+	set timeout 3
+	for {set i 0} {$i < 30} {incr i} {
+		send "sleep 1 ; sudo dfu-util --list\r"
 		expect {
 		"Found DFU:" {
 			return true
