@@ -93,7 +93,7 @@ post_flash() {
 	enable_usb_data_port
 
 	echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
-	wait_for_board || {
+	wait_for_board_online || {
 		echo_red "Board did not come online"
 		return 1
 	}
