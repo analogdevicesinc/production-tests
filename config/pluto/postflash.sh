@@ -105,6 +105,11 @@ post_flash() {
 	}
 	export BOARD_SERIAL
 
+	if [ -n "$1" ] ; then
+		$1
+		return
+	fi
+
 	echo_green "2. XO Calibration"
 	retry 4 xo_calibration || {
 		echo_red "  XO Calibration failed"
