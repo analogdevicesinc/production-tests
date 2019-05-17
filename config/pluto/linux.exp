@@ -78,6 +78,8 @@ send_wait_for_prompt $cmd
 
 send_wait_for_prompt "fw_setenv -c /var/fw_env.conf -s /var/fw.scr\r"
 
+send_wait_for_prompt "sync\r"
+
 close
 
 exit 0

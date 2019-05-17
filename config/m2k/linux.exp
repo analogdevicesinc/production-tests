@@ -162,6 +162,19 @@ while 1 {
     }
 }
 
+send "sync\r"
+while 1 {
+	expect {
+	-re $multiPrompt {
+		break
+	}
+        timeout {
+	    send_error "Failed to get Linux prompt after sync\n"
+            exit 1
+        }
+    }
+}
+
 set timeout 20
 
 send "device_reboot break\r"
