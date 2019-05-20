@@ -81,7 +81,7 @@ check_env() {
 
 	echo_green "5. Rebooting & checking env-vars are saved"
 
-	#powercycle_board_wait
+	powercycle_board_wait
 
 	run_ssh_cmd 'echo /dev/mtd0 0xff000 0x1000 0x1000 > /tmp/fw_env.conf'
 
@@ -109,13 +109,13 @@ post_flash() {
 	force_terminate_programs
 
 	echo_green "0. Enabling USB data port"
-	#enable_usb_data_port
+	enable_usb_data_port
 
-	#echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
-	#wait_for_board_online || {
-#		echo_red "Board did not come online"
-#		return 1
-#	}
+	echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
+	wait_for_board_online || {
+		echo_red "Board did not come online"
+		return 1
+	}
 
 	BOARD_SERIAL=$(get_hwserial 20)
 	[ -n "$BOARD_SERIAL" ] || {
