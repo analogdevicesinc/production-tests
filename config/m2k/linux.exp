@@ -1,5 +1,7 @@
 #!/usr/bin/expect
 
+source [file dirname [info script]]/../../lib/lib.exp
+
 set ttyUSB [lindex $argv 0]
 
 set timeout 50
@@ -15,18 +17,8 @@ proc send_screen_quit_cmd {} {
 spawn bash
 
 send "iio_info -s\r"
-while 1 {
-    expect {
-        "0456:b672" {
-            break
-        }
-        timeout {
-            send_error "Failed to find IIO USB device\n"
-            exit 1
-        }
-    }
-}
 
+wait_for_text "0456:b672"
 
 ########## Done Check Host Side ################
 
@@ -36,144 +28,43 @@ set multiPrompt {[#$] }
 
 set timeout 10
 
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after ssh\n"
-            exit 1
-        }
-    }
-}
+wait_for_prompt "ssh"
 
 ############### Check IIO device probing ################
 
 send "grep '' /sys/bus/iio/devices/iio\:device*/name | wc -l\r"
-# Expect 5
+# Expect 13
 
-while 1 {
-	expect {
+expect {
 	-re "13.*$multiPrompt" {
-		break
 	}
         timeout {
 	    send_error "Failed to find 13 IIO devices\n"
             exit 1
         }
-    }
 }
 
 ############### Setup the extra environment ################
 
-send "echo /dev/mtd0 0xff000 0x1000 0x1000 > /var/fw_env.conf\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "echo /dev/mtd0 0xff000 0x1000 0x1000 > /var/fw_env.conf\r"
 
 #### Initially the extra env has a bad CRC - make sure we remove the defaults
 
-send "echo bootcmd > /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "echo bootcmd > /var/fw.scr\r"
 
-send "echo baudrate >> /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "echo baudrate >> /var/fw.scr\r"
 
-send "echo bootdelay >> /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "echo bootdelay >> /var/fw.scr\r"
 
-send "cat /etc/serial| xargs echo serial >> /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "cat /etc/serial| xargs echo serial >> /var/fw.scr\r"
 
-send "cat /etc/serial | xargs echo M2k_by_Analog_Devices_Inc! | sha1sum | cut -f 0 -d ' ' > pkey; cat pkey | xargs echo productkey >> /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "cat /etc/serial | xargs echo M2k_by_Analog_Devices_Inc! | sha1sum | cut -f 0 -d ' ' > pkey; cat pkey | xargs echo productkey >> /var/fw.scr\r"
 
 ############### Save environment ################
 
-send "fw_setenv -c /var/fw_env.conf -s /var/fw.scr\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after fw_env.conf\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "fw_setenv -c /var/fw_env.conf -s /var/fw.scr\r"
 
-send "sync\r"
-while 1 {
-	expect {
-	-re $multiPrompt {
-		break
-	}
-        timeout {
-	    send_error "Failed to get Linux prompt after sync\n"
-            exit 1
-        }
-    }
-}
+send_wait_for_prompt "sync\r"
 
 set timeout 20
 
@@ -245,4 +136,3 @@ send_screen_quit_cmd
 close
 
 exit 0
-
