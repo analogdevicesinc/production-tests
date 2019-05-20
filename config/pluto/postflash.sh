@@ -15,7 +15,13 @@ xo_calibration() {
 	./cal_ad9361 $IIO_URI_MODE -s 1048576 -b 1048576 -e 2000000000 || return 1
 
 	# Check that we can read the XO correction attr
-	iio_attr -q $IIO_URI_MODE -d ad9361-phy xo_correction &> /dev/null
+	iio_attr -q $IIO_URI_MODE -d ad9361-phy xo_correction || return 1
+	xo=$(iio_attr -q $IIO_URI_MODE -d ad9361-phy xo_correction)
+	[ -n "$xo" ] || {
+		echo_red "Got empty XO value"
+		return 1
+	}
+	export JIG_XO="$xo"
 }
 
 tx_margin() {
@@ -69,6 +75,32 @@ tx_margin() {
 	fi
 }
 
+check_env() {
+	local pkey="$(productkey_gen "$BOARD_SERIAL" "PlutoSDR_by_Analog_Devices_Inc!")"
+	local vars="serial=$BOARD_SERIAL ad936x_ext_refclk=<$JIG_XO> productkey=$pkey"
+
+	echo_green "5. Rebooting & checking env-vars are saved"
+
+	#powercycle_board_wait
+
+	run_ssh_cmd 'echo /dev/mtd0 0xff000 0x1000 0x1000 > /tmp/fw_env.conf'
+
+	for var in $vars ; do
+		local key=$(echo $var | cut -d'=' -f1)
+		local var1=$(run_ssh_cmd "/usr/sbin/fw_printenv -c /tmp/fw_env.conf $key 2>/dev/null")
+		if [ "$var" != "$var1" ] ; then
+			echo
+			echo_red "   Env-vars not saved correctly"
+			echo_red "   Got '$var1'"
+			echo_red "   Exp '$var'"
+			return 1
+		fi
+	done
+	echo_green "Env-vars saved correctly"
+
+	return 0
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -77,13 +109,13 @@ post_flash() {
 	force_terminate_programs
 
 	echo_green "0. Enabling USB data port"
-	enable_usb_data_port
+	#enable_usb_data_port
 
-	echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
-	wait_for_board_online || {
-		echo_red "Board did not come online"
-		return 1
-	}
+	#echo_green "1. Waiting for board to come online (timeout $BOARD_ONLINE_TIMEOUT seconds)"
+	#wait_for_board_online || {
+#		echo_red "Board did not come online"
+#		return 1
+#	}
 
 	BOARD_SERIAL=$(get_hwserial 20)
 	[ -n "$BOARD_SERIAL" ] || {
@@ -116,7 +148,9 @@ post_flash() {
 		return 1
 	}
 
-	echo_green "5. Locking flash"
+	check_env || return 1
+
+	echo_green "6. Locking flash"
 	retry_and_run_on_fail 4 powercycle_board_wait \
 		expect $SCRIPT_DIR/lib/lockflash.exp "$TTYUSB" "Pluto>" "pluto login:" || {
 		echo

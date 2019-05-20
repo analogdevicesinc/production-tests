@@ -639,3 +639,15 @@ powercycle_board_wait() {
 	powercycle_board
 	wait_for_board_online
 }
+
+productkey_gen() {
+	echo "$1" | xargs echo "$2" | sha1sum | cut -f1 -d ' '
+}
+
+run_ssh_cmd() {
+	sshpass -panalog ssh \
+		-oStrictHostKeyChecking=no \
+		-oUserKnownHostsFile=/dev/null \
+		-oCheckHostIP=no root@192.168.2.1 \
+		"$@"
+}
