@@ -94,6 +94,14 @@ post_flash() {
 		return 1
 	}
 
+	echo_green "2a. Locking flash"
+	retry_and_run_on_fail 4 powercycle_board_wait \
+		expect $SCRIPT_DIR/lib/lockflash.exp "$TTYUSB" "M2k>" "m2k login:" || {
+		echo
+		echo_red "   Locking flash failed"
+		return 1
+	}
+
 	echo_green "3. Testing Scopy -- Part 1"
 	scopy --nogui --script $SCRIPT_DIR/config/m2k/scopy1.js || {
 		terminate_any_lingering_stuff

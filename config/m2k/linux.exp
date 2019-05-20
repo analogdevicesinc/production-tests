@@ -6,12 +6,6 @@ set ttyUSB [lindex $argv 0]
 
 set timeout 50
 
-proc send_screen_quit_cmd {} {
-    # Send Ctrl-A to screen
-    send "\x01"
-    send ":quit\r"
-}
-
 ############### Check Host Side ################
 
 spawn bash
@@ -66,73 +60,6 @@ send_wait_for_prompt "fw_setenv -c /var/fw_env.conf -s /var/fw.scr\r"
 
 send_wait_for_prompt "sync\r"
 
-set timeout 20
-
-send "device_reboot break\r"
-sleep 1
-close
-
-if [ catch "spawn screen /dev/$ttyUSB 115200\r" reason ] {
-        send_error "failed to spawn screen : $reason\n"
-        exit 1
-}
-
-while 1 {
-    expect {
-        "M2k> " {
-            break
-        }
-        timeout {
-	    send_error "Failed to see u-boot prompt\n"
-            exit 1
-        }
-    }
-}
-
-### Protect SF Flash now
-
-send "sf probe; sf protect lock 0 0x100000\r"
-
-while 1 {
-    expect {
-        "SF: Locked" {
-            break
-        }
-        timeout {
-	    send_error "Failed to LOCK flash\n"
-            exit 1
-        }
-    }
-}
-
-while 1 {
-    expect {
-        "M2k>" {
-            break
-        }
-        timeout {
-	    send_error "Failed to see u-boot prompt\n"
-            exit 1
-        }
-    }
-}
-
-send "reset\r"
-sleep 0.5
-
-while 1 {
-    expect {
-        "m2k login:" {
-                break
-        }
-        timeout {
-                send_error "timeout waiting for m2k login\n"
-                exit 1
-        }
-    }
-}
-
-send_screen_quit_cmd
 close
 
 exit 0

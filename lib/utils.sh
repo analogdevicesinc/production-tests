@@ -626,3 +626,16 @@ wait_for_board_offline() {
 	done
 	return 1
 }
+
+powercycle_board() {
+	force_terminate_programs
+	disable_all_usb_ports
+	power_cycle_sleep
+	enable_all_usb_ports
+	power_cycle_sleep
+}
+
+powercycle_board_wait() {
+	powercycle_board
+	wait_for_board_online
+}
