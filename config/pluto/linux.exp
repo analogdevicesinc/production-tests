@@ -66,7 +66,7 @@ send_wait_for_prompt "echo bootdelay >> /var/fw.scr\r"
 
 send_wait_for_prompt "cat /etc/serial| xargs echo serial >> /var/fw.scr\r"
 
-send_wait_for_prompt "cat /etc/serial | xargs echo PlutoSDR_by_Analog_Devices_Inc! | sha1sum | cut -f 0 -d ' ' > pkey; cat pkey | xargs echo productkey >> /var/fw.scr\r"
+send_wait_for_prompt "cat /etc/serial | xargs echo PlutoSDR_by_Analog_Devices_Inc! | sha1sum | cut -f 1 -d ' ' > pkey; cat pkey | xargs echo productkey >> /var/fw.scr\r"
 
 ############### Compute and set actual frequency here ################
 
