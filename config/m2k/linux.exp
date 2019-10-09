@@ -27,13 +27,13 @@ wait_for_prompt "ssh"
 ############### Check IIO device probing ################
 
 send "grep '' /sys/bus/iio/devices/iio\:device*/name | wc -l\r"
-# Expect 13
+# Expect 14
 
 expect {
-	-re "13.*$multiPrompt" {
+	-re "14.*$multiPrompt" {
 	}
         timeout {
-	    send_error "Failed to find 13 IIO devices\n"
+	    send_error "Failed to find 14 IIO devices\n"
             exit 1
         }
 }
