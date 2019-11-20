@@ -40,17 +40,17 @@ expect {
 
 ############### Check ADM1177 ################
 
-send "awk \"BEGIN{print \$(cat /sys/bus/iio/devices/iio\\:device0/in_voltage0_raw) * \$(cat /sys/bus/iio/devices/iio\\:device0/in_voltage0_scale)}\"\r"
+#send "awk \"BEGIN{print \$(cat /sys/bus/iio/devices/iio\\:device0/in_voltage0_raw) * \$(cat /sys/bus/iio/devices/iio\\:device0/in_voltage0_scale)}\"\r"
 
 # result is in mV, look for 4500 to 5200
 
-wait_for_value_in_range 4500 5200 "mV"
+#wait_for_value_in_range 4500 5200 "mV"
 
-send "awk \"BEGIN{print \$(cat /sys/bus/iio/devices/iio\\:device0/in_current0_raw) * \$(cat /sys/bus/iio/devices/iio\\:device0/in_current0_scale)}\"\r"
+#send "awk \"BEGIN{print \$(cat /sys/bus/iio/devices/iio\\:device0/in_current0_raw) * \$(cat /sys/bus/iio/devices/iio\\:device0/in_current0_scale)}\"\r"
 
 # result is in mA
 
-wait_for_value_in_range 350 550 "mA"
+#wait_for_value_in_range 350 550 "mA"
 
 ############### Setup the extra environment ################
 
