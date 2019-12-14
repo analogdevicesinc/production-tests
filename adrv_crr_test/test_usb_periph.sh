@@ -15,9 +15,10 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 TEST_NAME="TEST_USB_DRIVE_SPEED"
 
 TEST_ID="02"
-SHORT_DESC="Test device access and speed - Read 500MegaSamples and compute average read speed"
-CMD="iio_readdev -u \$USB_DEV -b 10000 -s 5000000 axi-adrv9009-rx-hpc | pv -a >/dev/null;"
-CMD+="YES_no 'Was read speed over 70MB/s ? ';"
+SHORT_DESC="Test device access and speed - Read 500Mega Samples and compute average read speed"
+CMD="iio_readdev -u \$USB_DEV -b 100000 -s 50000000 axi-adrv9009-rx-hpc | pv -a -f >/dev/null;"
+CMD+="YES_no 'Was read speed over 60MB/s ? ';"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
+
 
 : #if reached this point, ensure exit code 0
