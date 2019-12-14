@@ -37,4 +37,9 @@ SHORT_DESC="Test PCI Express. PCI Express Loopback should be inserted and powere
 CMD="sudo $SCRIPT_DIR/test_periph PCIE"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
+TEST_ID="07"
+SHORT_DESC="Test Display Port video interface. Connect Display port cable."
+CMD="YES_no 'Is image visible on monitor?'"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
+
  : #if reached this point, ensure exito code 0
