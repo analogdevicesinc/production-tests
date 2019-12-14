@@ -8,7 +8,7 @@ TEST_NAME="TEST_PREIPHERALS"
 
 TEST_ID="01"
 SHORT_DESC="Test AD9545 ETH_REFCLK1 out"
-CMD="sudo $SCRIPT_DIR/i2c &> /dev/null;"
+CMD="sudo $SCRIPT_DIR/i2c_ad9545 &> /dev/null;"
 CMD+="CLK_FREQ=\$(sudo $SCRIPT_DIR/test_clk CLK0 verbose);"
 CMD+="[[ \$CLK_FREQ -ge 311 ]] && [[ \$CLK_FREQ -le 315 ]]"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
