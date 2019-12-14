@@ -7,6 +7,3 @@ answer=$?
 proceed_if_ok $answer
 
 echo
-source $SCRIPT_DIR/test_rf.sh
-answer=$?
-proceed_if_ok $answer
