@@ -61,9 +61,8 @@ then
 		str=$2
 	fi
 	timed_log "$str"
-	exit 1
 fi
-if [ -n "$3" ]
+if [ -n "$3" ] && [ $1 -eq 0 ]
 then
 	timed_log "$3"
 fi
@@ -80,15 +79,20 @@ then
 	until [ "$answer" -eq 0 ]
 	do
 		YES_no "${RED}TEST FAILED${NC} - Do you want to repeat test?"
-		abort=$?
-		if [ $abort -eq 1 ]
+		if [ $? -eq 1 ]
 		then
-			break
+			YES_no "Do you want to close the test?"
+			if [ $? -eq 0 ]
+			then
+				exit 1
+			else
+				break
+			fi
 		fi
 		eval "$3"
 		answer=$?
 	done
-	
+
 fi
 
 proceed_if_ok $answer "${RED}FAIL${NC}" "${GREEN}OK${NC}"
