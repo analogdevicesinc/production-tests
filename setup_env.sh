@@ -37,7 +37,8 @@ setup_apt_install_prereqs() {
 		expect usbutils dfu-util screen libaio-dev libglib2.0-dev \
 		wget unzip curl cups cups-bsd intltool itstool libxml2-utils \
 		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal libiec16022-dev \
-		openssh-server gpg dnsmasq libcurl4-gnutls-dev libqrencode-dev pv
+		openssh-server gpg dnsmasq libcurl4-gnutls-dev libqrencode-dev pv \
+		python3-pytest python3-libiio python3-scapy python3-scipy
 	/etc/init.d/htpdate restart
 	EOF
 }
@@ -95,6 +96,22 @@ setup_libiio() {
 	make -j3
 	sudo make install
 	sudo ldconfig
+
+	popd
+	popd
+}
+
+setup_pyadi-iio() {
+	[ ! -d "work/pyadi-iio" ] || return 0
+
+	__download_github_common pyadi-iio
+	#Set python3 as default
+	sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
+	sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
+
+	pushd work
+	pushd pyadi-iio
+	git checkout som-testing-fmcomms8
 
 	popd
 	popd
@@ -337,7 +354,7 @@ export PATH=/usr/lib/:$PATH
 }
 
 setup_dhcp_config() {
-	
+
     sudo_required
 
     cat >> /etc/dhcpcd.conf <<-EOF
@@ -349,7 +366,7 @@ static ip_address=192.168.0.1/24
 static domain_search=
 # --- end setup_env.sh
 	EOF
-	
+
     sudo -s <<-EOF
 echo "# --- added by setup_env.sh
 #DHCP server active for eth0 interface
@@ -387,7 +404,7 @@ pushd $SCRIPT_DIR
 
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs"
-STEPS="$STEPS write_autostart_config libiio"
+STEPS="$STEPS write_autostart_config libiio pyadi-iio"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
 STEPS="$STEPS dhcp_config"
 
