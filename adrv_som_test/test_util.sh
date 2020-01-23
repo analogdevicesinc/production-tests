@@ -92,7 +92,6 @@ then
 		eval "$3"
 		answer=$?
 	done
-
 fi
 
 proceed_if_ok $answer "${RED}FAIL${NC}" "${GREEN}OK${NC}"
