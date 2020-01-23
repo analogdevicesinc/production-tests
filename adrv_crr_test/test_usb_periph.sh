@@ -20,5 +20,4 @@ CMD="iio_readdev -u \$USB_DEV -b 100000 -s 50000000 axi-adrv9009-rx-hpc | pv -a 
 CMD+="YES_no 'Was read speed over 60MB/s ? ';"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-
 : #if reached this point, ensure exit code 0
