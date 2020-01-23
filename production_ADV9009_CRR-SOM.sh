@@ -14,7 +14,7 @@ source $SCRIPT_DIR/lib/utils.sh
 
 while true; do
 	echo_blue "Please enter your choice: "
-	options=("Program Sequencer" "Program PLL" "ADRV Carrier Test" "ADRV SOM Test" "ADRV SOM RF test" "Power-Off Pi" "Power-Off ADRV")
+	options=("Program Sequencer" "Program PLL" "ADRV Carrier Test" "ADRV SOM Test" "ADRV SOM RF test" "ADRV FMCOMMS8 RF test" "Power-Off Pi" "Power-Off ADRV")
 	select opt in "${options[@]}"; do
     		case $REPLY in
     		1)
@@ -38,13 +38,19 @@ while true; do
 				break ;;
 			5)
 				wait_for_board_online
-				python3 -m pytest $SCRIPT_DIR/src/pyadi-iio/test/test_adrv9009_zu11eg.py -v
+				python3 -m pytest --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg.py -v
 				break ;;
 			6)
+				wait_for_board_online
+				echo_blue "Starting FMCOMMS8 Test"
+				python3 -m pytest --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg_fmcomms8.py -v
+				production "fmcomms8" "$opt"
+				break ;;
+			7)
 				enforce_root
 				poweroff
 				break 2 ;;
-			7)
+			8)
 				wait_for_board_online
 				ssh_cmd "sudo poweroff &>/dev/null"
 				break ;;
