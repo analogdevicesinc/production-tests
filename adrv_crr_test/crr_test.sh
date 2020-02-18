@@ -17,6 +17,11 @@ answer=$?
 proceed_if_ok $answer
 
 echo
+source $SCRIPT_DIR/test_hmc.sh
+answer=$?
+proceed_if_ok $answer
+
+echo
 source $SCRIPT_DIR/test_clk.sh
 answer=$?
 proceed_if_ok $answer
