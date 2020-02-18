@@ -30,7 +30,7 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 TEST_NAME="TEST_USB_HOST_MODE"
 
 TEST_ID="04"
-SHORT_DESC="USB port testing - please plug OTG cable with a connected USB3 flash device"
+SHORT_DESC="USB port testing - please replug OTG cable but rotated 180 degrees"
 CMD="wait_enter && lsusb -t | grep -q \"Class=Mass Storage, Driver=usb-storage, 5000M\";"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
