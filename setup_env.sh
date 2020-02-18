@@ -101,6 +101,18 @@ setup_libiio() {
 	popd
 }
 
+setup_adm1266() {
+	[ ! -d "src/adm1266" ] || return 0
+
+	pushd src
+	pushd adm1266
+	
+	make all
+
+	popd
+	popd
+}
+
 setup_pyadi-iio() {
 	[ ! -d "work/pyadi-iio" ] || return 0
 
@@ -404,7 +416,7 @@ pushd $SCRIPT_DIR
 
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs"
-STEPS="$STEPS write_autostart_config libiio pyadi-iio"
+STEPS="$STEPS write_autostart_config libiio pyadi-iio adm1266"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
 STEPS="$STEPS dhcp_config"
 
