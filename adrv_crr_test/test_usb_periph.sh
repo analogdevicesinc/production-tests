@@ -12,12 +12,24 @@ CMD="wait_enter && USB_DEV=\$(iio_info -s | grep \"0456:b671\" | cut -d '[' -f 2
 CMD+="[ ! -z \$USB_DEV ]"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
+TEST_ID="02"
+SHORT_DESC="USB type check - Detect USB class HighSpeed or SuperSpeed"
+CMD="lsusb -t | grep \"CDC Data\" | grep -q \"480M\" && echo \"HighSpeed\";"
+CMD+="lsusb -t | grep \"CDC Data\" | grep -q \"5000M\" && echo \"SuperSpeed\";"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
+
 TEST_NAME="TEST_USB_DRIVE_SPEED"
 
 TEST_ID="02"
-SHORT_DESC="Test device access and speed - Read 500Mega Samples and compute average read speed"
-CMD="iio_readdev -u \$USB_DEV -b 100000 -s 50000000 axi-adrv9009-rx-hpc | pv -a -f >/dev/null;"
-CMD+="YES_no 'Was read speed over 60MB/s ? ';"
+SHORT_DESC="Test device access and speed - Read 50Mega Samples and compute average read speed"
+CMD="iio_readdev -u \$USB_DEV -b 100000 -s 50000000 axi-adrv9009-rx-hpc | pv -af >/dev/null 2>/tmp/rate;"
+CMD+="RATE=\$(cat /tmp/rate | grep -oP '^[^0-9]*\K[0-9]+'); echo \"Read rate \$RATE MB/s\";"
+CMD+="[ \$RATE -gt 60 ]"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
+
+TEST_ID="04"
+SHORT_DESC="USB port testing - please replug cable but rotated 180 degrees"
+CMD="wait_enter && lsusb -t | grep \"CDC Data\" | grep -q \"5000M\" && echo \"SuperSpeed\";"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 : #if reached this point, ensure exit code 0
