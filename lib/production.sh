@@ -175,6 +175,7 @@ production() {
         case $mode in
                 "ADRV Carrier Test")
                         $SCRIPT_DIR/adrv_crr_test/test_usb_periph.sh &&
+                        $SCRIPT_DIR/adrv_crr_test/test_uart.sh &&
                         ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"
                         if [ $? -ne 0 ]; then
                                 handle_error_state
@@ -185,14 +186,13 @@ production() {
                         if [ $? -ne 0 ]; then
                                 handle_error_state
                         fi
-			;;
+                        ;;
                 "ADRV FMCOMMS8 RF test")
                         ssh_cmd "sudo /home/analog/adrv_fmcomms8_test/fmcomms8_test.sh"
                         if [ $? -ne 0 ]; then
                                 handle_error_state
                         fi
                         ;;
-		
                 *) echo "invalid option $mode" ;;
         esac
 
