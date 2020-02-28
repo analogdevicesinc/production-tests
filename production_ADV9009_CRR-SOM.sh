@@ -17,12 +17,12 @@ while true; do
 	options=("Program Sequencer" "Program PLL" "ADRV Carrier Test" "ADRV SOM Test" "ADRV SOM RF test" "ADRV FMCOMMS8 RF test" "Power-Off Pi" "Power-Off ADRV")
 	select opt in "${options[@]}"; do
     		case $REPLY in
-    		1)
+			1)
 				$SCRIPT_DIR/src/adm1266/production_flash
 				break ;;
 			2)
 				wait_for_board_online
-				ssh_cmd "sudo /home/analog/AD9542_eeprom_download/i2c/i2c"
+				ssh_cmd "sudo /home/analog/adrv_crr_test/i2c_ad9545"
 				ssh_cmd "sudo poweroff &>/dev/null"
 				echo "Board will power off. Wait for PS_DONE LED from carrier to turn off."
 				break ;;
