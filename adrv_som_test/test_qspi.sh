@@ -12,16 +12,18 @@ CMD="test -e /dev/mtd0"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="02"
-SHORT_DESC="Erase test on QSPI Flash - Erase 10 x 4Kibyte blocks"
-CMD="timeout 3 flash_erase /dev/mtd0 0 10"
+SHORT_DESC="Mount boot partition"
+CMD="mount /dev/mmcblk0p1 /boot"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="03"
-SHORT_DESC="Write test on QSPI Flash"
-CMD="dd if=/dev/urandom of=/tmp/foo.foo bs=4k count=10 &>/dev/null;"
-CMD+="[ -e /dev/mtd0 ] && dd if=/tmp/foo.foo of=/dev/mtd0 &>/dev/null;"
-CMD+="[ -e /dev/mtd0 ] && dd if=/dev/mtd0 of=/tmp/foo_rb.foo bs=4k count=10 &>/dev/null;"
-CMD+="cmp -n40960 -s /tmp/foo.foo /tmp/foo_rb.foo"
+SHORT_DESC="Write BOOT.BIN on QSPI Flash"
+CMD="flashcp -v /boot/qspi_boot/BOOT.BIN /dev/mtd0"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
+
+TEST_ID="04"
+SHORT_DESC="Write Kernel+RamFS on QSPI Flash"
+CMD="flashcp -v /boot/qspi_boot/zu11eg.itb /dev/mtd3"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
  : #if reached this point, ensure exito code 0
