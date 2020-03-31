@@ -48,19 +48,11 @@ int main(int argc, char *argv[])
 	// Path of the configuration file for linux
 	ADM1266_ptr_file_cfg[0] = fopen("./config_files/TaliseSOM_Sequencing_ADM1266@48.hex", "r");
 
-	// Check for if refresh is running and all the devices are present
-	if ((ADM1266_Refresh_Status(ADM1266_Address, ADM1266_NUM) == 1) || (ADM1266_Device_Present(ADM1266_Address, ADM1266_NUM) == 0))
+	// Check if all the devices are present
+	if (ADM1266_Device_Present(ADM1266_Address, ADM1266_NUM) == 0)
 	{
-		if ((ADM1266_Refresh_Status(ADM1266_Address, ADM1266_NUM) == 1))
-		{
-			printf("Memory refresh is currently running, please try after 10 secounds.");
-			return -1;
-		}
-		else
-		{
-			printf("ADM1266 Power Sequencer not detected. Please check connection");
-			return -1;
-		}
+		printf("ADM1266 Power Sequencer not detected. Please check connection");
+		return -1;
 	}
 	else
 	{
