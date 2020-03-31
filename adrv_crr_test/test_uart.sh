@@ -13,9 +13,7 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="02"
 SHORT_DESC="Check UART communication"
-CMD="stty -F /dev/ttyUSB0 115200;"
-CMD+="echo \"cat /proc/device-tree/model\" > /dev/ttyUSB0;"
-CMD+="cat /dev/ttyUSB0;"
+CMD="\$SCRIPT_DIR/test_uart.expect"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
  : #if reached this point, ensure exito code 0
