@@ -19,7 +19,7 @@ while true; do
     		case $REPLY in
 			1)
 				pushd $SCRIPT_DIR/src/adm1266/
-				exec $SCRIPT_DIR/src/adm1266/production_flash
+				./production_flash
 				popd
 				break ;;
 			2)
