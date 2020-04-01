@@ -18,7 +18,9 @@ while true; do
 	select opt in "${options[@]}"; do
     		case $REPLY in
 			1)
-				$SCRIPT_DIR/src/adm1266/production_flash
+				pushd $SCRIPT_DIR/src/adm1266/
+				exec $SCRIPT_DIR/src/adm1266/production_flash
+				popd
 				break ;;
 			2)
 				wait_for_board_online
