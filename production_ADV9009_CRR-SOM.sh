@@ -18,6 +18,7 @@ while true; do
 	select opt in "${options[@]}"; do
     		case $REPLY in
 			1)
+				echo_blue "This procedure takes around 40 seconds."
 				pushd $SCRIPT_DIR/src/adm1266/
 				./production_flash
 				popd
@@ -26,7 +27,9 @@ while true; do
 				wait_for_board_online
 				ssh_cmd "sudo /home/analog/adrv_crr_test/i2c_ad9545"
 				ssh_cmd "sudo poweroff &>/dev/null"
-				echo "Board will power off. Wait for PS_DONE LED from carrier to turn off."
+				echo_red "Power off command sent!" 
+				echo_blue "Wait for PS_DONE LED from carrier to turn off."
+				echo_blue "Manually powercycle the board using S12 switch."
 				break ;;
 			3)
 				wait_for_board_online
