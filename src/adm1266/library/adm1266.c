@@ -1953,7 +1953,7 @@ void ADM1266_Program_Firmware(__u8 *ADM1266_Address, __u8 ADM1266_NUM, FILE *ADM
 		}
 	}
 	else
-		printf("ADM1266 is locked, please verify the unlock password");
+		printf("ADM1266 is locked, please verify the unlock password\n");
 	    
  
     fclose(ADM1266_Ptr_File);
@@ -2009,7 +2009,7 @@ void ADM1266_Program_Config(__u8 *ADM1266_Address, __u8 ADM1266_NUM, FILE *ADM12
 		ADM1266_Delay(10000);
 	}
 	else
-		printf("ADM1266 is locked, please verify the unlock password");    
+		printf("ADM1266 is locked, please verify the unlock password\n");    
 }
  
 void ADM1266_CRC_Summary(__u8 *ADM1266_Address, __u8 ADM1266_NUM)
@@ -2021,15 +2021,15 @@ void ADM1266_CRC_Summary(__u8 *ADM1266_Address, __u8 ADM1266_NUM)
         ADM1266_FW_Boot_Rev(ADM1266_Address[loop], ADM1266_datain);
         ADM1266_Recalculate_CRC(ADM1266_Address[loop]);
         crc_result = ADM1266_All_CRC_Status(ADM1266_Address[loop]);
-        printf("\nFirmware Version in device 0x%x is v%d.%d.%d", ADM1266_Address[loop], ADM1266_datain[1], ADM1266_datain[2], ADM1266_datain[3]);
+        printf("\nFirmware Version in device 0x%x is v%d.%d.%d\n", ADM1266_Address[loop], ADM1266_datain[1], ADM1266_datain[2], ADM1266_datain[3]);
  
         if (crc_result > 0)
         {
-            printf("\nThere is CRC error in device 0x%x.", ADM1266_Address[loop]);
+            printf("\nThere is CRC error in device 0x%x.\n", ADM1266_Address[loop]);
         }
         else
         {
-            printf("\nAll CRC passed in device device 0x%x.", ADM1266_Address[loop]);
+            printf("\nAll CRC passed in device device 0x%x.\n", ADM1266_Address[loop]);
         }
     }
 }
