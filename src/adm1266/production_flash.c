@@ -52,6 +52,11 @@ int main(int argc, char *argv[])
 
 	// Path of the configuration file for linux
 	ADM1266_ptr_file_cfg[0] = fopen("./config_files/TaliseSOM_Sequencing_ADM1266@48.hex", "r");
+	
+	if(!ADM1266_ptr_file_cfg[0]) {
+		printf("Input file \"TaliseSOM_Sequencing_ADM1266@48.hex\" could not be open!\n");
+		exit(1);
+	}
 
 	if(!ADM1266_ptr_file_cfg[0]) {
 		printf("Input file \"TaliseSOM_Sequencing_ADM1266@48.hex\" could not be open!\n");
