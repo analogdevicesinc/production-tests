@@ -14,8 +14,8 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="02"
 SHORT_DESC="USB type check - Detect USB class HighSpeed or SuperSpeed"
-CMD="lsusb -t | grep \"CDC Data\" | grep -q \"480M\" && echo \"HighSpeed\";"
-CMD+="lsusb -t | grep \"CDC Data\" | grep -q \"5000M\" && echo \"SuperSpeed\";"
+CMD="lsusb -t | grep \"CDC Data\" | grep -q \"480M\" && echo \"HighSpeed\" && false;"
+CMD+="lsusb -t | grep \"CDC Data\" | grep -q \"5000M\" && echo \"SuperSpeed\" && true;"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_NAME="TEST_USB_DRIVE_SPEED"
