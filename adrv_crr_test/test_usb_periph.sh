@@ -25,6 +25,7 @@ SHORT_DESC="Test device access and speed - Read 50Mega Samples and compute avera
 CMD="iio_readdev -u \$USB_DEV -b 100000 -s 50000000 axi-adrv9009-rx-hpc | pv -af >/dev/null 2>/tmp/rate;"
 CMD+="RATE=\$(cat /tmp/rate | grep -oP '^[^0-9]*\K[0-9]+'); echo \"Read rate \$RATE MB/s\";"
 CMD+="[ \$RATE -gt 60 ]"
+if lsusb -t | grep "CDC Data" | grep -q "480M"; then CMD="false"; fi
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="04"
