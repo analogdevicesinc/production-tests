@@ -28,6 +28,11 @@ CMD="flashcp -v /boot/qspi_boot/zu11eg.itb /dev/mtd3"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="05"
+SHORT_DESC="Un-mount boot partition"
+CMD="umount /boot"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
+
+TEST_ID="06"
 SHORT_DESC="Write MAC addresses on ENV partition"
 CMD="write_mac"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
