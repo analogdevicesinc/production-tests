@@ -9,4 +9,7 @@ proceed_if_ok $answer
 source $SCRIPT_DIR/test_hmc.sh
 proceed_if_ok $?
 
+source $SCRIPT_DIR/test_adrv.sh
+proceed_if_ok $?
+
 echo
