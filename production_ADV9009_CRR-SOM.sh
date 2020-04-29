@@ -25,7 +25,7 @@ while true; do
 				break ;;
 			2)
 				wait_for_board_online
-				ssh_cmd "sudo /home/analog/adrv_crr_test/i2c_ad9545"
+				ssh_cmd "sudo /home/analog/adrv_som_test/i2c_ad9542"
 				ssh_cmd "sudo poweroff &>/dev/null"
 				echo_red "Power off command sent!" 
 				echo_blue "Wait for PS_DONE LED from carrier to turn off."
