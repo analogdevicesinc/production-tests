@@ -309,7 +309,7 @@ function step_7()
 		return false;
 	manual_calib.start(2);
 	manual_calib.saveCalibration(M2KCALIB_INI_LOCAL);
-	ret = extern.start("./scp.sh " + M2KCALIB_INI_LOCAL + " root@192.168.2.1:/mnt_jffs2/" + M2KCALIB_INI + " analog").trim();
+	ret = extern.start("./scp.sh " + M2KCALIB_INI_LOCAL + " root@192.168.2.1:/mnt/jffs2/" + M2KCALIB_INI + " analog").trim();
 	if (ret != "ok") {
 		extern.start("rm -f " + M2KCALIB_INI_LOCAL);
 		log("Failed to save calibration file to M2k: " + ret);
