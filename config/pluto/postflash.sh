@@ -6,6 +6,10 @@
 
 source $SCRIPT_DIR/config.sh
 
+# Note: this overrides the default TTYUSB var from vars.sh;
+#       for Pluto, this is now on the board
+TTYUSB=ttyPluto0
+
 #----------------------------------#
 # Functions section                #
 #----------------------------------#
