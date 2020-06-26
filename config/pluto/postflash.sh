@@ -159,9 +159,9 @@ post_flash() {
 
 	echo_green "6. Locking flash"
 
-	wait_file_exists "$TTYUSB" 20 || {
+	wait_file_exists "/dev/$TTYUSB" 20 || {
 		echo
-		echo_red "   '$TTYUSB' did not appear after time 20 seconds"
+		echo_red "   '/dev/$TTYUSB' did not appear after time 20 seconds"
 		return 1
 	}
 
