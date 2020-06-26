@@ -605,6 +605,18 @@ usbreset() {
 	__usbreset "$entry"
 }
 
+wait_file_exists() {
+	local file="$1"
+	local timeout="${2:-20}"
+	for iter in $(seq $timeout) ; do
+		if [ -e "$file" ] ; then
+			return 0
+		fi
+		sleep 1
+	done
+	return 1
+}
+
 wait_for_board_online() {
 	BOARD_ONLINE_TIMEOUT=${BOARD_ONLINE_TIMEOUT:-20}
 	local serial

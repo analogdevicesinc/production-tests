@@ -95,6 +95,13 @@ post_flash() {
 	}
 
 	echo_green "2a. Locking flash"
+
+	wait_file_exists "$TTYUSB" 20 || {
+		echo
+		echo_red "   '$TTYUSB' did not appear after time 20 seconds"
+		return 1
+	}
+
 	retry_and_run_on_fail 4 powercycle_board_wait \
 		expect $SCRIPT_DIR/lib/lockflash.exp "$TTYUSB" "M2k>" "m2k login:" || {
 		echo

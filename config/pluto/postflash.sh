@@ -155,6 +155,13 @@ post_flash() {
 	check_env || return 1
 
 	echo_green "6. Locking flash"
+
+	wait_file_exists "$TTYUSB" 20 || {
+		echo
+		echo_red "   '$TTYUSB' did not appear after time 20 seconds"
+		return 1
+	}
+
 	retry_and_run_on_fail 4 powercycle_board_wait \
 		expect $SCRIPT_DIR/lib/lockflash.exp "$TTYUSB" "Pluto>" "pluto login:" || {
 		echo
