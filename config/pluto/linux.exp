@@ -73,7 +73,7 @@ send_wait_for_prompt "cat /etc/serial | xargs echo PlutoSDR_by_Analog_Devices_In
 ############### Compute and set actual frequency here ################
 
 set cmd "echo -n 'ad936x_ext_refclk <' >> /var/fw.scr;"
-set cmd "$cmd echo -n $\(cat /sys/bus/iio/devices/iio:device1/xo_correction\) >> /var/fw.scr;"
+set cmd "$cmd echo -n $\(iio_attr -d ad9361-phy xo_correction\) >> /var/fw.scr;"
 set cmd "$cmd echo '>' >> /var/fw.scr\r"
 
 send_wait_for_prompt $cmd
