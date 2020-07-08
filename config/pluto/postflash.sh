@@ -110,6 +110,12 @@ check_env() {
 	return 0
 }
 
+save_extra_env() {
+	run_ssh_cmd <<-EOF
+	$(cat $SCRIPT_DIR/config/pluto/save-env.sh)
+	EOF
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -154,6 +160,13 @@ post_flash() {
 	retry 4 expect $SCRIPT_DIR/config/pluto/linux.exp || {
 		echo
 		echo_red "   Linux test failed"
+		return 1
+	}
+
+	echo_green "5. Writing extra-environment settings"
+	retry 4 save_extra_env || {
+		echo
+		echo_red "   Writing extra environment failed"
 		return 1
 	}
 

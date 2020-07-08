@@ -40,48 +40,6 @@ expect {
         }
 }
 
-############### Check ADM1177 ################
-
-#send "awk \"BEGIN{print \$(cat /sys/bus/iio/devices/iio\\:device0/in_voltage0_raw) * \$(cat /sys/bus/iio/devices/iio\\:device0/in_voltage0_scale)}\"\r"
-
-# result is in mV, look for 4500 to 5200
-
-#wait_for_value_in_range 4500 5200 "mV"
-
-#send "awk \"BEGIN{print \$(cat /sys/bus/iio/devices/iio\\:device0/in_current0_raw) * \$(cat /sys/bus/iio/devices/iio\\:device0/in_current0_scale)}\"\r"
-
-# result is in mA
-
-#wait_for_value_in_range 350 550 "mA"
-
-############### Setup the extra environment ################
-
-send_wait_for_prompt "echo /dev/mtd0 0xff000 0x1000 0x1000 > /var/fw_env.conf\r"
-
-#### Initially the extra env has a bad CRC - make sure we remove the defaults
-
-send_wait_for_prompt "echo bootcmd > /var/fw.scr\r"
-
-send_wait_for_prompt "echo baudrate >> /var/fw.scr\r"
-
-send_wait_for_prompt "echo bootdelay >> /var/fw.scr\r"
-
-send_wait_for_prompt "cat /etc/serial| xargs echo serial >> /var/fw.scr\r"
-
-send_wait_for_prompt "cat /etc/serial | xargs echo PlutoSDR_by_Analog_Devices_Inc! | sha1sum | cut -f 1 -d ' ' > pkey; cat pkey | xargs echo productkey >> /var/fw.scr\r"
-
-############### Compute and set actual frequency here ################
-
-set cmd "echo -n 'ad936x_ext_refclk <' >> /var/fw.scr;"
-set cmd "$cmd echo -n $\(iio_attr -d ad9361-phy xo_correction\) >> /var/fw.scr;"
-set cmd "$cmd echo '>' >> /var/fw.scr\r"
-
-send_wait_for_prompt $cmd
-
-send_wait_for_prompt "fw_setenv -c /var/fw_env.conf -s /var/fw.scr\r"
-
-send_wait_for_prompt "sync\r"
-
 close
 
 exit 0
