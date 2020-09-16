@@ -33,17 +33,20 @@ while true; do
 				break ;;
 			3)
 				wait_for_board_online
+				get_board_serial
 				echo_blue "Starting ADRV Carrier Test"
 				production "crr" "$opt"
 				break ;;
 			4)
 				wait_for_board_online
+				get_board_serial
 				echo_blue "Starting ADRV SOM Test"
 				production "som" "$opt"
 				break ;;
 			5)
 				wait_for_board_online
-				python3 -m pytest --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg.py -v
+				get_board_serial
+				python3 -m pytest --resultlog=$SCRIPT_DIR/logRF_test_log/result_${BOARD_SERIAL}.log --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg.py -v
 				break ;;
 			6)
 				wait_for_board_online
