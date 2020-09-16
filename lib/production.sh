@@ -1,7 +1,6 @@
 #!/bin/bash
 
 source $SCRIPT_DIR/config.sh
-BOARD_SERIAL=$(ssh_cmd "dmesg | grep SPI-NOR-UniqueID | cut -d' ' -f4")
 
 #----------------------------------#
 # Functions section                #
@@ -17,6 +16,10 @@ show_start_state() {
 	READY=0
 	FAILED=0
 	PROGRESS=1
+}
+
+get_board_serial() {
+	BOARD_SERIAL=$(ssh_cmd "dmesg | grep SPI-NOR-UniqueID | cut -d' ' -f9 | tr -d '[:cntrl:]'")
 }
 
 handle_error_state() {
@@ -178,19 +181,19 @@ production() {
                         $SCRIPT_DIR/adrv_crr_test/test_uart.sh &&
                         ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"
                         if [ $? -ne 0 ]; then
-                                handle_error_state
+                                handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
                 "ADRV SOM Test")
                         ssh_cmd "sudo /home/analog/adrv_som_test/som_test.sh"
                         if [ $? -ne 0 ]; then
-                                handle_error_state
+                                handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
                 "ADRV FMCOMMS8 RF test")
                         ssh_cmd "sudo /home/analog/adrv_fmcomms8_test/fmcomms8_test.sh"
                         if [ $? -ne 0 ]; then
-                                handle_error_state
+                                handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
                 *) echo "invalid option $mode" ;;
