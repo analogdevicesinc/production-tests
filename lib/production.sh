@@ -22,6 +22,15 @@ get_board_serial() {
 	BOARD_SERIAL=$(ssh_cmd "dmesg | grep SPI-NOR-UniqueID | cut -d' ' -f9 | tr -d '[:cntrl:]'")
 }
 
+get_fmcomms_serial() {
+	BOARD_SERIAL=$(ssh_cmd "fru-dump -i /sys/devices/platform/amba/ff030000.i2c/i2c-1/i2c-8/8-0052/eeprom -b | grep 'Serial Number' | cut -d' ' -f3 | tr -d '[:cntrl:]'")
+}
+
+dut_date_sync() {
+	CURR_DATE="@$(date +%s)"
+	ssh_cmd "sudo date -s '$CURR_DATE'"
+}
+
 handle_error_state() {
 	local serial="$1"
 	FAILED=1
@@ -195,6 +204,7 @@ production() {
                         if [ $? -ne 0 ]; then
                                 handle_error_state "$BOARD_SERIAL"
                         fi
+                        get_fmcomms_serial
                         ;;
                 *) echo "invalid option $mode" ;;
         esac
