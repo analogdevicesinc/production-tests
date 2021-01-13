@@ -381,6 +381,8 @@ setup_disable_lxde_automount() {
 	pushd "$HOME/.config/pcmanfm/"
 	for cfg_file in $(find . -name pcmanfm.conf) ; do
 		sed 's/autorun=1/autorun=0/g' -i $cfg_file
+		sed 's/mount_on_startup=1/mount_on_startup=0/g' -i $cfg_file
+		sed 's/mount_removable=1/mount_removable=0/g' -i $cfg_file
 	done
 
 	popd
