@@ -15,7 +15,7 @@ TTYUSB=ttyPluto0
 #----------------------------------#
 
 read_xo_correction() {
-	iio_attr -q $IIO_URI_MODE -d ad9361-phy xo_correction
+	iio_attr $IIO_URI_MODE -d ad9361-phy xo_correction
 }
 
 xo_calibration() {
@@ -35,20 +35,20 @@ xo_calibration() {
 tx_margin() {
 	# This is the cal freq, check the rssi
 	echo_green "    Calibration frequency is " \
-		$(iio_attr $IIO_URI_MODE -q -c ad9361-phy RX_LO frequency 3500000000)
+		$(iio_attr $IIO_URI_MODE -c ad9361-phy RX_LO frequency 3500000000)
 
-	local rssi_rx=$(iio_attr $IIO_URI_MODE -q  -i -c ad9361-phy voltage0 rssi)
+	local rssi_rx=$(iio_attr $IIO_URI_MODE -i -c ad9361-phy voltage0 rssi)
 	echo_green "    rssi_rx is ${rssi_rx}"
 
 	echo_green "    setting TX_LO frequency to " \
-		$(iio_attr $IIO_URI_MODE -q -c ad9361-phy TX_LO frequency 3700000000)
+		$(iio_attr $IIO_URI_MODE -c ad9361-phy TX_LO frequency 3700000000)
 	echo_green "    setting DDS amplitude to frequency to " \
-		$(iio_attr $IIO_URI_MODE -q -c cf-ad9361-dds-core-lpc TX1_I_F1 scale 0.0) \
-		$(iio_attr $IIO_URI_MODE -q -c cf-ad9361-dds-core-lpc TX1_Q_F1 scale 0.0)
+		$(iio_attr $IIO_URI_MODE -c cf-ad9361-dds-core-lpc TX1_I_F1 scale 0.0) \
+		$(iio_attr $IIO_URI_MODE -c cf-ad9361-dds-core-lpc TX1_Q_F1 scale 0.0)
 
 	echo_green "    setting DDS amplitude to frequency to " \
-		$(iio_attr $IIO_URI_MODE -q -c cf-ad9361-dds-core-lpc TX1_I_F2 scale 0.0) \
-		$(iio_attr $IIO_URI_MODE -q -c cf-ad9361-dds-core-lpc TX1_Q_F2 scale 0.0)
+		$(iio_attr $IIO_URI_MODE -c cf-ad9361-dds-core-lpc TX1_I_F2 scale 0.0) \
+		$(iio_attr $IIO_URI_MODE -c cf-ad9361-dds-core-lpc TX1_Q_F2 scale 0.0)
 
 	# find an LO, and then see what is there
 	# RANDOM = random integer between 0 and 32767
@@ -56,20 +56,20 @@ tx_margin() {
 	local tx_lo=$(expr $RANDOM \* 61037 + $RANDOM + 1000000000)
 
 	echo_green "    setting RX_LO frequency to " \
-		$(iio_attr $IIO_URI_MODE -q -c ad9361-phy RX_LO frequency ${tx_lo})
+		$(iio_attr $IIO_URI_MODE -c ad9361-phy RX_LO frequency ${tx_lo})
 	sleep 1
 
-	local rssi_rx_random=$(iio_attr $IIO_URI_MODE -q  -i -c ad9361-phy voltage0 rssi)
+	local rssi_rx_random=$(iio_attr $IIO_URI_MODE -i -c ad9361-phy voltage0 rssi)
 	echo_green "    rssi at ${tx_lo} is $rssi_rx_random"
 	echo_green "    setting TX_LO frequency to " \
-		$(iio_attr $IIO_URI_MODE -q -c ad9361-phy TX_LO frequency ${tx_lo})
+		$(iio_attr $IIO_URI_MODE -c ad9361-phy TX_LO frequency ${tx_lo})
 
 	echo_green "    setting DDS amplitude to frequency to " \
-		$(iio_attr $IIO_URI_MODE -q -c cf-ad9361-dds-core-lpc TX1_I_F1 scale 0.9) \
-		$(iio_attr $IIO_URI_MODE -q -c cf-ad9361-dds-core-lpc TX1_Q_F1 scale 0.9)
+		$(iio_attr $IIO_URI_MODE -c cf-ad9361-dds-core-lpc TX1_I_F1 scale 0.9) \
+		$(iio_attr $IIO_URI_MODE -c cf-ad9361-dds-core-lpc TX1_Q_F1 scale 0.9)
 	sleep 1
 
-	local rssi_tx=$(iio_attr $IIO_URI_MODE -q  -i -c ad9361-phy voltage0 rssi)
+	local rssi_tx=$(iio_attr $IIO_URI_MODE -i -c ad9361-phy voltage0 rssi)
 	echo_green "    rssi at ${tx_lo} is $rssi_tx"
 
         local tx_margin=$(echo $rssi_rx_random $rssi_tx | awk '{printf "%2.2f", $1 - $3}')
