@@ -216,6 +216,44 @@ setup_scopy() {
 	popd
 }
 
+# Note: This code isn't used anymore; but we're keeping it around, in case it
+#       may become useful again later
+__disabled_call_home_logic() {
+	mkdir -p "$HOME/.ssh"
+	cat "$SCRIPT_DIR/config/jig_id.pub" >> "$HOME/.ssh/authorized_keys"
+	sudo chown "$USER.$USER" "$HOME/.ssh/authorized_keys"
+	chmod 0600 "$HOME/.ssh/authorized_keys"
+
+	sudo chown "$USER.$USER" "$SCRIPT_DIR/config/jig_id"
+	chmod 0600 "$SCRIPT_DIR/config/jig_id"
+	cat > $autostart_path/call-home.desktop <<-EOF
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.9.4
+Type=Application
+Name=call-home
+Comment=call-home
+Exec=/bin/bash $SCRIPT_DIR/call_home
+StartupNotify=false
+Terminal=false
+Hidden=false
+	EOF
+
+	cat > $autostart_path/auto-upload-logs.desktop <<-EOF
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.9.4
+Type=Application
+Name=auto-save-logs
+Comment=auto-save-logs
+Exec=/bin/bash $SCRIPT_DIR/autoupload_logs.sh
+StartupNotify=false
+Terminal=false
+Hidden=false
+	EOF
+
+}
+
 setup_write_autostart_config() {
 	local autostart_path="$HOME/.config/autostart"
 	local configs_disable="blueman light-locker polkit-gnome-authentication-agent-1"
@@ -257,26 +295,6 @@ Hidden=false
 		sudo ufw allow ssh
 	fi
 
-	mkdir -p "$HOME/.ssh"
-	cat "$SCRIPT_DIR/config/jig_id.pub" >> "$HOME/.ssh/authorized_keys"
-	sudo chown "$USER.$USER" "$HOME/.ssh/authorized_keys"
-	chmod 0600 "$HOME/.ssh/authorized_keys"
-
-	sudo chown "$USER.$USER" "$SCRIPT_DIR/config/jig_id"
-	chmod 0600 "$SCRIPT_DIR/config/jig_id"
-	cat > $autostart_path/call-home.desktop <<-EOF
-[Desktop Entry]
-Encoding=UTF-8
-Version=0.9.4
-Type=Application
-Name=call-home
-Comment=call-home
-Exec=/bin/bash $SCRIPT_DIR/call_home
-StartupNotify=false
-Terminal=false
-Hidden=false
-	EOF
-
 	cat > $autostart_path/auto-save-logs.desktop <<-EOF
 [Desktop Entry]
 Encoding=UTF-8
@@ -285,19 +303,6 @@ Type=Application
 Name=auto-save-logs
 Comment=auto-save-logs
 Exec=sudo /bin/bash $SCRIPT_DIR/autosave_logs.sh
-StartupNotify=false
-Terminal=false
-Hidden=false
-	EOF
-
-	cat > $autostart_path/auto-upload-logs.desktop <<-EOF
-[Desktop Entry]
-Encoding=UTF-8
-Version=0.9.4
-Type=Application
-Name=auto-save-logs
-Comment=auto-save-logs
-Exec=/bin/bash $SCRIPT_DIR/autoupload_logs.sh
 StartupNotify=false
 Terminal=false
 Hidden=false
