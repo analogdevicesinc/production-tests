@@ -58,11 +58,6 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if(!ADM1266_ptr_file_cfg[0]) {
-		printf("Input file \"TaliseSOM_Sequencing_ADM1266@48.hex\" could not be open!\n");
-		exit(1);
-	}
-
 	// Check if all the devices are present
 	if (ADM1266_Device_Present(ADM1266_Address, ADM1266_NUM) == 0)
 	{
