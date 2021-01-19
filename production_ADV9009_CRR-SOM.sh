@@ -52,7 +52,6 @@ while true; do
 				wait_for_board_online
 				echo_blue "Starting FMCOMMS8 Test"
 				dut_date_sync
-				python3 -m pytest --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg_fmcomms8.py -v
 				production "fmcomms8" "$opt"
 				break ;;
 			7)
