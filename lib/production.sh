@@ -140,7 +140,7 @@ stop_gps_spoofing(){
 
 production() {
         local TARGET="$1"
-        local mode="$2"
+        local MODE="$2"
 	local IIO_REMOTE=analog.local 
 
         [ -n "$TARGET" ] || {
@@ -184,7 +184,7 @@ production() {
 
 	RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
 
-        case $mode in
+        case $MODE in
                 "ADRV Carrier Test")
                         $SCRIPT_DIR/adrv_crr_test/test_usb_periph.sh &&
                         $SCRIPT_DIR/adrv_crr_test/test_uart.sh &&
@@ -201,12 +201,14 @@ production() {
                         ;;
                 "ADRV FMCOMMS8 RF test")
                         ssh_cmd "sudo /home/analog/adrv_fmcomms8_test/fmcomms8_test.sh"
-                        if [ $? -ne 0 ]; then
+			RESULT=$?
+			get_fmcomms_serial
+			python3 -m pytest --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg_fmcomms8.py -v
+                        if [ $? -ne 0 ] || [ $RESULT -ne 0 ]; then
                                 handle_error_state "$BOARD_SERIAL"
                         fi
-                        get_fmcomms_serial
                         ;;
-                *) echo "invalid option $mode" ;;
+                *) echo "invalid option $MODE" ;;
         esac
 
         if [ -f "$STATSFILE" ] ; then
