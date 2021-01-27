@@ -87,6 +87,18 @@ setup_build_libsmu() {
 	__build_cmake libsmu
 }
 
+# Note: this is no longer used; but we're keeping around as a reference in case
+#       it's needed again
+__disabled_jig_ssh_key_setup() {
+	mkdir -p "$HOME/.ssh"
+	cat "$SCRIPT_DIR/config/jig_id.pub" >> "$HOME/.ssh/authorized_keys"
+	sudo chown "$USER.$USER" "$HOME/.ssh/authorized_keys"
+	chmod 0600 "$HOME/.ssh/authorized_keys"
+
+	sudo chown "$USER.$USER" "$SCRIPT_DIR/config/jig_id"
+	chmod 0600 "$SCRIPT_DIR/config/jig_id"
+}
+
 setup_autostart_config() {
 	if type ufw &> /dev/null ; then
 		sudo ufw enable
@@ -108,14 +120,6 @@ else
 fi
 # --- end setup_env.sh
 	EOF
-
-	mkdir -p "$HOME/.ssh"
-	cat "$SCRIPT_DIR/config/jig_id.pub" >> "$HOME/.ssh/authorized_keys"
-	sudo chown "$USER.$USER" "$HOME/.ssh/authorized_keys"
-	chmod 0600 "$HOME/.ssh/authorized_keys"
-
-	sudo chown "$USER.$USER" "$SCRIPT_DIR/config/jig_id"
-	chmod 0600 "$SCRIPT_DIR/config/jig_id"
 }
 
 setup_disable_sudo_passwd() {
