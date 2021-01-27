@@ -30,7 +30,7 @@ setup_apt_install_prereqs() {
 	sudo -s <<-EOF
 	apt-get -y update
 	apt-get -y install bc sshpass unzip \
-		cmake build-essential git bison flex \
+		cmake build-essential git bison flex locales-all \
 		expect usbutils screen python-smbus python-matplotlib \
 		cython wget curl libusb-dev libusb-1.0-0-dev \
 		libboost-dev openssh-server i2c-tools pmount htpdate

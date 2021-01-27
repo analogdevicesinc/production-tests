@@ -18,6 +18,10 @@ export LD_LIBRARY_PATH="$SCRIPT_DIR/work/libsmu/build/src/"
 export PATH="$SMU_CLI_PATH:$PATH"
 export PYTHONDONTWRITEBYTECODE=1
 
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
 #----------------------------------#
 # Functions section                #
 #----------------------------------#
