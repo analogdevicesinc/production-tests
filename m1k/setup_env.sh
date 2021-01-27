@@ -125,9 +125,8 @@ fi
 setup_disable_sudo_passwd() {
 	sudo_required
 	sudo -s <<-EOF
-		if ! grep -q $USER /etc/sudoers ; then
-			echo "$USER	ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
-		fi
+		usermod -aG sudo $USER
+		sed -i 's/%sudo.*/%sudo   ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
 	EOF
 }
 
