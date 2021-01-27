@@ -164,11 +164,8 @@ setup_adafruit_pitft_install() {
 
 	local tmpfile=$(mktemp)
 	# lock version of script, so that the menu commands we automate are the same
-	local ver=407c4089f46c9e6e49b08418786a4b846d80e384
 	sudo -s <<-EOF
-		wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/${ver}/adafruit-pitft.sh -O $tmpfile
-		chmod +x $tmpfile
-		printf "${cmd_seq}" | $tmpfile -u $HOME
+		printf "${cmd_seq}" | ${SCRIPT_DIR}/adafruit-pitft.sh -u $HOME
 		rm -f $tmpfile
 	EOF
 }
