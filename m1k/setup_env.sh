@@ -29,7 +29,7 @@ setup_apt_install_prereqs() {
 	sudo_required
 	sudo -s <<-EOF
 	apt-get -y update
-	apt-get -y install bc sshpass \
+	apt-get -y install bc sshpass unzip \
 		cmake build-essential git bison flex \
 		expect usbutils screen python-smbus python-matplotlib \
 		cython wget curl libusb-dev libusb-1.0-0-dev \
