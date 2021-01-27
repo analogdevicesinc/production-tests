@@ -168,7 +168,7 @@ setup_adafruit_pitft_install() {
 	sudo -s <<-EOF
 		wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/${ver}/adafruit-pitft.sh -O $tmpfile
 		chmod +x $tmpfile
-		printf "${cmd_seq}" | $tmpfile
+		printf "${cmd_seq}" | $tmpfile -u $HOME
 		rm -f $tmpfile
 	EOF
 }
