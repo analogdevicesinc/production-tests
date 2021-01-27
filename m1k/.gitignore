@@ -1,0 +1,6 @@
+release/
+work/
+log/
+*.swp
+*.pyc
+.ftpconfig
