@@ -167,6 +167,8 @@ setup_adafruit_pitft_install() {
 	sudo -s <<-EOF
 		printf "${cmd_seq}" | ${SCRIPT_DIR}/adafruit-pitft.sh -u $HOME
 		rm -f $tmpfile
+		# Disable lightdm
+		systemctl disable lightdm
 	EOF
 }
 
