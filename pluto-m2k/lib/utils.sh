@@ -4,11 +4,13 @@
 # Global definitions section       #
 #----------------------------------#
 
-LD_LIBRARY_PATH="$SCRIPT_DIR/work/scopy/deps/staging/lib:$SCRIPT_DIR/work/libiio/build"
+LD_LIBRARY_PATH="$SCRIPT_DIR/work/libiio/build"
 export LD_LIBRARY_PATH
 
-PATH="$SCRIPT_DIR/work/scopy/build/scopy:$SCRIPT_DIR/work/:$PATH"
+PATH="$SCRIPT_DIR/work/:$PATH"
 export PATH
+
+alias scopy='flatpak run org.adi.Scopy'
 
 #----------------------------------#
 # Functions section                #

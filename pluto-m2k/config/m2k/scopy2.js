@@ -3,7 +3,7 @@
 var SHOW_TIMESTAMP = true;
 var SHOW_START_END_TIME = true;
 var ADC_BANDWIDTH_THRESHOLD = 9;
-var WORKING_DIR = ".";
+var WORKING_DIR = "~/production-tests/pluto-m2k";
 
 function _osc_change_gain_mode(ch, high)
 {
@@ -25,14 +25,14 @@ function _read_pos_power_supply()
 
 	power.dac1_value=0.100;
 	power.dac1_enabled=true;
-	value = extern.start("./m2k_power_calib_meas.sh V5B pos true").trim();
+	value = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/m2k_power_calib_meas.sh V5B pos true").trim();
 	log("pos result: " + value);
 	if (value == '' || value == "failed" || isNaN(value))
 		return false;
 
 	power.dac1_value=4.5;
 	power.dac1_enabled=true;
-	value = extern.start("./m2k_power_calib_meas.sh V5B pos true").trim();
+	value = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/m2k_power_calib_meas.sh V5B pos true").trim();
 	log("pos result: " + value);
 	if (value == '' || value == "failed" || isNaN(value))
 		return false;
@@ -46,14 +46,14 @@ function _read_neg_power_supply()
 	var value;
 	power.dac2_value=-0.100;
 	power.dac2_enabled=true;
-	value = extern.start("./m2k_power_calib_meas.sh V6B neg true").trim();
+	value = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/m2k_power_calib_meas.sh V6B neg true").trim();
 	log("neg result: " + value);
 	if (value == '' || value == "failed" || isNaN(value))
 		return false;
 
 	power.dac2_value=-4.5;
 	power.dac2_enabled=true;
-	value = extern.start("./m2k_power_calib_meas.sh V6B neg true").trim();
+	value = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/m2k_power_calib_meas.sh V6B neg true").trim();
 	log("neg result: " + value);
 	if (value == '' || value == "failed" || isNaN(value))
 		return false;
@@ -182,9 +182,9 @@ function toggle_relay(pos)
 {
 	/* set pin4 high to keep ref measurement off */
 	if (pos)
-		return extern.start("./toggle_pins.sh GPIO_EXP1 pin7 pin4");
+		return extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/toggle_pins.sh GPIO_EXP1 pin7 pin4");
 	else
-		return extern.start("./toggle_pins.sh GPIO_EXP1 pin4");
+		return extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/toggle_pins.sh GPIO_EXP1 pin4");
 }
 
 function _test_osc_trimmer_adjust(ch, positive)
@@ -195,7 +195,7 @@ function _test_osc_trimmer_adjust(ch, positive)
 	var ch_type = "positive";
 	/* FIXME: change this to something else if needed */
 	var continue_button = "pin1";
-	var ipc_file = "/tmp/" + continue_button + "_pressed";
+	var ipc_file = "/home/jig/.tmp/" + continue_button + "_pressed";
 
 	osc.internal_trigger = true;
 	osc.trigger_source = ch;
@@ -216,16 +216,15 @@ function _test_osc_trimmer_adjust(ch, positive)
 		osc.time_base = 0.0001;
 		osc.running = true;
 
-		extern.start("rm -rf " + ipc_file);
+		extern.start("sshpass -pjig ssh jig@localhost rm -rf " + ipc_file);
 		/* Some simple stupid IPC */
-		extern.start("( ./wait_pins.sh D pin1 ; echo pressed > " +
-			ipc_file + " ) &");
+		extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/wait_btn_background.sh " + ipc_file + " &");
 
 		while (input.trim() != "pressed") {
-			input = extern.start("cat " + ipc_file);
+			input = extern.start("sshpass -pjig ssh jig@localhost cat " + ipc_file);
 			msleep(200);
 		}
-		extern.start("rm -rf " + ipc_file);
+		extern.start("sshpass -pjig ssh jig@localhost rm -rf " + ipc_file);
 		ok = true;
 		input = "";
 
@@ -481,7 +480,6 @@ function main()
 
 	enableExternScripts();
 	enableCalibScripts();
-	extern.setWorkingDir(WORKING_DIR);
 	extern.setProcessTimeout(0);
 
 	if (SHOW_START_END_TIME)

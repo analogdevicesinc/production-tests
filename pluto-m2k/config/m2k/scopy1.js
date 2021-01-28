@@ -2,14 +2,14 @@
 
 var SHOW_TIMESTAMP = true;
 var SHOW_START_END_TIME = true;
-var MAX_HIGH_GAIN = 2.525;
-var MIN_HIGH_GAIN = 2.475;
-var MAX_LOW_GAIN = 10.25;
-var MIN_LOW_GAIN = 9.75;
+var MAX_HIGH_GAIN = 2.515;
+var MIN_HIGH_GAIN = 2.465;
+var MAX_LOW_GAIN = 10.15;
+var MIN_LOW_GAIN = 9.65;
 var ADC_CONST_ERR_THRESHOLD = 0.1;
-var WORKING_DIR = ".";
+var WORKING_DIR = "~/production-tests/pluto-m2k";
 var M2KCALIB_INI = "m2k-calib-factory.ini";
-var M2KCALIB_INI_LOCAL = "/tmp/" + M2KCALIB_INI;
+var M2KCALIB_INI_LOCAL = "/home/jig/.tmp/" + M2KCALIB_INI;
 
 /*********************************************************************************************************
 *	STEP 5
@@ -43,7 +43,7 @@ function _osc_check_range(high, value)
 
 function disable_ref_measurement()
 {
-	extern.start("./ref_measure_ctl.sh disable");
+	extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/ref_measure_ctl.sh disable");
 }
 
 function _test_osc_range(ch, high)
@@ -55,9 +55,9 @@ function _test_osc_range(ch, high)
 	var i;
 
 	if (high) {
-		output = extern.start("./ref_measure_ctl.sh ref2.5v");
+		output = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/ref_measure_ctl.sh ref2.5v");
 	} else {
-		output = extern.start("./ref_measure_ctl.sh ref10v");
+		output = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/ref_measure_ctl.sh ref10v");
 	}
 
 	osc.running = true;
@@ -77,7 +77,7 @@ function _test_osc_range(ch, high)
 		result += "FAILED ";
 	}
 	result += " channel: " +  ch + " high-mode: " + high + " " + value;
-	log(result); 
+	log(result);
 	osc.running = false;	
 	return ret;
 }
@@ -246,7 +246,7 @@ function _calibrate_pos_power_supply()
 	
 	while (next_step > 0) {
 		// call some shell script which returns the ADC value
-		value = extern.start("./m2k_power_calib_meas.sh V5B pos false").trim();
+		value = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/m2k_power_calib_meas.sh V5B pos false").trim();
 		log("pos " + step + " result: " + value);
 		if (value == '' || value == "failed" || isNaN(value))
 			return false;
@@ -276,7 +276,7 @@ function _calibrate_neg_power_supply()
 	
 	while (next_step > 0) {
 		// call some shell script which returns the ADC value
-		value = extern.start("./m2k_power_calib_meas.sh V6B neg false").trim();
+		value = extern.start("sshpass -pjig ssh jig@localhost sudo " +  WORKING_DIR + "/m2k_power_calib_meas.sh V6B neg false").trim();
 		log("neg " + step + " result: " + value);
 		if (value == '' || value == "failed" || isNaN(value))
 			return false;
@@ -309,13 +309,13 @@ function step_7()
 		return false;
 	manual_calib.start(2);
 	manual_calib.saveCalibration(M2KCALIB_INI_LOCAL);
-	ret = extern.start("./scp.sh " + M2KCALIB_INI_LOCAL + " root@192.168.2.1:/mnt/jffs2/" + M2KCALIB_INI + " analog").trim();
+	ret = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/scp.sh " + M2KCALIB_INI_LOCAL + " root@192.168.2.1:/mnt/jffs2/" + M2KCALIB_INI + " analog").trim();
 	if (ret != "ok") {
-		extern.start("rm -f " + M2KCALIB_INI_LOCAL);
+		extern.start("sshpass -pjig ssh jig@localhost sudo rm -f " + M2KCALIB_INI_LOCAL);
 		log("Failed to save calibration file to M2k: " + ret);
 		return false;
 	}
-	extern.start("rm -f " + M2KCALIB_INI_LOCAL);
+	extern.start("sshpass -pjig ssh jig@localhost sudo rm -f " + M2KCALIB_INI_LOCAL);
 	log("Saved calibration parameters to file");
 	return true;
 }
@@ -507,7 +507,7 @@ function main()
 
 	enableExternScripts();
 	enableCalibScripts();
-	extern.setWorkingDir(WORKING_DIR);
+	//extern.setWorkingDir(WORKING_DIR);
 	extern.setProcessTimeout(0);
 
 	if (SHOW_START_END_TIME)

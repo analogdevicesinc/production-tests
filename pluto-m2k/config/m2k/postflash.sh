@@ -110,7 +110,7 @@ post_flash() {
 	}
 
 	echo_green "3. Testing Scopy -- Part 1"
-	scopy --nogui --script $SCRIPT_DIR/config/m2k/scopy1.js || {
+	flatpak run --env=LC_ALL=en_US.UTF-8  org.adi.Scopy --nogui --script $SCRIPT_DIR/config/m2k/scopy1.js || {
 		terminate_any_lingering_stuff
 		echo_red "Scopy tests have failed..."
 		return 1
@@ -137,7 +137,7 @@ post_flash() {
 	}
 
 	echo_green "4. Testing Scopy -- Part 2"
-	scopy --script $SCRIPT_DIR/config/m2k/scopy2.js || {
+	flatpak run --env=LC_ALL=en_US.UTF-8 org.adi.Scopy --script $SCRIPT_DIR/config/m2k/scopy2.js || {
 		terminate_any_lingering_stuff
 		echo_red "Scopy tests have failed..."
 		return 1

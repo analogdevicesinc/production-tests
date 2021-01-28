@@ -38,6 +38,10 @@ expect {
         }
 }
 
+send "rm -f /mnt/m2k-calib.ini\r"
+send "rm -f /mnt/jffs2/m2k-calib.ini\r"
+send "rm -f /mnt/jffs2/m2k-calib-factory.ini\r"
+
 ############### Setup the extra environment ################
 
 send_wait_for_prompt "echo /dev/mtd0 0xff000 0x1000 0x1000 > /var/fw_env.conf\r"

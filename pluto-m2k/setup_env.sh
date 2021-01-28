@@ -49,11 +49,12 @@ setup_apt_install_prereqs() {
 	}
 	sudo_required
 	sudo -s <<-EOF
+	add-apt-repository ppa:alexlarsson/flatpak
 	apt-get -y update
 	apt-get -y install libftdi-dev bc sshpass openocd \
 		cmake build-essential git libxml2-dev bison flex \
 		libfftw3-dev expect usbutils dfu-util screen \
-		wget unzip curl \
+		wget unzip curl jq flatpak\
 		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal \
 		openssh-server gpg
 	/etc/init.d/htpdate restart
@@ -204,14 +205,19 @@ setup_scopy() {
 		return 0
 	fi
 
-	[ ! -d work/scopy ] || return 0
+	exist=$(flatpak list | grep -c Scopy)
+	if [ $exist != 0 ] ; then
+		return 0
+	fi
 
-	__download_github_common scopy
+	mkdir -p work/scopy
+	flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 	pushd work/scopy
-
-	./CI/travis/before_install_linux.sh
-	./CI/travis/make.sh
+	scopy_artifact_link=$(curl -s https://api.github.com/repos/analogdevicesinc/scopy/releases | jq -r ".[0].assets[] | select(.name | contains(\"flatpak\")) | .browser_download_url")
+	wget $scopy_artifact_link
+	unzip scopy-*.flatpak.zip
+	flatpak install Scopy.flatpak
 
 	popd
 }
