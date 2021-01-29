@@ -12,7 +12,6 @@ MIN_HIGH_GAIN = 2.465
 MAX_LOW_GAIN = 10.15
 MIN_LOW_GAIN = 9.65
 ADC_CONST_ERR_THRESHOLD = 0.1
-WORKING_DIR = "~/plutosdr-m2k-production-test-V2"
 M2KCALIB_INI = "m2k-calib-factory.ini"
 M2KCALIB_INI_LOCAL = "/tmp/" + M2KCALIB_INI
 PWS_POS_FIRST = 0.1;
@@ -47,14 +46,14 @@ def _osc_change_gain_mode(ch, high):
 def _osc_check_range(high, value):
 	if high:
 		if (value < MAX_HIGH_GAIN) and (value > MIN_HIGH_GAIN):
-			return true
+			return True
 		else:
-			return false
+			return False
 	else:
 		if (value < MAX_LOW_GAIN) and (value > MIN_LOW_GAIN):
-			return true
+			return True
 		else:
-			return false
+			return False
 
 def disable_ref_measurement():
 	subprocess.run(["./ref_measure_ctl.sh", "disable"])
@@ -88,7 +87,7 @@ def _test_osc_range(ch, high):
 	else:
 		result += "FAILED "
 
-	result += " channel: " +  ch + " high-mode: " + high + " " + value
+	result += " channel: " +  str(ch) + " high-mode: " + str(high) + " " + str(value)
 	log(result)
 
 	osc.stopAcquisition()
@@ -146,8 +145,8 @@ def _awg_output_constant(ch, value):
 def _osc_read_constant(ch):
 	global osc
 
-	osc.setKernelBuffersCount(1)
 	osc.enableChannel(ch, True)
+	osc.setKernelBuffersCount(1)
 	osc.setSampleRate(100000000)
 	val = osc.getVoltage(ch)
 	#var val = osc.channels[ch].mean
@@ -178,6 +177,7 @@ def _awg_osc_constant(ch, value):
 
 	log(result)
 	siggen.stop()
+	osc.stopAcquisition()
 	return ret
 
 def _test_awg_osc(ch):
@@ -215,6 +215,8 @@ def step_6():
 
 def _calibrate_pos_power_supply():
 	global pws
+	global OFFSET_POS_ADC, OFFSET_POS_DAC
+	global GAIN_POS_ADC, GAIN_POS_DAC
 	step = 0
 	res = ""
 
@@ -231,7 +233,7 @@ def _calibrate_pos_power_supply():
 	OFFSET_POS_DAC = PWS_POS_FIRST - value
 	value_m2k = pws.readChannel(0)
 	OFFSET_POS_ADC = value - value_m2k
-	res += value + " "
+	res += str(value) + " "
 
 	step += 1
 	# Pos dac/adc gain calib with 4.5V
@@ -246,7 +248,7 @@ def _calibrate_pos_power_supply():
 	GAIN_POS_DAC = PWS_POS_SECOND / (value + OFFSET_POS_DAC)
 	value_m2k = pws.readChannel(0)
 	GAIN_POS_ADC = value / (value_m2k + OFFSET_POS_ADC)
-	res += value + " "
+	res += str(value) + " "
 
 	res = "DONE with POSITIVE supply --> voltages: " + res
 	log(res)
@@ -257,6 +259,8 @@ def _calibrate_pos_power_supply():
 
 def _calibrate_neg_power_supply():
 	global pws
+	global OFFSET_NEG_ADC, OFFSET_NEG_DAC
+	global GAIN_NEG_ADC, GAIN_NEG_DAC
 	step = 0
 	res = ""
 
@@ -267,13 +271,13 @@ def _calibrate_neg_power_supply():
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg false"], universal_newlines = False, stdout = subprocess.PIPE)
 	#value = extern.start("sshpass -pjig ssh jig@localhost sudo " +  WORKING_DIR + "/m2k_power_calib_meas.sh V6B neg false");
 	value = float(value.stdout.decode())	
-	log("pos " + step + " result: " + value)
+	log("pos " + str(step) + " result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
 		return False
 	OFFSET_NEG_DAC = PWS_NEG_FIRST - value
 	value_m2k = pws.readChannel(1)
 	OFFSET_NEG_ADC = value - value_m2k
-	res += value + " "
+	res += str(value) + " "
 
 	step += 1
 	# Neg dac/adc gain calib with -4.5V
@@ -282,13 +286,13 @@ def _calibrate_neg_power_supply():
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg false"], universal_newlines = False, stdout = subprocess.PIPE)
 	#value = extern.start("sshpass -pjig ssh jig@localhost sudo " +  WORKING_DIR + "/m2k_power_calib_meas.sh V6B neg false")
 	value = float(value.stdout.decode())
-	log("pos " + step + " result: " + value)
+	log("pos " + str(step) + " result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
 		return False
 	GAIN_NEG_DAC = PWS_NEG_SECOND / (value + OFFSET_NEG_DAC)
 	value_m2k = pws.readChannel(1)
 	GAIN_NEG_ADC = value / (value_m2k + OFFSET_NEG_ADC)
-	res += value + " "
+	res += str(value) + " "
 
 	res = "DONE with NEGATIVE supply --> voltages: " + res
 	log(res)
@@ -325,23 +329,22 @@ def step_7():
 	ret = _calibrate_pos_power_supply()
 	if not ret:
 		return False
-	log("\n")
+	log("")
 	ret = _calibrate_neg_power_supply()
 	if not ret:
 		return False
 
 	_write_calib_file()
-	ret = subprocess.run(["./scp.sh", M2KCALIB_INI_LOCAL + " root@192.168.2.1:/mnt/jffs2/" + M2KCALIB_INI + " analog"],
-		universal_newlines = False, stdout = subprocess.PIPE)
+	ret = subprocess.run(["./scp.sh", M2KCALIB_INI_LOCAL, " root@192.168.2.1:/mnt/jffs2/" + M2KCALIB_INI, " analog"],
+		universal_newlines = False, capture_output = True)
 	#ret = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/scp.sh " + M2KCALIB_INI_LOCAL + " root@192.168.2.1:/mnt/jffs2/" + M2KCALIB_INI + " analog").trim();
 
+	ret = str(ret.stdout.decode().rstrip('\r\n'))
 	subprocess.run(["rm", M2KCALIB_INI_LOCAL])
 	if ret != "ok":
-		#extern.start("sshpass -pjig ssh jig@localhost rm -f " + M2KCALIB_INI_LOCAL);
-		log("Failed to save calibration file to M2k: " + str(ret.stdout.decode()))
+		log("Failed to save calibration file to M2k: " + ret)
 		return False
 
-	#extern.start("sshpass -pjig ssh jig@localhost rm -f " + M2KCALIB_INI_LOCAL)
 	log("Saved calibration parameters to file");
 	return True
 
@@ -471,11 +474,11 @@ def main():
 	if SHOW_START_END_TIME:
 		log("Script started on: " + get_now_s() + '\n');
 
-	for i in range(7,8):
+	for i in range(5,8):
 		if not runTest(i):
 			libm2k.contextClose(m2k)
 			raise Exception("M2k testing steps failed...")
-	log("\nDone\n")
+	log("Done\n")
 	if SHOW_START_END_TIME:
 		log("Script ended on: " + get_now_s() + '\n')
 	libm2k.contextClose(m2k)

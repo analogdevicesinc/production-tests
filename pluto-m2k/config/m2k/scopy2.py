@@ -1,5 +1,6 @@
 import libm2k
 import subprocess
+import os
 from time import sleep
 import math
 import numpy as np
@@ -11,13 +12,12 @@ mlt.use('tkagg')
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from sine_gen import sine_buffer_generator
-from multiprocessing import Process
+from multiprocessing import Process, Manager, Value
 from scipy import signal as sg
 
 SHOW_TIMESTAMP = True;
 SHOW_START_END_TIME = True;
 ADC_BANDWIDTH_THRESHOLD = 9;
-WORKING_DIR = "~/plutosdr-m2k-production-test-V2";
 PWS_POS_FIRST = 0.1;
 PWS_POS_SECOND = 4.5;
 PWS_NEG_FIRST = -PWS_POS_FIRST;
@@ -34,9 +34,10 @@ def _read_pos_power_supply():
 	pws.pushChannel(0, PWS_POS_FIRST)
 
 	# call some shell script which returns the ADC value
-	value = subprocess.run(["./m2k_power_calib_meas.sh", "V5B pos true"])
+	value = subprocess.run(["./m2k_power_calib_meas.sh", "V5B pos true"], universal_newlines = False, stdout = subprocess.PIPE)
 #	value = extern.start("sshpass -pjig ssh jig@localhost sudo $WORKING_DIR/m2k_power_calib_meas.sh V5B pos true");
-	log("pos result: " + value)
+	value = float(value.stdout.decode())
+	log("pos result: " + str(value))
 
 	if value == '' or value == "failed" or math.isnan(value):
 		return False
@@ -44,9 +45,10 @@ def _read_pos_power_supply():
 	# Pos dac/adc gain calib with 4.5V
 	pws.pushChannel(0, PWS_POS_SECOND)
 	# call some shell script which returns the ADC value
-	value = subprocess.run(["./m2k_power_calib_meas.sh", "V5B pos true"])
+	value = subprocess.run(["./m2k_power_calib_meas.sh", "V5B pos true"], universal_newlines = False, stdout = subprocess.PIPE)
 	#value = extern.start("sshpass -pjig ssh jig@localhost sudo $WORKING_DIR/m2k_power_calib_meas.sh V5B pos true");
-	log("pos result: " + value)
+	value = float(value.stdout.decode())
+	log("pos result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
 		return False
 
@@ -61,18 +63,20 @@ def _read_neg_power_supply():
 	pws.pushChannel(1, PWS_NEG_FIRST)
 	# call some shell script which returns the ADC value
 	######### TODO use check_output for output retrieval
-	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg true"])
+	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg true"], universal_newlines = False, stdout = subprocess.PIPE)
 	#value = extern.start("sshpass -pjig ssh jig@localhost sudo $WORKING_DIR/m2k_power_calib_meas.sh V6B neg true").trim();
-	log("neg result: " + value)
+	value = float(value.stdout.decode())
+	log("neg result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
 		return False
 
 	# Neg dac/adc gain calib with -4.5V
 	pws.pushChannel(1, PWS_NEG_SECOND)
 	# call some shell script which returns the ADC value
-	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg true"])
+	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg true"], universal_newlines = False, stdout = subprocess.PIPE)
 	#value = extern.start("sshpass -pjig ssh jig@localhost sudo $WORKING_DIR/m2k_power_calib_meas.sh V6B neg true").trim();
-	log("neg result: " + value);
+	value = float(value.stdout.decode())
+	log("neg result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
 		return False
 
@@ -85,7 +89,7 @@ def step_7():
 	ret = _read_pos_power_supply()
 	if not ret:
 		return False
-	log("\n")
+	log("")
 	ret = _read_neg_power_supply()
 	if not ret:
 		return False;
@@ -181,34 +185,41 @@ def toggle_relay(pos):
 	else:
 		subprocess.run(["./toggle_pins.sh", " GPIO_EXP1 pin4"])
 
-def func_animate(i, ch, nb_samples):
-	global osc, plt_line
-	x = np.linspace(0, nb_samples, nb_samples)
-	y = osc.getSamples(nb_samples)[ch]
-	plt_line.set_data(x, y)
-	return plt_line,
-
-def plot_graph(ch, nb_samples, color):
-	global plt_line, figure
+def plot_graph(ch, nb_samples, color, done_trimming):
+	global osc
+	plt.ion()
+	fig = plt.figure()
+	ax = plt.subplot(1, 1, 1)
+	ax.set_xlabel('Time')
+	ax.set_ylabel('Voltage')
+	ax.set_xlim([0, nb_samples])
+	ax.set_ylim([-3, 3])
 	x = []
 	y = []
-	figure, ax = plt.subplots(figsize=(4,3))
-	plt_line, = ax.plot(x, y, c = color)
-	plt.axis([0, nb_samples, -3, 3])
-
-	ani = FuncAnimation(figure, func_animate, fargs=(ch, nb_samples, ), frames=10, interval=50)
-	plt.show()
+	ax.plot(x, y, color = color) #empty line on the plot
+	fig.show()
+	
+	while done_trimming.value == 0:
+		x = np.linspace(0, nb_samples, nb_samples)
+		y = osc.getSamples(nb_samples)[ch]
+		ax.lines[0].set_data(x,y)
+		#ax.relim()
+		#ax.autoscale_view()
+		fig.canvas.flush_events()
+		sleep(0.1)
+	plt.close()
 
 def _test_osc_trimmer_adjust(ch, positive, color):
-	global osc, plt_line, figure
+	global osc
 	trigger = osc.getTrigger()
-	nb_samples = 4096
+	nb_samples = 1024
 	pressed = ""
 	ok = False
 	ch_type = "positive"
 	#FIXME: change this to something else if needed
 	continue_button = "pin1"
 	ipc_file = "/tmp/" + continue_button + "_pressed"
+	done_trimming = False
 
 	trigger.setAnalogSource(ch)
 	trigger.setAnalogCondition(ch, libm2k.RISING_EDGE_ANALOG)
@@ -229,19 +240,33 @@ def _test_osc_trimmer_adjust(ch, positive, color):
 		_awg_output_square(ch, 1000, 2, 0);
 
 		#Display and run the OSC
-		subprocess.run(["rm", ipc_file])
-		subprocess.run(["./wait_pins.sh", " D pin1 ; echo pressed > " +
-			ipc_file + " ) &"])
+		subprocess.run(["rm", "-f", ipc_file])
+	
+		done_trimming = Value('i', 0)
+		plot_process = Process(target=plot_graph, args=(ch, nb_samples, color, done_trimming))
+		plot_process.start()
 
-		p = Process(target=plot_graph, args=(ch, nb_samples, color, ))
-		p.start()
+		command = "./wait_pins.sh D pin1 ; echo pressed > " + ipc_file + " &"
+		waiting_process = subprocess.Popen(command, stdout = subprocess.PIPE, shell=True)
+
 		while pressed != "pressed":
+			if not os.path.exists(ipc_file):
+				continue
 			tmp = open(ipc_file, "r")
 			pressed = tmp.readline().strip()
 			tmp.close()
-		#subprocess.run(["rm", ipc_file])
-		p.join()
-		#TODO close the plot window
+
+		# Join the btn waiting background proc
+		waiting_process.wait()
+		
+		# Remove btn dummy file
+		subprocess.run(["rm", "-f", ipc_file])
+		
+		# Signal the plot process to finish its job
+		done_trimming.value = 1
+		# Join the plot process and close the window
+		plot_process.join()
+		
 		ok = True;
 		pressed = "";
 
@@ -270,6 +295,7 @@ def step_9():
 
 	#CH 1 Negative
 	result = _test_osc_trimmer_adjust(1, True, 'purple')
+
 	if not result:
 		return False
 	return True
@@ -285,35 +311,36 @@ def _awg_output_sine(ch, frequency, amplitude, offset):
 	siggen.enableChannel(ch, True)
 	siggen.setCyclic(True)
 	samp_rate, buffer1 = sine_buffer_generator(ch, frequency, amplitude, offset, 0)
-	print("SAMP rate " + str(samp_rate))
 	siggen.setSampleRate(ch, samp_rate)
 	siggen.push(ch, buffer1)
 
-def _spectrum_setup_general():
+def _spectrum_setup_general(ch, test_sig_frequency):
 	global osc
 
 	fs = 100000000
-	N = 8192
+	N = 16384
 	NFFT = N // 2
 
-	osc.setKernelBuffersCount(1)
 	osc.enableChannel(0, True)
 	osc.enableChannel(1, True)
 	osc.setSampleRate(fs)
 
-	#f = float(fs) / 2 * np.linspace(0, 1, NFFT)  # array to x ticks
-	a = osc.getSamplesRaw(N)[0] 	#RAW or VOLTS
+	a = osc.getSamplesRaw(N)[ch] 	#RAW or VOLTS
 
-	fig, ax = plt.subplots(nrows = 1, ncols = 1)
+	fig, ax = plt.subplots(2)
 
 	sp_data = np.fft.fft(a, N)
 	fVals = np.linspace(0, fs, N)
 
-	sp_data = np.abs(sp_data)[:NFFT]# * 1 / N#[0 : np.int(NFFT)])
-	sp_data = 10 * np.log10(sp_data / (2048 * 2048) )
+	sp_data = np.abs(sp_data)[:NFFT] * 1 / N    #[0 : np.int(NFFT)])
+	sp_data = 10 * np.log10(sp_data * scaling_factor[ch] / (2048 * 2048) )
 
-	ax.plot(fVals[:NFFT], sp_data, 'b')
+	ax[0].plot(fVals[:NFFT], sp_data, 'b')
+	ax[1].plot(a)
+	print(sp_data[np.where(fVals == test_sig_frequency)])
 	plt.show()
+	return max(sp_data)
+
 
 def _spectrum_setup_marker(ch, frequency):
 	global osc
@@ -328,19 +355,21 @@ def _spectrum_setup_marker(ch, frequency):
 
 def _compute_adc_bandwidth(ch):
 	global osc, siggen
-	db_1 = 10
-	db_2 = 20
+	db_1 = 0
+	db_2 = 0
 	freq_1 = 10000
 	freq_2 = 30000000
 
-	#_awg_output_sine(ch, freq_1, 2, 0)
-	#db_1 = _spectrum_setup_marker(ch, freq_1);
-
+	_awg_output_sine(ch, freq_1, 2, 0)
+	#= _spectrum_setup_marker(ch, freq_1);
+	db_1 = _spectrum_setup_general(ch, freq_1)
+	#_spectrum_setup_general(ch, freq_1)
+	
 	_awg_output_sine(ch, freq_2, 2, 0)
 	#db_2 = _spectrum_setup_marker(ch, freq_2);
-
-	_spectrum_setup_general()
-
+	db_2 = _spectrum_setup_general(ch, freq_2)
+	#_spectrum_setup_general(ch, freq_2)
+	
 	diff = db_1 - db_2
 	log("channel: " + str(ch) + " diff dB: " + str(diff))
 	osc.stopAcquisition()
@@ -360,9 +389,9 @@ def step_10():
 	if not ret:
 		return False
 
-	#ret = _compute_adc_bandwidth(1)
-	#if not ret:
-#		return False
+	ret = _compute_adc_bandwidth(1)
+	if not ret:
+		return False
 	return True
 
 
@@ -377,7 +406,7 @@ def connect():
 	if (len(ctx_list) == 0):
 		log("No usb devices available")
 		return False
-	m2k = libm2k.m2kOpen("usb:1.6.5")
+	m2k = libm2k.m2kOpen()
 	if m2k is None:
 		log("Can't connect to M2K")
 		return False
@@ -386,6 +415,7 @@ def connect():
 	siggen = m2k.getAnalogOut()
 	pws = m2k.getPowerSupply()
 	dig = m2k.getDigital()
+	osc.setKernelBuffersCount(1)
 	return True
 
 def log(message):
@@ -428,7 +458,7 @@ def main():
 	if SHOW_START_END_TIME:
 		log("Script started on: " + get_now_s() + '\n');
 
-	for i in range(10,11):
+	for i in range(10, 11):
 		if not runTest(i):
 			libm2k.contextClose(m2k)
 			raise Exception("M2k testing steps failed...")

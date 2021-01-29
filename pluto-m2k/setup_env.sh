@@ -509,7 +509,7 @@ pushd $SCRIPT_DIR
 
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs openocd ft4232h_tool"
-STEPS="$STEPS libiio scopy plutosdr_scripts sync_udev_rules_file write_autostart_config"
+STEPS="$STEPS libiio plutosdr_scripts sync_udev_rules_file write_autostart_config"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking usbreset_tool release_files"
 STEPS="$STEPS zerotier_vpn"
 
