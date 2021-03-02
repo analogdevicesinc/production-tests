@@ -34,7 +34,7 @@ terminate_any_lingering() {
 }
 
 terminate_any_lingering_stuff() {
-	terminate_any_lingering scopy
+	terminate_any_lingering libm2k
 	terminate_any_lingering wait_pins
 }
 
@@ -53,7 +53,7 @@ eject_m2k() {
 
 	reboot_via_ssh || {
 		terminate_any_lingering_stuff
-		echo_red "Scopy tests have failed..."
+		echo_red "libm2k tests have failed..."
 		return 1
 	}
 }
@@ -109,17 +109,17 @@ post_flash() {
 		return 1
 	}
 
-	echo_green "3. Testing Scopy -- Part 1"
-	scopy --nogui --script $SCRIPT_DIR/config/m2k/scopy1.js || {
+	echo_green "3. Testing libm2k -- Part 1"
+	python3 $SCRIPT_DIR/config/m2k/scopy1.py || {
 		terminate_any_lingering_stuff
-		echo_red "Scopy tests have failed..."
+		echo_red "libm2k tests have failed..."
 		return 1
 	}
 
 	echo_green "3.1. Ejecting M2K to apply calibration parameters..."
 	eject_m2k || {
 		terminate_any_lingering_stuff
-		echo_red "Scopy tests have failed..."
+		echo_red "libm2k tests have failed..."
 		return 1
 	}
 
@@ -136,10 +136,10 @@ post_flash() {
 		return 1
 	}
 
-	echo_green "4. Testing Scopy -- Part 2"
-	scopy --script $SCRIPT_DIR/config/m2k/scopy2.js || {
+	echo_green "4. Testing libm2k -- Part 2"
+	python3 $SCRIPT_DIR/config/m2k/scopy2.py || {
 		terminate_any_lingering_stuff
-		echo_red "Scopy tests have failed..."
+		echo_red "libm2k tests have failed..."
 		return 1
 	}
 

@@ -50,7 +50,7 @@ setup_apt_install_prereqs() {
 	sudo_required
 	sudo -s <<-EOF
 	apt-get -y update
-	apt-get -y install libftdi-dev bc sshpass openocd \
+	apt-get -y install swig libftdi-dev bc sshpass openocd \
 		cmake build-essential git libxml2-dev bison flex \
 		libfftw3-dev expect usbutils dfu-util screen \
 		wget unzip curl \
@@ -175,6 +175,27 @@ setup_libiio() {
 	popd
 }
 
+setup_libm2k() {
+	if [ "${BOARD}" != "m2k" ] ; then
+		echo_blue "Not installing libm2k ; board needs to be 'm2k'"
+		return 0
+	fi
+
+	[ ! -d "work/libm2k" ] || return 0
+
+	__download_github_common libm2k
+
+	pushd work/libm2k
+	mkdir -p build
+	pushd build
+
+	cmake -DENABLE_PYTHON=ON -DENABLE_CSHARP=OFF ..
+	make -j3
+
+	popd
+	popd
+}
+
 setup_plutosdr_scripts() {
 	local cflags="-I../libiio -Wall -Wextra"
 	local ldflags="-L../libiio/build -lfftw3 -lpthread -liio -lm"
@@ -194,24 +215,6 @@ setup_plutosdr_scripts() {
 	pushd work/plutosdr_scripts
 
 	gcc -g -o cal_ad9361 cal_ad9361.c $cflags $ldflags
-
-	popd
-}
-
-setup_scopy() {
-	if [ "${BOARD}" != "m2k" ] ; then
-		echo_blue "Not installing scopy ; board needs to be 'm2k'"
-		return 0
-	fi
-
-	[ ! -d work/scopy ] || return 0
-
-	__download_github_common scopy
-
-	pushd work/scopy
-
-	./CI/travis/before_install_linux.sh
-	./CI/travis/make.sh
 
 	popd
 }
@@ -509,7 +512,7 @@ pushd $SCRIPT_DIR
 
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs openocd ft4232h_tool"
-STEPS="$STEPS libiio plutosdr_scripts sync_udev_rules_file write_autostart_config"
+STEPS="$STEPS libiio libm2k plutosdr_scripts sync_udev_rules_file write_autostart_config"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking usbreset_tool release_files"
 STEPS="$STEPS zerotier_vpn"
 
