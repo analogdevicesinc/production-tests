@@ -14,6 +14,7 @@ from matplotlib.animation import FuncAnimation
 from sine_gen import sine_buffer_generator
 from multiprocessing import Process, Manager, Value
 from scipy import signal as sg
+from scipy.stats import pearsonr
 
 SHOW_TIMESTAMP = True;
 SHOW_START_END_TIME = True;
@@ -22,6 +23,9 @@ PWS_POS_FIRST = 0.1;
 PWS_POS_SECOND = 4.5;
 PWS_NEG_FIRST = -PWS_POS_FIRST;
 PWS_NEG_SECOND = -PWS_POS_SECOND;
+SHAPE_CORR_THRESHOLD = 0.9998
+SHAPE_PHASE_THRESHOLD = 0.8
+
 
 #*********************************************************************************************************
 #	TEST STEP 7 AFTER EJECT and CALIBRATION
@@ -163,20 +167,16 @@ def step_8():
 #	STEP 9
 #*********************************************************************************************************
 # Setup and run SIG GEN
-def _awg_output_square(ch, frequency, amplitude, offset):
+def _awg_output_square(ch, nb_samples, dac_sample_rate, amplitude, offset):
 	global siggen
-	nb_samples = 8192
-	square_signals = []
-	samp_rate = 75000000
-
 	siggen.enableChannel(ch, True)
 	siggen.setCyclic(True)
 
-	time = np.linspace(0, 2, 1000)
-	buffer1 = amplitude * sg.square(2 *np.pi * frequency * time, duty=0.5)
-	siggen.setSampleRate(ch, samp_rate)
+	buffer1 = amplitude * np.append(np.linspace(-1,-1,int(nb_samples/2)),np.linspace(1,1,int(nb_samples/2)))
+
+	siggen.setSampleRate(ch, dac_sample_rate)
 	siggen.push(ch, buffer1)
-	#sleep(0.200);
+	return buffer1
 
 def toggle_relay(pos):
 	# set pin4 high to keep ref measurement off
@@ -185,65 +185,102 @@ def toggle_relay(pos):
 	else:
 		subprocess.run(["./toggle_pins.sh", " GPIO_EXP1 pin4"])
 
-def plot_graph(ch, nb_samples, color, done_trimming):
+def plot_graph(ch, nb_samples_per, adc_nb_periods, color, done_trimming, generated_buffer):
 	global osc
 	plt.ion()
+	adc_final_nb_samples = nb_samples_per * adc_nb_periods
+
+	# Uncomment to display reference waveform
+	'''fig2 = plt.figure()
+	gen = plt.subplot(1, 1, 1)
+	gen.set_xlabel('Time')
+	gen.set_ylabel('Voltage - generated signal')
+	gen.set_xlim([0, len(generated_buffer)])
+	gen.set_ylim([-3, 3])'''
+
 	fig = plt.figure()
 	ax = plt.subplot(1, 1, 1)
 	ax.set_xlabel('Time')
 	ax.set_ylabel('Voltage')
-	ax.set_xlim([0, nb_samples])
+	ax.set_xlim([0, adc_final_nb_samples])
 	ax.set_ylim([-3, 3])
+
 	x = []
 	y = []
 	ax.plot(x, y, color = color) #empty line on the plot
 	fig.show()
+
+	# Uncomment to display reference waveform
+	'''x_gen = np.linspace(0, len(generated_buffer), len(generated_buffer))
+	gen.plot(x_gen, generated_buffer, 'b') #empty line on the plot
+	fig2.show()'''
 	
 	while done_trimming.value == 0:
-		x = np.linspace(0, nb_samples, nb_samples)
-		y = osc.getSamples(nb_samples)[ch]
-		ax.lines[0].set_data(x,y)
-		#ax.relim()
-		#ax.autoscale_view()
+		x = np.linspace(0, adc_final_nb_samples, adc_final_nb_samples)
+		y = osc.getSamples(adc_final_nb_samples)[ch]
+
+		shape_ok = _test_shape(y[0:len(generated_buffer)], generated_buffer)
+		if shape_ok:
+			ax.lines[0].set_color('g')
+			ax.set_title('Signal shape: good', loc = 'left', color = 'g')
+		else:
+			ax.lines[0].set_color('r')
+			ax.set_title('Signal shape: bad', loc = 'left', color = 'r')
+		ax.lines[0].set_data(x, y)
 		fig.canvas.flush_events()
 		sleep(0.1)
 	plt.close()
 
+def _test_shape(input_buffer, generated_buffer):
+	corr_shape, _= pearsonr(generated_buffer, input_buffer)
+	phase_diff=((math.acos(corr_shape))*180)/np.pi
+	#print("Correlation coefficient between square signal and its reference: " +str(corr_shape))
+	#print("Phase difference between square signal and its reference:" +str(phase_diff))
+	if (corr_shape <= SHAPE_CORR_THRESHOLD or phase_diff > SHAPE_PHASE_THRESHOLD):
+		return False
+	return True
+
 def _test_osc_trimmer_adjust(ch, positive, color):
 	global osc
 	trigger = osc.getTrigger()
-	nb_samples = 1024
+	nb_samples = 8192
+	adc_nb_periods = 3
+	dac_sample_rate = 7500000
+	adc_sample_rate = 10000000
+	adc_nb_samples = int(np.ceil(nb_samples / (dac_sample_rate / adc_sample_rate)))
+
+	# Used to align the first period with the DAC period (influenced by the 0.75 ratio)
+	adc_trig_value = int(np.ceil((adc_nb_samples - nb_samples) / 2))
 	pressed = ""
 	ok = False
 	ch_type = "positive"
-	#FIXME: change this to something else if needed
 	continue_button = "pin1"
 	ipc_file = "/tmp/" + continue_button + "_pressed"
 	done_trimming = False
 
 	trigger.setAnalogSource(ch)
-	trigger.setAnalogCondition(ch, libm2k.RISING_EDGE_ANALOG)
+	trigger.setAnalogCondition(ch, libm2k.FALLING_EDGE_ANALOG)
 	trigger.setAnalogLevel(ch, 0.0)
 	trigger.setAnalogMode(ch, libm2k.ANALOG)
-	trigger.setAnalogDelay(int(-nb_samples/2))
+	trigger.setAnalogDelay(adc_trig_value)
 
 	toggle_relay(positive);
 
 	if not positive:
 		ch_type = "negative"
 
-	osc.setSampleRate(100000000)
+	osc.setSampleRate(adc_sample_rate)
 	osc.setRange(ch, -2.5, 2.5)
 	osc.enableChannel(ch, True)
 	while not ok:
 		#Start the SIG GEN
-		_awg_output_square(ch, 1000, 2, 0);
+		generated_buffer = _awg_output_square(ch, nb_samples, dac_sample_rate, 2, 0);
 
 		#Display and run the OSC
 		subprocess.run(["rm", "-f", ipc_file])
 	
 		done_trimming = Value('i', 0)
-		plot_process = Process(target=plot_graph, args=(ch, nb_samples, color, done_trimming))
+		plot_process = Process(target=plot_graph, args=(ch, adc_nb_samples, adc_nb_periods, color, done_trimming, generated_buffer))
 		plot_process.start()
 
 		command = "./wait_pins.sh D pin1 ; echo pressed > " + ipc_file + " &"
@@ -314,44 +351,54 @@ def _awg_output_sine(ch, frequency, amplitude, offset):
 	siggen.setSampleRate(ch, samp_rate)
 	siggen.push(ch, buffer1)
 
-def _spectrum_setup_general(ch, test_sig_frequency):
+def _spectrum_setup_general(ch, test_sig_frequency, fs):
 	global osc
 
-	fs = 100000000
-	N = 16384
+	scaling_factor = osc.getScalingFactor(ch)
+	N = 8192
 	NFFT = N // 2
 
-	osc.enableChannel(0, True)
-	osc.enableChannel(1, True)
+	# Low range
+	osc.setRange(ch, -25, 25)
+	osc.enableChannel(ch, True)
 	osc.setSampleRate(fs)
 
-	a = osc.getSamplesRaw(N)[ch] 	#RAW or VOLTS
+	a = osc.getSamplesRaw(N)[ch]
 
-	fig, ax = plt.subplots(2)
+	# Convert raw values to volts (for debug and display only)
+	b = list(a)
+	for i in range(0, N):
+		b[i] = b[i] * scaling_factor
+
+	# Uncomment the following to use the plots for debugging
+	fig, ax = plt.subplots(3)
 
 	sp_data = np.fft.fft(a, N)
-	fVals = np.linspace(0, fs, N)
+	freq = np.arange(NFFT + 1) / (float(N) / fs)
 
-	sp_data = np.abs(sp_data)[:NFFT] * 1 / N    #[0 : np.int(NFFT)])
-	sp_data = 10 * np.log10(sp_data * scaling_factor[ch] / (2048 * 2048) )
+	# Scale the magnitude of FFT by window(None) and factor of 2,
+	# because we are using half of FFT spectrum.
+	sp_data = np.abs(sp_data)[0:NFFT+1]
+	sp_data = sp_data * 2 / N
+	sp_data = 10 * np.log10(sp_data / 32768)
 
-	ax[0].plot(fVals[:NFFT], sp_data, 'b')
+	# Uncomment the following to use the plots for debugging
+	'''ax[0].plot(freq, sp_data, 'b')
 	ax[1].plot(a)
-	print(sp_data[np.where(fVals == test_sig_frequency)])
+	ax[2].plot(b)'''
+
+	# Determine the db value for the test_sig_frequency
+	# We choose the max db value from the 2 values that are closest to test_sig_frequency
+	# freqs_gt contains the index of all the frequency values >= test_sig_frequency
+	freqs_gt = np.where(freq >= test_sig_frequency)
+	marker_1 = freq[freqs_gt[0][0] - 1]
+	marker_2 = freq[freqs_gt[0][0]]
+	peak_marker_1 = sp_data[freqs_gt[0][0]]
+	peak_marker_2 = sp_data[freqs_gt[0][0] - 1]
+
+	# Uncomment the following to use the plots for debugging
 	plt.show()
-	return max(sp_data)
-
-
-def _spectrum_setup_marker(ch, frequency):
-	global osc
-	#idx = ch * 5
-	#if (ch != spectrum.markers[idx].chId) {
-	#	return 0;
-	#}
-	#spectrum.markers[idx].en = true;
-	#spectrum.markers[idx].type = 0;
-	#spectrum.markers[idx].freq = frequency;
-	#return spectrum.markers[idx].magnitude;
+	return max(peak_marker_1, peak_marker_2)
 
 def _compute_adc_bandwidth(ch):
 	global osc, siggen
@@ -359,18 +406,19 @@ def _compute_adc_bandwidth(ch):
 	db_2 = 0
 	freq_1 = 10000
 	freq_2 = 30000000
+	adc_freq_1 = 1000000
+	adc_freq_2 = 100000000
 
 	_awg_output_sine(ch, freq_1, 2, 0)
-	#= _spectrum_setup_marker(ch, freq_1);
-	db_1 = _spectrum_setup_general(ch, freq_1)
-	#_spectrum_setup_general(ch, freq_1)
-	
+	db_1 = _spectrum_setup_general(ch, freq_1, adc_freq_1)
+	siggen.stop()
+	osc.stopAcquisition()
+
 	_awg_output_sine(ch, freq_2, 2, 0)
-	#db_2 = _spectrum_setup_marker(ch, freq_2);
-	db_2 = _spectrum_setup_general(ch, freq_2)
-	#_spectrum_setup_general(ch, freq_2)
+	db_2 = _spectrum_setup_general(ch, freq_2, adc_freq_2)
 	
 	diff = db_1 - db_2
+	log("db_1: " + str(db_1) + " db_2: " + str(db_2))
 	log("channel: " + str(ch) + " diff dB: " + str(diff))
 	osc.stopAcquisition()
 	siggen.stop()
@@ -383,12 +431,16 @@ def _compute_adc_bandwidth(ch):
 def step_10():
 	global m2k
 	log(createStepHeader(10))
-	m2k.calibrate()
+	osc.setKernelBuffersCount(1)
 
+	osc.enableChannel(0, False)
+	osc.enableChannel(1, False)
 	ret = _compute_adc_bandwidth(0)
 	if not ret:
 		return False
 
+	osc.enableChannel(0, False)
+	osc.enableChannel(1, False)
 	ret = _compute_adc_bandwidth(1)
 	if not ret:
 		return False
@@ -458,7 +510,7 @@ def main():
 	if SHOW_START_END_TIME:
 		log("Script started on: " + get_now_s() + '\n');
 
-	for i in range(10, 11):
+	for i in range(7, 11):
 		if not runTest(i):
 			libm2k.contextClose(m2k)
 			raise Exception("M2k testing steps failed...")
