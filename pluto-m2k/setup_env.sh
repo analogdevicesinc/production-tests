@@ -53,9 +53,9 @@ setup_apt_install_prereqs() {
 	apt-get -y install swig libftdi-dev bc sshpass openocd \
 		cmake build-essential git libxml2-dev bison flex \
 		libfftw3-dev expect usbutils dfu-util screen \
-		wget unzip curl \
+		wget unzip curl xfce4 \
 		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal \
-		openssh-server gpg
+		openssh-server gpg thunar-volman
 	/etc/init.d/htpdate restart
 	EOF
 }
@@ -344,10 +344,13 @@ setup_xfce4_power_manager_settings() {
 		/xfce4-power-manager/power-button-action=4
 		/xfce4-power-manager/show-panel-label=0"
 	xfconf_has_cap xfce4-power-manager || return 0
+	prop_list=`xfconf-query -c xfce4-power-manager -l`
 	for sett in $pm_sett ; do
 		local key="$(echo $sett | cut -d'=' -f1)"
 		local val="$(echo $sett | cut -d'=' -f2)"
-		xfconf-query -c xfce4-power-manager -p $key -s $val
+		if [[ $prop_list == *$key* ]]; then
+			xfconf-query -c xfce4-power-manager -p $key -s $val
+		fi
 	done
 }
 
@@ -376,10 +379,13 @@ setup_thunar_volman() {
 		/autorun/enabled=false
 		/autotablet/enabled=false"
 	xfconf_has_cap thunar-volman || return 0
+	prop_list=`xfconf-query -c thunar-volman -l`
 	for sett in $configs ; do
 		local key="$(echo $sett | cut -d'=' -f1)"
 		local val="$(echo $sett | cut -d'=' -f2)"
-		xfconf-query -c thunar-volman -p $key -s $val
+		if [[ $prop_list == *$key* ]]; then
+			xfconf-query -c thunar-volman -p $key -s $val
+		fi
 	done
 }
 
@@ -510,8 +516,8 @@ board_is_supported "$BOARD" || {
 
 pushd $SCRIPT_DIR
 
-STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
-STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs openocd ft4232h_tool"
+STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config apt_install_prereqs"
+STEPS="$STEPS xfce4_power_manager_settings thunar_volman disable_lxde_automount openocd ft4232h_tool"
 STEPS="$STEPS libiio libm2k plutosdr_scripts sync_udev_rules_file write_autostart_config"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking usbreset_tool release_files"
 STEPS="$STEPS zerotier_vpn"
