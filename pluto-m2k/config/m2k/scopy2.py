@@ -185,7 +185,7 @@ def toggle_relay(pos):
 	else:
 		subprocess.run(["./toggle_pins.sh", " GPIO_EXP1 pin4"])
 
-def plot_graph(ch, nb_samples_per, adc_nb_periods, color, done_trimming, generated_buffer):
+def plot_graph(ch, nb_samples_per, adc_nb_periods, color, done_trimming, generated_buffer, ch_type):
 	global osc
 	plt.ion()
 	adc_final_nb_samples = nb_samples_per * adc_nb_periods
@@ -198,9 +198,9 @@ def plot_graph(ch, nb_samples_per, adc_nb_periods, color, done_trimming, generat
 	gen.set_xlim([0, len(generated_buffer)])
 	gen.set_ylim([-3, 3])'''
 
-	fig = plt.figure()
+	fig = plt.figure("CH " + str(ch) + " " + ch_type)
 	ax = plt.subplot(1, 1, 1)
-	ax.set_xlabel('Time')
+	ax.set_xlabel('Samples')
 	ax.set_ylabel('Voltage')
 	ax.set_xlim([0, adc_final_nb_samples])
 	ax.set_ylim([-3, 3])
@@ -229,6 +229,8 @@ def plot_graph(ch, nb_samples_per, adc_nb_periods, color, done_trimming, generat
 		ax.lines[0].set_data(x, y)
 		fig.canvas.flush_events()
 		sleep(0.1)
+	osc.stopAcquisition()
+	osc.enableChannel(ch, False)
 	plt.close()
 
 def _test_shape(input_buffer, generated_buffer):
@@ -280,7 +282,8 @@ def _test_osc_trimmer_adjust(ch, positive, color):
 		subprocess.run(["rm", "-f", ipc_file])
 	
 		done_trimming = Value('i', 0)
-		plot_process = Process(target=plot_graph, args=(ch, adc_nb_samples, adc_nb_periods, color, done_trimming, generated_buffer))
+		plot_process = Process(target=plot_graph, args=(ch, adc_nb_samples, adc_nb_periods, 
+					color, done_trimming, generated_buffer, ch_type))
 		plot_process.start()
 
 		command = "./wait_pins.sh D pin1 ; echo pressed > " + ipc_file + " &"
@@ -307,16 +310,14 @@ def _test_osc_trimmer_adjust(ch, positive, color):
 		ok = True;
 		pressed = "";
 
-		osc.stopAcquisition()
-		siggen.stop()
-		osc.enableChannel(ch, False)
+		siggen.stop(ch)
 		ret = ok
 	return ret
 
 def step_9():
 	log(createStepHeader(9))
 	# CH 0 Positive
-	result = _test_osc_trimmer_adjust(0, True, 'red');
+	result = _test_osc_trimmer_adjust(0, True, 'blue');
 	if not result:
 		return False
 
@@ -326,12 +327,12 @@ def step_9():
 		return False
 
 	#CH 1 Positive
-	result = _test_osc_trimmer_adjust(1, False, 'green');
+	result = _test_osc_trimmer_adjust(1, True, 'green');
 	if not result:
 		return False
 
 	#CH 1 Negative
-	result = _test_osc_trimmer_adjust(1, True, 'purple')
+	result = _test_osc_trimmer_adjust(1, False, 'green')
 
 	if not result:
 		return False
@@ -351,7 +352,7 @@ def _awg_output_sine(ch, frequency, amplitude, offset):
 	siggen.setSampleRate(ch, samp_rate)
 	siggen.push(ch, buffer1)
 
-def _spectrum_setup_general(ch, test_sig_frequency, fs):
+def _spectrum_setup_channel(ch, test_sig_frequency, fs):
 	global osc
 
 	scaling_factor = osc.getScalingFactor(ch)
@@ -363,7 +364,13 @@ def _spectrum_setup_general(ch, test_sig_frequency, fs):
 	osc.enableChannel(ch, True)
 	osc.setSampleRate(fs)
 
-	a = osc.getSamplesRaw(N)[ch]
+	m2k.setTimeout(5000)
+	try:
+		a = osc.getSamplesRaw(N)[ch]
+	except:
+		m2k.setTimeout(0)
+		raise Exception("Timeout occured")
+	m2k.setTimeout(0)
 
 	# Convert raw values to volts (for debug and display only)
 	b = list(a)
@@ -371,7 +378,7 @@ def _spectrum_setup_general(ch, test_sig_frequency, fs):
 		b[i] = b[i] * scaling_factor
 
 	# Uncomment the following to use the plots for debugging
-	fig, ax = plt.subplots(3)
+	'''fig, ax = plt.subplots(3)'''
 
 	sp_data = np.fft.fft(a, N)
 	freq = np.arange(NFFT + 1) / (float(N) / fs)
@@ -397,7 +404,7 @@ def _spectrum_setup_general(ch, test_sig_frequency, fs):
 	peak_marker_2 = sp_data[freqs_gt[0][0] - 1]
 
 	# Uncomment the following to use the plots for debugging
-	plt.show()
+	'''plt.show()'''
 	return max(peak_marker_1, peak_marker_2)
 
 def _compute_adc_bandwidth(ch):
@@ -409,29 +416,47 @@ def _compute_adc_bandwidth(ch):
 	adc_freq_1 = 1000000
 	adc_freq_2 = 100000000
 
-	_awg_output_sine(ch, freq_1, 2, 0)
-	db_1 = _spectrum_setup_general(ch, freq_1, adc_freq_1)
-	siggen.stop()
-	osc.stopAcquisition()
+	try:
+		_awg_output_sine(ch, freq_1, 2, 0)
+		db_1 = _spectrum_setup_channel(ch, freq_1, adc_freq_1)
+		siggen.stop()
+		osc.stopAcquisition()
 
-	_awg_output_sine(ch, freq_2, 2, 0)
-	db_2 = _spectrum_setup_general(ch, freq_2, adc_freq_2)
+		_awg_output_sine(ch, freq_2, 2, 0)
+		db_2 = _spectrum_setup_channel(ch, freq_2, adc_freq_2)
+		siggen.stop()
+		osc.stopAcquisition()
+	except:
+		log("Error: Timeout occured")
+		siggen.stop()
+		osc.stopAcquisition()
+		return False
 	
 	diff = db_1 - db_2
 	log("db_1: " + str(db_1) + " db_2: " + str(db_2))
 	log("channel: " + str(ch) + " diff dB: " + str(diff))
-	osc.stopAcquisition()
-	siggen.stop()
 
 	if (diff > ADC_BANDWIDTH_THRESHOLD) or (diff < 0):
 		log("Error: dB difference is too big")
 		return False
 	return True
 
+def _spectrum_setup_trigger():
+	global osc
+	trigger = osc.getTrigger()
+	trigger.setAnalogDelay(0)
+	trigger.setAnalogMode(0, libm2k.ALWAYS)
+	trigger.setAnalogMode(1, libm2k.ALWAYS)
+
 def step_10():
 	global m2k
 	log(createStepHeader(10))
+
+	m2k.calibrate()
 	osc.setKernelBuffersCount(1)
+
+	# Disable the triggers setup during the previous step
+	_spectrum_setup_trigger()
 
 	osc.enableChannel(0, False)
 	osc.enableChannel(1, False)
@@ -467,7 +492,6 @@ def connect():
 	siggen = m2k.getAnalogOut()
 	pws = m2k.getPowerSupply()
 	dig = m2k.getDigital()
-	osc.setKernelBuffersCount(1)
 	return True
 
 def log(message):
@@ -484,7 +508,7 @@ def get_now_s():
 	return str(now)
 
 def runTest(step):
-	global m2k
+	global m2k, osc
 	trial_nb = 1
 	ret = False
 	while (not ret and trial_nb < 4):
@@ -500,6 +524,7 @@ def runTest(step):
 				log("Failed " + str(trial_nb) + " times at step " + str(step))
 			trial_nb += 1
 			m2k.calibrate()
+			osc.setKernelBuffersCount(1)
 
 	return ret
 
