@@ -34,7 +34,8 @@ terminate_any_lingering() {
 }
 
 terminate_any_lingering_stuff() {
-	terminate_any_lingering libm2k
+	terminate_any_lingering m2k_part1.py
+	terminate_any_lingering m2k_part2.py
 	terminate_any_lingering wait_pins
 }
 
@@ -110,7 +111,8 @@ post_flash() {
 	}
 
 	echo_green "3. Testing libm2k -- Part 1"
-	python3 $SCRIPT_DIR/config/m2k/scopy1.py || {
+	export PYTHONPATH=$SCRIPT_DIR/work/libm2k/build/
+	python3 $SCRIPT_DIR/config/m2k/m2k_part1.py || {
 		terminate_any_lingering_stuff
 		echo_red "libm2k tests have failed..."
 		return 1
@@ -137,7 +139,8 @@ post_flash() {
 	}
 
 	echo_green "4. Testing libm2k -- Part 2"
-	python3 $SCRIPT_DIR/config/m2k/scopy2.py || {
+	export PYTHONPATH=$SCRIPT_DIR/work/libm2k/build/
+	python3 $SCRIPT_DIR/config/m2k/m2k_part2.py || {
 		terminate_any_lingering_stuff
 		echo_red "libm2k tests have failed..."
 		return 1
