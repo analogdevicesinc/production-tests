@@ -222,7 +222,7 @@ def _calibrate_pos_power_supply():
 
 	# Pos dac/adc offset calib with 100mV
 	pws.enableChannel(0, True)
-	pws.pushChannel(0, PWS_POS_FIRST)
+	pws.pushChannel(0, PWS_POS_FIRST, False)
 	# call some shell script which returns the ADC value
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V5B pos false"], universal_newlines = False, stdout = subprocess.PIPE)
 	#value = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/m2k_power_calib_meas.sh V5B pos false").trim()
@@ -231,13 +231,13 @@ def _calibrate_pos_power_supply():
 	if value == '' or value == "failed" or math.isnan(value):
 		return False
 	OFFSET_POS_DAC = PWS_POS_FIRST - value
-	value_m2k = pws.readChannel(0)
+	value_m2k = pws.readChannel(0, False)
 	OFFSET_POS_ADC = value - value_m2k
 	res += str(value) + " "
 
 	step += 1
 	# Pos dac/adc gain calib with 4.5V
-	pws.pushChannel(0, PWS_POS_SECOND)
+	pws.pushChannel(0, PWS_POS_SECOND, False)
 	# call some shell script which returns the ADC value
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V5B pos false"], universal_newlines = False, stdout = subprocess.PIPE)
 	#value = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/m2k_power_calib_meas.sh V5B pos false").trim()
@@ -246,14 +246,14 @@ def _calibrate_pos_power_supply():
 	if value == '' or value == "failed" or math.isnan(value):
 		return False
 	GAIN_POS_DAC = PWS_POS_SECOND / (value + OFFSET_POS_DAC)
-	value_m2k = pws.readChannel(0)
+	value_m2k = pws.readChannel(0, False)
 	GAIN_POS_ADC = value / (value_m2k + OFFSET_POS_ADC)
 	res += str(value) + " "
 
 	res = "DONE with POSITIVE supply --> voltages: " + res
 	log(res)
 
-	pws.pushChannel(0, 0.0)
+	pws.pushChannel(0, 0.0, False)
 	pws.enableChannel(0, False)
 	return True
 
@@ -266,7 +266,7 @@ def _calibrate_neg_power_supply():
 
 	# Neg dac/adc offset calib with -100mV
 	pws.enableChannel(1, True)
-	pws.pushChannel(1, PWS_NEG_FIRST)
+	pws.pushChannel(1, PWS_NEG_FIRST, False)
 	# call some shell script which returns the ADC value
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg false"], universal_newlines = False, stdout = subprocess.PIPE)
 	#value = extern.start("sshpass -pjig ssh jig@localhost sudo " +  WORKING_DIR + "/m2k_power_calib_meas.sh V6B neg false");
@@ -275,13 +275,13 @@ def _calibrate_neg_power_supply():
 	if value == '' or value == "failed" or math.isnan(value):
 		return False
 	OFFSET_NEG_DAC = PWS_NEG_FIRST - value
-	value_m2k = pws.readChannel(1)
+	value_m2k = pws.readChannel(1, False)
 	OFFSET_NEG_ADC = value - value_m2k
 	res += str(value) + " "
 
 	step += 1
 	# Neg dac/adc gain calib with -4.5V
-	pws.pushChannel(1, PWS_NEG_SECOND)
+	pws.pushChannel(1, PWS_NEG_SECOND, False)
 	# call some shell script which returns the ADC value
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg false"], universal_newlines = False, stdout = subprocess.PIPE)
 	#value = extern.start("sshpass -pjig ssh jig@localhost sudo " +  WORKING_DIR + "/m2k_power_calib_meas.sh V6B neg false")
@@ -290,14 +290,14 @@ def _calibrate_neg_power_supply():
 	if value == '' or value == "failed" or math.isnan(value):
 		return False
 	GAIN_NEG_DAC = PWS_NEG_SECOND / (value + OFFSET_NEG_DAC)
-	value_m2k = pws.readChannel(1)
+	value_m2k = pws.readChannel(1, False)
 	GAIN_NEG_ADC = value / (value_m2k + OFFSET_NEG_ADC)
 	res += str(value) + " "
 
 	res = "DONE with NEGATIVE supply --> voltages: " + res
 	log(res)
 
-	pws.pushChannel(1, 0.0)
+	pws.pushChannel(1, 0.0, False)
 	pws.enableChannel(1, False)
 	return True
 
@@ -425,6 +425,7 @@ def connect():
 	if m2k is None:
 		log("Can't connect to M2K")
 		return False
+	m2k.reset()
 	m2k.calibrate()
 	osc = m2k.getAnalogIn()
 	siggen = m2k.getAnalogOut()
@@ -471,6 +472,8 @@ def main():
 	global m2k
 	if not connect():
 		raise Exception("Can't connect to an M2k")
+
+	log("Running libm2k " + libm2k.getVersion())
 	if SHOW_START_END_TIME:
 		log("Script started on: " + get_now_s() + '\n');
 
