@@ -3,5 +3,5 @@ Type=Application
 Terminal=true
 Name=Print ADALM2000 Label
 Icon=utilities-terminal
-Exec=sh -c "cd \$HOME/plutosdr-m2k-production-test-V2/print; python pgui-adalm2000.py"
+Exec=sh -c "cd \$HOME/production-tests/pluto-m2k/print; python pgui-adalm2000.py"
 Categories=Application;
