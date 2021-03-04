@@ -335,12 +335,12 @@ def step_9():
 		return False
 
 	#CH 1 Positive
-	result = _test_osc_trimmer_adjust(1, True, 'green');
+	result = _test_osc_trimmer_adjust(1, False, 'green');
 	if not result:
 		return False
 
 	#CH 1 Negative
-	result = _test_osc_trimmer_adjust(1, False, 'green')
+	result = _test_osc_trimmer_adjust(1, True, 'green')
 
 	if not result:
 		return False
