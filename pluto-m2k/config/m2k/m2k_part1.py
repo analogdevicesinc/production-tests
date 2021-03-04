@@ -4,6 +4,7 @@ from time import sleep
 import math
 import numpy as np
 from datetime import datetime
+import sys
 
 SHOW_TIMESTAMP = True
 SHOW_START_END_TIME = True
@@ -101,25 +102,25 @@ def step_5():
 	result = _test_osc_range(0, False)
 	if not result:
 		disable_ref_measurement()
-		return false
+		return False
 
 	#/* CH 0 HIGH Gain*/
 	result = _test_osc_range(0, True)
 	if not result:
 		disable_ref_measurement()
-		return false
+		return False
 
 	#/* CH 1 LOW Gain*/
 	result = _test_osc_range(1, False)
 	if not result:
 		disable_ref_measurement()
-		return false
+		return False
 
 	#/* CH 1 HIGH Gain*/
 	result = _test_osc_range(1, True)
 	if not result:
 		disable_ref_measurement()
-		return false
+		return False
 
 	_osc_change_gain_mode(0, False)
 	_osc_change_gain_mode(1, False)
@@ -146,10 +147,8 @@ def _osc_read_constant(ch):
 	global osc
 
 	osc.enableChannel(ch, True)
-	osc.setKernelBuffersCount(1)
 	osc.setSampleRate(100000000)
 	val = osc.getVoltage(ch)
-	#var val = osc.channels[ch].mean
 	return val
 
 def _awg_osc_constant(ch, value):
@@ -183,6 +182,7 @@ def _awg_osc_constant(ch, value):
 def _test_awg_osc(ch):
 	global osc
 	ret = True
+	osc.setKernelBuffersCount(1)
 
 	# Display and run the OSC
 	_osc_change_gain_mode(ch, False)
@@ -399,14 +399,10 @@ def step_8():
 		ret = _test_DIO_pair(i, i + 8)
 		if not ret:
 			retAll = False
-			#_reset_DIO()
-			#return False
 		_reset_DIO()
 		ret = _test_DIO_pair(i + 8, i)
 		if not ret:
 			retAll = False
-			#_reset_DIO()
-			#return False
 	_reset_DIO()
 	return retAll
 
@@ -470,8 +466,9 @@ def runTest(step):
 
 def main():
 	global m2k
+	sys.tracebacklimit = 0
 	if not connect():
-		raise Exception("Can't connect to an M2k")
+		raise Exception("ERROR: Can't connect to an M2k")
 
 	log("Running libm2k " + libm2k.getVersion())
 	if SHOW_START_END_TIME:
@@ -480,7 +477,7 @@ def main():
 	for i in range(5,8):
 		if not runTest(i):
 			libm2k.contextClose(m2k)
-			raise Exception("M2k testing steps failed...")
+			raise ValueError("ERROR: M2k testing steps failed at step " + str(i) + "...")
 	log("Done\n")
 	if SHOW_START_END_TIME:
 		log("Script ended on: " + get_now_s() + '\n')

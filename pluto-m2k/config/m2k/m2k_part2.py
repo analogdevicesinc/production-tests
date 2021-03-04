@@ -15,6 +15,7 @@ from sine_gen import sine_buffer_generator
 from multiprocessing import Process, Manager, Value
 from scipy import signal as sg
 from scipy.stats import pearsonr
+import sys
 
 SHOW_TIMESTAMP = True;
 SHOW_START_END_TIME = True;
@@ -23,7 +24,7 @@ PWS_POS_FIRST = 0.1;
 PWS_POS_SECOND = 4.5;
 PWS_NEG_FIRST = -PWS_POS_FIRST;
 PWS_NEG_SECOND = -PWS_POS_SECOND;
-SHAPE_CORR_THRESHOLD = 0.9998
+SHAPE_CORR_THRESHOLD = 0.9997
 SHAPE_PHASE_THRESHOLD = 0.8
 
 
@@ -151,14 +152,10 @@ def step_8():
 		ret = _test_DIO_pair(i, i + 8)
 		if not ret:
 			retAll = False
-			#_reset_DIO()
-			#return False
 		_reset_DIO()
 		ret = _test_DIO_pair(i + 8, i)
 		if not ret:
 			retAll = False
-			#_reset_DIO()
-			#return False
 	_reset_DIO()
 	return retAll
 
@@ -168,14 +165,20 @@ def step_8():
 #*********************************************************************************************************
 # Setup and run SIG GEN
 def _awg_output_square(ch, nb_samples, dac_sample_rate, amplitude, offset):
-	global siggen
+	global siggen, m2k
 	siggen.enableChannel(ch, True)
 	siggen.setCyclic(True)
 
 	buffer1 = amplitude * np.append(np.linspace(-1,-1,int(nb_samples/2)),np.linspace(1,1,int(nb_samples/2)))
 
 	siggen.setSampleRate(ch, dac_sample_rate)
-	siggen.push(ch, buffer1)
+	m2k.setTimeout(5000)
+	try:
+		siggen.push(ch, buffer1)
+	except:
+		m2k.setTimeout(0)
+		raise Exception("Timeout occured")
+	m2k.setTimeout(0)
 	return buffer1
 
 def toggle_relay(pos):
@@ -276,7 +279,12 @@ def _test_osc_trimmer_adjust(ch, positive, color):
 	osc.enableChannel(ch, True)
 	while not ok:
 		#Start the SIG GEN
-		generated_buffer = _awg_output_square(ch, nb_samples, dac_sample_rate, 2, 0);
+		try:
+			generated_buffer = _awg_output_square(ch, nb_samples, dac_sample_rate, 2, 0);
+		except:
+			log("Error: DAC Timeout occured")
+			siggen.stop(ch)
+			return False
 
 		#Display and run the OSC
 		subprocess.run(["rm", "-f", ipc_file])
@@ -530,15 +538,16 @@ def runTest(step):
 
 def main():
 	global m2k
+	sys.tracebacklimit = 0
 	if not connect():
-		raise Exception("Can't connect to an M2k")
+		raise Exception("ERROR: Can't connect to an M2k")
 	if SHOW_START_END_TIME:
 		log("Script started on: " + get_now_s() + '\n');
 
 	for i in range(7, 11):
 		if not runTest(i):
 			libm2k.contextClose(m2k)
-			raise Exception("M2k testing steps failed...")
+			raise ValueError("ERROR: M2k testing steps failed at step " + str(i) + "...")
 	log("\nDone\n")
 	if SHOW_START_END_TIME:
 		log("Script ended on: " + get_now_s() + '\n')
