@@ -66,4 +66,4 @@ rm -rf /tmp/back.pdf
 
 glabels-3-batch -o /tmp/back.pdf -i /tmp/csvfile.csv ./m2k_back.glabels
 cancel -a -x
-lpr -PDYMO-LabelWriter-450 /tmp/back.pdf
+lpr -PDYMO_LabelWriter_450 /tmp/back.pdf
