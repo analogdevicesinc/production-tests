@@ -189,7 +189,7 @@ setup_libm2k() {
 	mkdir -p build
 	pushd build
 
-	cmake -DENABLE_PYTHON=ON -DENABLE_CSHARP=OFF ..
+	cmake -DENABLE_PYTHON=ON -DENABLE_CSHARP=OFF -DIIO_INCLUDE_DIRS=../../libiio/ -DIIO_LIBRARIES=../../libiio/build/libiio.so ..
 	make -j3
 
 	popd
