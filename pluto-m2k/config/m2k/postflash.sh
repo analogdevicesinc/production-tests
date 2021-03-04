@@ -44,11 +44,11 @@ reboot_via_ssh() {
 }
 
 remove_mount_folder() {
-	rm -rf /media/jig/M2k
+	rm -rf /media/analog/M2k
 }
 
 eject_m2k() {
-	umount "/media/jig/M2k" || {
+	umount "/media/analog/M2k" || {
 		remove_mount_folder
 	}
 
@@ -112,7 +112,8 @@ post_flash() {
 
 	echo_green "3. Testing libm2k -- Part 1"
 	export PYTHONPATH=$SCRIPT_DIR/work/libm2k/build/
-	python3 $SCRIPT_DIR/config/m2k/m2k_part1.py || {
+	powercycle_board_wait
+	python3 -u $SCRIPT_DIR/config/m2k/m2k_part1.py || {
 		terminate_any_lingering_stuff
 		echo_red "libm2k tests have failed..."
 		return 1
@@ -140,7 +141,7 @@ post_flash() {
 
 	echo_green "4. Testing libm2k -- Part 2"
 	export PYTHONPATH=$SCRIPT_DIR/work/libm2k/build/
-	python3 $SCRIPT_DIR/config/m2k/m2k_part2.py || {
+	python3 -u $SCRIPT_DIR/config/m2k/m2k_part2.py || {
 		terminate_any_lingering_stuff
 		echo_red "libm2k tests have failed..."
 		return 1
