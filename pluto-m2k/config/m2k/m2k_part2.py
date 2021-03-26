@@ -40,7 +40,6 @@ def _read_pos_power_supply():
 
 	# call some shell script which returns the ADC value
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V5B pos true"], universal_newlines = False, stdout = subprocess.PIPE)
-#	value = extern.start("sshpass -pjig ssh jig@localhost sudo $WORKING_DIR/m2k_power_calib_meas.sh V5B pos true");
 	value = float(value.stdout.decode())
 	log("pos result: " + str(value))
 
@@ -51,7 +50,6 @@ def _read_pos_power_supply():
 	pws.pushChannel(0, PWS_POS_SECOND)
 	# call some shell script which returns the ADC value
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V5B pos true"], universal_newlines = False, stdout = subprocess.PIPE)
-	#value = extern.start("sshpass -pjig ssh jig@localhost sudo $WORKING_DIR/m2k_power_calib_meas.sh V5B pos true");
 	value = float(value.stdout.decode())
 	log("pos result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
@@ -67,9 +65,7 @@ def _read_neg_power_supply():
 	pws.enableChannel(1, True)
 	pws.pushChannel(1, PWS_NEG_FIRST)
 	# call some shell script which returns the ADC value
-	######### TODO use check_output for output retrieval
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg true"], universal_newlines = False, stdout = subprocess.PIPE)
-	#value = extern.start("sshpass -pjig ssh jig@localhost sudo $WORKING_DIR/m2k_power_calib_meas.sh V6B neg true").trim();
 	value = float(value.stdout.decode())
 	log("neg result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
@@ -79,7 +75,6 @@ def _read_neg_power_supply():
 	pws.pushChannel(1, PWS_NEG_SECOND)
 	# call some shell script which returns the ADC value
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg true"], universal_newlines = False, stdout = subprocess.PIPE)
-	#value = extern.start("sshpass -pjig ssh jig@localhost sudo $WORKING_DIR/m2k_power_calib_meas.sh V6B neg true").trim();
 	value = float(value.stdout.decode())
 	log("neg result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
@@ -113,9 +108,8 @@ def _reset_DIO():
 		dig.setValueRaw(i, 1)
 
 
-#/* Set the output to a value and check it with the input
-# * true(high), false(low)
-# */
+''' Set the output to a value and check it with the input
+	true(high), false(low)'''
 def _test_DIO_pair(input, output):
 	global dig
 	value = False

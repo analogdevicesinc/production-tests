@@ -58,8 +58,6 @@ def _osc_check_range(high, value):
 
 def disable_ref_measurement():
 	subprocess.run(["./ref_measure_ctl.sh", "disable"])
-	#extern.start("sshpass -pjig ssh jig@localhost sudo ~/plutosdr-m2k-production-test-V2/ref_measure_ctl.sh disable");
-	#//extern.start("./ref_measure_ctl.sh disable");
 
 def _test_osc_range(ch, high):
 	global osc
@@ -67,15 +65,11 @@ def _test_osc_range(ch, high):
 
 	if high:
 		subprocess.run(["./ref_measure_ctl.sh", "ref2.5v"])
-		#output = extern.start("sshpass -pjig ssh jig@localhost sudo ~/plutosdr-m2k-production-test-V2/ref_measure_ctl.sh ref2.5v");
-		#output = extern.start("./ref_measure_ctl.sh ref2.5v")
 	else:
 		subprocess.run(["./ref_measure_ctl.sh", "ref10v"])
-		#output = extern.start("sshpass -pjig ssh jig@localhost sudo ~/plutosdr-m2k-production-test-V2/ref_measure_ctl.sh ref10v");
-		#output = extern.start("./ref_measure_ctl.sh ref10v")
 
 	_osc_change_gain_mode(ch, high)
-	#/* Busy wait for 10 seconds, with 100 milliseconds intervals */
+	# Busy wait for 10 seconds, with 100 milliseconds intervals
 	for i in range(0, 100):
 		value = _osc_read_constant(ch)
 		ret = _osc_check_range(high, value)
@@ -98,25 +92,25 @@ def step_5():
 	log(createStepHeader(5))
 	disable_ref_measurement()
 
-	#/* CH 0 LOW Gain*/
+	# CH 0 LOW Gain
 	result = _test_osc_range(0, False)
 	if not result:
 		disable_ref_measurement()
 		return False
 
-	#/* CH 0 HIGH Gain*/
+	# CH 0 HIGH Gain
 	result = _test_osc_range(0, True)
 	if not result:
 		disable_ref_measurement()
 		return False
 
-	#/* CH 1 LOW Gain*/
+	# CH 1 LOW Gain
 	result = _test_osc_range(1, False)
 	if not result:
 		disable_ref_measurement()
 		return False
 
-	#/* CH 1 HIGH Gain*/
+	# CH 1 HIGH Gain
 	result = _test_osc_range(1, True)
 	if not result:
 		disable_ref_measurement()
@@ -130,8 +124,8 @@ def step_5():
 
 #*********************************************************************************************************
 #	STEP 6
-#*********************************************************************************************************/
-#/* Setup and run SIG GEN */
+#*********************************************************************************************************
+# Setup and run SIG GEN
 def _awg_output_constant(ch, value):
 	global siggen
 
@@ -142,7 +136,7 @@ def _awg_output_constant(ch, value):
 	siggen.push(ch, buffer)
 	sleep(0.500)
 
-#/* Read OSC values */
+# Read OSC values
 def _osc_read_constant(ch):
 	global osc
 
@@ -157,7 +151,7 @@ def _awg_osc_constant(ch, value):
 	result = ""
 	_awg_output_constant(ch, value)
 	ret = False
-	#/* busy wait for 10 seconds with 100 milliseconds intervals */
+	# busy wait for 10 seconds with 100 milliseconds intervals
 	for i in range (0, 100):
 		ret_value = _osc_read_constant(ch)
 		if ((ret_value < (value + ADC_CONST_ERR_THRESHOLD)) and (ret_value > (value - ADC_CONST_ERR_THRESHOLD))):
@@ -225,7 +219,6 @@ def _calibrate_pos_power_supply():
 	pws.pushChannel(0, PWS_POS_FIRST, False)
 	# call some shell script which returns the ADC value
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V5B pos false"], universal_newlines = False, stdout = subprocess.PIPE)
-	#value = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/m2k_power_calib_meas.sh V5B pos false").trim()
 	value = float(value.stdout.decode())
 	log("pos " + str(step) + " result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
@@ -240,7 +233,6 @@ def _calibrate_pos_power_supply():
 	pws.pushChannel(0, PWS_POS_SECOND, False)
 	# call some shell script which returns the ADC value
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V5B pos false"], universal_newlines = False, stdout = subprocess.PIPE)
-	#value = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/m2k_power_calib_meas.sh V5B pos false").trim()
 	value = float(value.stdout.decode())
 	log("pos " + str(step) + " result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
@@ -269,7 +261,6 @@ def _calibrate_neg_power_supply():
 	pws.pushChannel(1, PWS_NEG_FIRST, False)
 	# call some shell script which returns the ADC value
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg false"], universal_newlines = False, stdout = subprocess.PIPE)
-	#value = extern.start("sshpass -pjig ssh jig@localhost sudo " +  WORKING_DIR + "/m2k_power_calib_meas.sh V6B neg false");
 	value = float(value.stdout.decode())	
 	log("pos " + str(step) + " result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
@@ -284,7 +275,6 @@ def _calibrate_neg_power_supply():
 	pws.pushChannel(1, PWS_NEG_SECOND, False)
 	# call some shell script which returns the ADC value
 	value = subprocess.run(["./m2k_power_calib_meas.sh", "V6B neg false"], universal_newlines = False, stdout = subprocess.PIPE)
-	#value = extern.start("sshpass -pjig ssh jig@localhost sudo " +  WORKING_DIR + "/m2k_power_calib_meas.sh V6B neg false")
 	value = float(value.stdout.decode())
 	log("pos " + str(step) + " result: " + str(value))
 	if value == '' or value == "failed" or math.isnan(value):
@@ -337,7 +327,6 @@ def step_7():
 	_write_calib_file()
 	ret = subprocess.run(["./scp.sh", M2KCALIB_INI_LOCAL, " root@192.168.2.1:/mnt/jffs2/" + M2KCALIB_INI, " analog"],
 		universal_newlines = False, capture_output = True)
-	#ret = extern.start("sshpass -pjig ssh jig@localhost sudo " + WORKING_DIR + "/scp.sh " + M2KCALIB_INI_LOCAL + " root@192.168.2.1:/mnt/jffs2/" + M2KCALIB_INI + " analog").trim();
 
 	ret = str(ret.stdout.decode().rstrip('\r\n'))
 	subprocess.run(["rm", M2KCALIB_INI_LOCAL])
@@ -360,9 +349,8 @@ def _reset_DIO():
 		dig.setValueRaw(i, 1)
 
 
-#/* Set the output to a value and check it with the input
-# * true(high), false(low)
-# */
+''' Set the output to a value and check it with the input
+	true(high), false(low) '''
 def _test_DIO_pair(input, output):
 	global dig
 	value = False
