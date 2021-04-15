@@ -407,20 +407,6 @@ static int32_t iio_set_attribute(char *device, char *channel, bool in_out,
         return EXIT_FAILURE;
     }
 
-    ret = iio_channel_attr_read(chan, attribute, buf, sizeof(buf));
-    if (ret > 0)
-    {
-        /*if (log)
-        {
-            write_log[wl_index].device = strdup(device);
-            write_log[wl_index].channel = strdup(channel);
-            write_log[wl_index].in_out = in_out;
-            write_log[wl_index].attribute = strdup(attribute);
-            write_log[wl_index].value = strdup(buf);
-            wl_index++;
-        }*/
-    }
-
     if (buffer)
     {
         ret = iio_channel_attr_write(chan, attribute, buffer);
