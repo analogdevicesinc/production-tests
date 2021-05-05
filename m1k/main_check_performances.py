@@ -64,8 +64,7 @@ TOLERANCE_VOLTAGE = 0.011
 TOLERANCE_CURRENT = 0.004
 
 # Read from EEPROM External 2V5 and 1V2 references value
-EX_2V5_REF = eeprom_m24c02.read_write(0x00, '', 6, 'float')
-EX_1V2_REF = eeprom_m24c02.read_write(0x08, '', 8, 'float')
+EX_1V2_REF = eeprom_m24c02.read_write(0x08, '', 6, 'float')
 
 # Voltage setpoints for positive and
 # negative current when M1K is in SVMI mode
