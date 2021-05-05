@@ -3,14 +3,13 @@ import signal
 import sys
 import types
 
-from numpy import mean
-
 import adc_ad7091r5
 import dac_ad5647r
 import eeprom_m24c02
 import global_
 import ioxp_adp5589
 from gpiozero import LED
+from numpy import mean
 from pysmu import Mode, Session
 
 TEXT = global_.TEXT_COLOR_MAP
@@ -142,12 +141,15 @@ def predetermine_resistance(polarity):
     adc_gain_neg = int(eeprom_m24c02.read_write(0x85, '', 3, 'hex'), 16)
     i_gain_neg = eeprom_m24c02.read_write(0x89, '', 7, 'float')
 
+    comp_poz = eeprom_m24c02.read_write(0x61, '', 6, 'float')
+    comp_neg = eeprom_m24c02.read_write(0x68, '', 7, 'float')
+
     if polarity == 'poz':
         ref_2v5_srs = adc_ad7091r5.voltage_input(3, adc_params_3, 1000)[0]
         chx_voltage_srs = adc_ad7091r5.voltage_input(2, adc_params_2, 1000)[0]
         current_chx_poz = adc_ad7091r5.current_value(
             adc_offset_poz, adc_gain_poz, i_gain_poz, 1000)[0]
-        voltage = chx_voltage_srs + 0.022 - ref_2v5_srs
+        voltage = chx_voltage_srs + comp_poz - ref_2v5_srs
         resistance_srs = voltage / current_chx_poz
         print(resistance_srs)
 
@@ -156,7 +158,7 @@ def predetermine_resistance(polarity):
         chx_voltage_snc = adc_ad7091r5.voltage_input(2, adc_params_2, 1000)[0]
         current_chx_neg = adc_ad7091r5.current_value(
             adc_offset_neg, adc_gain_neg, i_gain_neg, 1000)[0]
-        voltage = chx_voltage_snc - 0.027 - ref_2v5_snc
+        voltage = chx_voltage_snc + comp_neg - ref_2v5_snc
         resistance_snc = voltage / current_chx_neg
         print(resistance_snc)
 
