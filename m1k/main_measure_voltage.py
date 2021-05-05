@@ -57,9 +57,8 @@ FOURTH_STAGE = False
 # Stop script execution until user press ENTER
 BRAKE_SCRIPT = False
 
-# Read from EEPROM External 2V5 and 1V2 references value
+# Read from EEPROM External 2V5 reference value
 EX_2V5_REF = eeprom_m24c02.read_write(0x00, '', 6, 'float')
-EX_1V2_REF = eeprom_m24c02.read_write(0x08, '', 8, 'float')
 
 USB = LED(12)
 if __name__ == '__main__':
