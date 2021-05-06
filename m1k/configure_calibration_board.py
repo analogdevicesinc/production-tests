@@ -454,7 +454,7 @@ def __calculate_voltage_drop_3v75():
     """Measure switch voltage drop.
 
     SETUP: Connect M1K on the calibration board.
-    Measure voltage value on connector and R8 on the M1K.
+    Measure voltage value on the M1K connector between CHA and CHB pins.
     """
     print TEXT['green'], __calculate_voltage_drop_3v75.__doc__, TEXT['default']
     ioxp_adp5589.gpo_set_ac(['GPIO_8__1', 'GPIO_7__1', 'GPIO_1__1'])
@@ -475,7 +475,7 @@ def __calculate_voltage_drop_1v25():
     """Measure switch voltage drop.
 
     SETUP: Connect M1K on the calibration board.
-    Measure voltage value on connector and R8 on the M1K.
+    Measure voltage value on the M1K connector between CHA and CHB pins.
     """
     print TEXT['green'], __calculate_voltage_drop_1v25.__doc__, TEXT['default']
     ioxp_adp5589.gpo_set_ac(['GPIO_8__1', 'GPIO_7__1', 'GPIO_1__1'])
