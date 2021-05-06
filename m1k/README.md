@@ -208,12 +208,16 @@ To determine the offset is necessary to disconnect the M1K from the calibration 
 This step require to determine the gain for the ADC input used to measure the M1K sourced current.
 To determine the gain source a voltage with a digital power supply and measure the resulted current with a digital multimeter. Read the hexadecimal ADC code and the digital multimeter measurement and enter the resulted values in the application to be write in the EEPROM.
 
+**Note:** A benchtop source measure unit can also be used instead of a digital power supply and a digital multimeter.
+
 ![Step_m](Config_Setup_Images/Step_m.png)
 
 ## 9. ADC gain calibration for negative current measurement
 
 This step require to determine the gain for the ADC input used to measure the M1K sourced current.
 To determine the gain source a voltage with a digital power supply and measure the resulted current with a digital multimeter. Read the hexadecimal ADC code and the digital multimeter measurement and enter the resulted values in the application to be write in the EEPROM.
+
+**Note:** A benchtop source measure unit can also be used instead of a digital power supply and a digital multimeter.
 
 ![Step_o](Config_Setup_Images/Step_o.png)
 
