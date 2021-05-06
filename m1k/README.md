@@ -221,21 +221,8 @@ To determine the gain source a voltage with a digital power supply and measure t
 
 ![Step_o](Config_Setup_Images/Step_o.png)
 
-## 10. Calculate resistance for a positive current measurement
 
-This step require to already have the external ADC calibrated and to have an M1K board up and running plugged in the calibration board. We need this to measure the M1K 2.5 V reference, the sourced voltage by the M1K and also the resulted current.
-If ADC measurements are correct, then we only need to enter the resulted value in the application to be write in the EEPROM.
-
-![Step_b](Config_Setup_Images/Step_b.png)
-
-## 11. Calculate resistance for a negative current measurement
-
-This step require to already have the external ADC calibrated and to have an M1K board up and running plugged in the calibration board. We need this to measure the M1K 2.5 V reference, the sourced voltage by the M1K and also the resulted current.
-If ADC measurements are correct, then is only necessary to enter the resulted value in the application to be write in the EEPROM.
-
-![Step_c](Config_Setup_Images/Step_c.png)
-
-## 12. Voltage drop compensation for positive current measurement
+## 10. Voltage drop compensation for positive current measurement
 
 This step require to determine the voltage drop over the channel selection switches to calculate more accurate the resulted positive current.
 To determine the voltage drop measure with a digital multimeter the voltage on the indicated points.
@@ -243,13 +230,27 @@ After that enter the resulted value in the application to be write in the EEPROM
 
 ![Step_j](Config_Setup_Images/Step_j.png)
 
-## 13. Voltage drop compensation for negative current measurement
+## 11. Voltage drop compensation for negative current measurement
 
 This step require to determine the voltage drop over the channel selection switches to calculate more accurate the resulted negative current.
 To determine the voltage drop measure with a digital multimeter the voltage on the indicated points.
 After that enter the resulted value in the application to be write in the EEPROM.
 
 ![Step_k](Config_Setup_Images/Step_k.png)
+
+## 12. Calculate resistance for a positive current measurement
+
+This step require to already have the external ADC calibrated and to have an M1K board up and running plugged in the calibration board. We need this to measure the M1K 2.5 V reference, the sourced voltage by the M1K and also the resulted current.
+If ADC measurements are correct, then we only need to enter the resulted value in the application to be write in the EEPROM.
+
+![Step_b](Config_Setup_Images/Step_b.png)
+
+## 13. Calculate resistance for a negative current measurement
+
+This step require to already have the external ADC calibrated and to have an M1K board up and running plugged in the calibration board. We need this to measure the M1K 2.5 V reference, the sourced voltage by the M1K and also the resulted current.
+If ADC measurements are correct, then is only necessary to enter the resulted value in the application to be write in the EEPROM.
+
+![Step_c](Config_Setup_Images/Step_c.png)
 
 ## 14. Set DAC code for 1.25 V
 
