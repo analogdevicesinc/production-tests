@@ -2,6 +2,7 @@
 import signal
 import sys
 import types
+from time import sleep
 
 import adc_ad7091r5
 import dac_ad5647r
@@ -752,6 +753,27 @@ def output(string_text):
     return sys.stdout.write('\r' + string_text)
 
 
+def format_eeprom_with_spaces_if_empty():
+    """Format EEPROM with spaces."""
+    add, memory_content = 0x00, []
+    while add <= global_.MEMORY_ARRAY_BYTES - global_.PAGE_SIZE:
+        sleep(0.01)
+        read_data = global_.bus.read_i2c_block_data(
+            global_.EEPROM_ID, add, global_.PAGE_SIZE)
+        memory_content.append(eeprom_m24c02.unpack_memory_data(
+            read_data, 0, global_.PAGE_SIZE))
+        add += global_.PAGE_SIZE
+    if all(list_item == memory_content[0] for list_item in memory_content):
+        print 'Format EEPROM since is empty'
+        for memory_index in range(16):
+            memory_address = int(hex(memory_index) + '0', 16)
+            eeprom_m24c02.read_write(memory_address, '                ')
+        eeprom_m24c02.read_memory_content()
+    else:
+        print 'Skip EEPROM formatting'
+        pass
+
+
 def set_channel_a_mode(received_mode, setpoint):
     """Set channel A mode."""
     if received_mode == Mode.SVMI:
@@ -765,6 +787,8 @@ def set_channel_a_mode(received_mode, setpoint):
 
 
 if __name__ == "__main__":
+    format_eeprom_with_spaces_if_empty()
+
     SESSION = Session()
     VALID_SETPOINT = 0.0
 
