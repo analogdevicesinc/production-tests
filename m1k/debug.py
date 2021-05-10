@@ -5,61 +5,21 @@ import signal
 import sys
 
 
-def plot(directory, file_name, data_list, highlight=''):
-    """Generate plot images."""
-    import matplotlib.pyplot as plt
-    from pylab import arange
-
-    plt.subplot(2, 2, 1)
-    plt.plot(arange(0.0, len(data_list[0]), 1), data_list[0])
-    plt.ylabel('[V]')
-    plt.xlabel('Samples')
-    plt.title('Channel A voltage')
-    plt.grid(True)
-    if highlight == '0':
-        plt.subplot(2, 2, 1).set_axis_bgcolor('#16BA42')
-
-    plt.subplot(2, 2, 3)
-    plt.plot(arange(0.0, len(data_list[1]), 1), data_list[1])
-    plt.ylabel('[A]')
-    plt.xlabel('Samples')
-    plt.title('Channel A current')
-    plt.grid(True)
-    if highlight == '1':
-        plt.subplot(2, 2, 3).set_axis_bgcolor('#16BA42')
-
-    plt.subplot(2, 2, 2)
-    plt.plot(arange(0.0, len(data_list[2]), 1), data_list[2])
-    plt.ylabel('[V]')
-    plt.xlabel('Samples')
-    plt.title('Channel B voltage')
-    plt.grid(True)
-    if highlight == '2':
-        plt.subplot(2, 2, 2).set_axis_bgcolor('#16BA42')
-
-    plt.subplot(2, 2, 4)
-    plt.plot(arange(0.0, len(data_list[3]), 1), data_list[3])
-    plt.ylabel('[A]')
-    plt.xlabel('Samples')
-    plt.title('Channel B current')
-    plt.grid(True)
-    if highlight == '3':
-        plt.subplot(2, 2, 4).set_axis_bgcolor('#16BA42')
-
-    plt.subplots_adjust(
-        left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0.15, hspace=0.2)
-    manager = plt.get_current_fig_manager()
-    manager.resize(*manager.window.maxsize())
-
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    figure = plt.gcf()
-    figure.set_size_inches(22, 11)
-    plt.savefig(directory + '/' + file_name + '.png', dpi=100)
-    plt.close()
-
-# plt.show()
+def log_samples(directory, file_name, data_list, highlight=''):
+    """Log samples."""
+    print file_name
+    with open(str(file_name) + ".csv", "w") as results_file:
+        results_file.write(
+            'Ch_A_Voltage' + ',' +
+            'Ch_A_Current' + ',' +
+            'Ch_B_Voltage' + ',' +
+            'Ch_B_Current' + '\n')
+        for index in range(len(data_list[0])):
+            results_file.write(
+                str(data_list[0][index]) + ',' +
+                str(data_list[1][index]) + ',' +
+                str(data_list[2][index]) + ',' +
+                str(data_list[3][index]) + '\n')
 
 
 def add_break_point(message):

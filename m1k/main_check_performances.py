@@ -18,7 +18,7 @@ VIEW_SHORT_DEBUG_MESSAGES = False
 ENABLE_DEBUG_MODE = False
 
 # create plot from buffer data
-CREATE_PLOTS = False
+LOG_SAMPLES = False
 
 # number of samples colected in buffer,
 # discarding samples and effective number of used samples
@@ -167,7 +167,7 @@ if __name__ == '__main__':
                      'view_debug_messages': VIEW_DEBUG_MESSAGES,
                      'view_short_debug_messages': VIEW_SHORT_DEBUG_MESSAGES,
                      'enable_debug_mode': ENABLE_DEBUG_MODE,
-                     'create_plots': CREATE_PLOTS,
+                     'log_samples': LOG_SAMPLES,
                      'brake_script': BRAKE_SCRIPT,
                      'device': global_.dev,
                      'restart_verification': RESTART_VERIFICATION,
