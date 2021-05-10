@@ -146,8 +146,8 @@ def voltage_measurement_2v5(args, text):
         adc_ad7091r5.voltage_input(
             2, args['calibration_factors_vin2'],
             args['adc_samples'])[0]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Performance'), '1__P__CH_' +
             args['channel_name'] + '_measure_2V5',
             global_.CHX_V_I[4], str(args['channel_index'] * 2))
@@ -198,8 +198,8 @@ def voltage_measurement_2v5_aux(args, text):
         adc_ad7091r5.voltage_input(
             2, args['calibration_factors_vin2'],
             args['adc_samples'])[0]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Performance'),
             '2__P__CH_' + args['channel_name'] + '_aux_measure_2V5',
             global_.CHX_V_I[4], str(args['channel_index'] * 2))
@@ -252,8 +252,8 @@ def voltage_measurement_1v25(args, text):
         adc_ad7091r5.voltage_input(
             2, args['calibration_factors_vin2'],
             args['adc_samples'])[0]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Performance'), '3__P__CH_' +
             args['channel_name'] + '_measure_1V25',
             global_.CHX_V_I[4], str(args['channel_index'] * 2))
@@ -299,8 +299,8 @@ def voltage_measurement_3v75(args, text):
         adc_ad7091r5.voltage_input(
             2, args['calibration_factors_vin2'],
             args['adc_samples'])[0]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Performance'), '4__P__CH_' +
             args['channel_name'] + '_measure_3V75',
             global_.CHX_V_I[4], str(args['channel_index'] * 2))
@@ -362,8 +362,8 @@ def source_0v8(args, text):
             text['orange'] + 'Measure sourced 0v8 with channel ' +
             args['channel_name'] + ' ... Press ENTER to continue... ' +
             text['default'])
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Performance'), '5__P__CH_' +
             args['channel_name'] + '_source_0V8',
             global_.CHX_V_I[4], str(args['channel_index'] * 2))
@@ -415,8 +415,8 @@ def source_2v5(args, text):
             text['orange'] + 'Measure sourced 2v5 with channel ' +
             args['channel_name'] + ' ... Press ENTER to continue... ' +
             text['default'])
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Performance'), '6__P__CH_' +
             args['channel_name'] + '_source_2V5',
             global_.CHX_V_I[4], str(args['channel_index'] * 2))
@@ -468,8 +468,8 @@ def source_4v5(args, text):
             text['orange'] + 'Measure sourced 4v5 with channel ' +
             args['channel_name'] + ' ... Press ENTER to continue... ' +
             text['default'])
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Performance'), '7__P__CH_' +
             args['channel_name'] + '_source_4V5',
             global_.CHX_V_I[4], str(args['channel_index'] * 2))
@@ -524,8 +524,8 @@ def positive_current_measurement(args, text):
     adc_meas = adc_ad7091r5.current_value(
         args['adc_offset_poz'], args['adc_gain_poz'],
         args['i_gain_poz'], args['adc_samples'])[0]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Performance'), '8__P__CH_' +
             args['channel_name'] + '_measure_positive_current',
             global_.CHX_V_I[4], str(args['channel_index'] * 2 + 1))
@@ -575,8 +575,8 @@ def negative_current_measurement(args, text):
     adc_meas = adc_ad7091r5.current_value(
         args['adc_offset_neg'], args['adc_gain_neg'],
         args['i_gain_neg'], args['adc_samples'])[0]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Performance'), '9__P__CH_' +
             args['channel_name'] + '_measure_negative_current',
             global_.CHX_V_I[4], str(args['channel_index'] * 2 + 1))
@@ -626,8 +626,8 @@ def positive_current_source(args, text):
     adc_meas = adc_ad7091r5.current_value(
         args['adc_offset_poz'], args['adc_gain_poz'],
         args['i_gain_poz'], args['adc_samples'])[0]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Performance'), '10__P__CH_' +
             args['channel_name'] + '_source_positive_current',
             global_.CHX_V_I[4], str(args['channel_index'] * 2 + 1))
@@ -674,8 +674,8 @@ def negative_current_source(args, text):
     adc_meas = adc_ad7091r5.current_value(
         args['adc_offset_neg'], args['adc_gain_neg'],
         args['i_gain_neg'], args['adc_samples'])[0]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Performance'), '11__P__CH_' +
             args['channel_name'] + '_source_negative_current',
             global_.CHX_V_I[4], str(args['channel_index'] * 2 + 1))

@@ -105,8 +105,8 @@ def measure_chx_external_2v5(args, text):
             str('{0:.4f}'.format(
                 global_.CHX_2V5_EX_REF[args['channel_index'] * 2])) + \
             text['default']
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Calibration'), '1__CH_' +
             args['channel_name'] + '_measure_External_2V5',
             global_.CHX_2V5_EX_REF[4], str(args['channel_index'] * 2))
@@ -145,8 +145,8 @@ def measure_chx_gnd(args, text):
                             2] = global_.CHX_V_I[args['channel_index'] * 2]
     args['chx_v_i_gnd_raw'][args['channel_index'] * 2 +
                             1] = global_.CHX_V_I[args['channel_index'] * 2 + 1]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Calibration'), '2__CH_' +
             args['channel_name'] + '_measure_GND',
             global_.CHX_V_I[4], str(args['channel_index'] * 2))
@@ -188,8 +188,8 @@ def source_chx_0v_without_load(args, text):
                         2] = global_.CHX_V_I[args['channel_index'] * 2]
     args['chx_f0v_raw'][args['channel_index'] * 2 +
                         1] = global_.CHX_V_I[args['channel_index'] * 2 + 1]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Calibration'), '3__CH_' +
             args['channel_name'] + '_source_0V',
             global_.CHX_V_I[4], str(args['channel_index'] * 2))
@@ -228,8 +228,8 @@ def source_chx_2v5_without_load(args, text):
                          2] = global_.CHX_V_I[args['channel_index'] * 2]
     args['chx_f2v5_raw'][args['channel_index'] * 2 +
                          1] = global_.CHX_V_I[args['channel_index'] * 2 + 1]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Calibration'),
             '4__CH_' + args['channel_name'] +
             '_source_2V5', global_.CHX_V_I[4], str(args['channel_index'] * 2))
@@ -310,8 +310,8 @@ def measure_chx_positive_current(args, text):
                         2] = global_.CHX_V_I[args['channel_index'] * 2]
     args['chx_s5v_raw'][args['channel_index'] * 2 +
                         1] = global_.CHX_V_I[args['channel_index'] * 2 + 1]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Calibration'), '5__CH_' +
             args['channel_name'] + '_measure_positive_current',
             global_.CHX_V_I[4], str(args['channel_index'] * 2 + 1))
@@ -401,8 +401,8 @@ def measure_chx_negative_current(args, text):
                         2] = global_.CHX_V_I[args['channel_index'] * 2]
     args['chx_s0v_raw'][args['channel_index'] * 2 +
                         1] = global_.CHX_V_I[args['channel_index'] * 2 + 1]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Calibration'), '6__CH_' +
             args['channel_name'] + '_measure_negative_current',
             global_.CHX_V_I[4], str(args['channel_index'] * 2 + 1))
@@ -460,8 +460,8 @@ def source_chx_0a_current(args, text):
                         2] = global_.CHX_V_I[args['channel_index'] * 2]
     args['chx_s0a_raw'][args['channel_index'] * 2 +
                         1] = global_.CHX_V_I[args['channel_index'] * 2 + 1]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Calibration'), '7__CH_' +
             args['channel_name'] + '_measure_0A_current',
             global_.CHX_V_I[4], str(args['channel_index'] * 2 + 1))
@@ -511,8 +511,8 @@ def source_chx_positive_current(args, text):
                           2] = global_.CHX_V_I[args['channel_index'] * 2]
     args['chx_s_poz_raw'][args['channel_index'] * 2 +
                           1] = global_.CHX_V_I[args['channel_index'] * 2 + 1]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Calibration'), '8__CH_' +
             args['channel_name'] + '_source_positive_current',
             global_.CHX_V_I[4], str(args['channel_index'] * 2 + 1))
@@ -563,8 +563,8 @@ def source_chx_negative_current(args, text):
                           2] = global_.CHX_V_I[args['channel_index'] * 2]
     args['chx_s_neg_raw'][args['channel_index'] * 2 +
                           1] = global_.CHX_V_I[args['channel_index'] * 2 + 1]
-    if args['create_plots']:
-        debug.plot(
+    if args['log_samples']:
+        debug.log_samples(
             str(args['device_id'] + '/Calibration'), '9__CH_' +
             args['channel_name'] + '_source_negative_current',
             global_.CHX_V_I[4], str(args['channel_index'] * 2 + 1))

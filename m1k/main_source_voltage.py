@@ -16,7 +16,7 @@ VIEW_CALIBRATION_FACTORS = False
 VIEW_DEBUG_MESSAGES = False
 
 # create plot from buffer data
-CREATE_PLOTS = False
+LOG_SAMPLES = False
 
 # number of samples colected in buffer,
 # discarding samples and effective number of used samples
@@ -106,7 +106,7 @@ if __name__ == '__main__':
                     {'channel_name': CHANNEL_NAME,
                      'device_id': DEVICE_ID,
                      'view_debug_messages': VIEW_DEBUG_MESSAGES,
-                     'create_plots': CREATE_PLOTS,
+                     'log_samples': LOG_SAMPLES,
                      'brake_script': BRAKE_SCRIPT,
                      'device': global_.dev,
                      'restart_calibration': RESTART_CALIBRATION,
