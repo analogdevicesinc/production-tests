@@ -162,14 +162,19 @@ __download_github_common() {
 setup_libiio() {
 	[ ! -d "work/libiio" ] || return 0
 
-	__download_github_common libiio
+	#__download_github_common libiio
+	git clone https://github.com/analogdevicesinc/libiio work/libiio
 
 	pushd work/libiio
+	git checkout 52e6dc3
 	mkdir -p build
 	pushd build
 
-	cmake ..
+	cmake -DHAVE_DNS_SD=OFF -DHAVE_AVAHI=OFF ..
 	make -j3
+	# TEMP: the install is needed to replace the iiod
+	# the system iiod uses DNS SD; the new installed version will disable the DNS SD
+	sudo make install
 
 	popd
 	popd
