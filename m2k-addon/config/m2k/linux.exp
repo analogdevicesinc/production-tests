@@ -1,0 +1,65 @@
+#!/usr/bin/expect
+
+source [file dirname [info script]]/../../lib/lib.exp
+
+set ttyUSB [lindex $argv 0]
+
+set timeout 50
+
+############### Check Host Side ################
+
+spawn bash
+
+send "iio_info -s\r"
+
+wait_for_text "0456:b672"
+
+########## Done Check Host Side ################
+
+spawn sshpass -panalog ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oCheckHostIP=no root@192.168.2.1
+set screen_id $spawn_id
+set multiPrompt {[#$] }
+
+set timeout 10
+
+wait_for_prompt "ssh"
+
+############### Check IIO device probing ################
+
+send "grep '' /sys/bus/iio/devices/iio\:device*/name | wc -l\r"
+# Expect 14
+
+expect {
+	-re "14.*$multiPrompt" {
+	}
+        timeout {
+	    send_error "Failed to find 14 IIO devices\n"
+            exit 1
+        }
+}
+
+############### Setup the extra environment ################
+
+send_wait_for_prompt "echo /dev/mtd0 0xff000 0x1000 0x1000 > /var/fw_env.conf\r"
+
+#### Initially the extra env has a bad CRC - make sure we remove the defaults
+
+send_wait_for_prompt "echo bootcmd > /var/fw.scr\r"
+
+send_wait_for_prompt "echo baudrate >> /var/fw.scr\r"
+
+send_wait_for_prompt "echo bootdelay >> /var/fw.scr\r"
+
+send_wait_for_prompt "cat /etc/serial| xargs echo serial >> /var/fw.scr\r"
+
+send_wait_for_prompt "cat /etc/serial | xargs echo M2k_by_Analog_Devices_Inc! | sha1sum | cut -f 0 -d ' ' > pkey; cat pkey | xargs echo productkey >> /var/fw.scr\r"
+
+############### Save environment ################
+
+send_wait_for_prompt "fw_setenv -c /var/fw_env.conf -s /var/fw.scr\r"
+
+send_wait_for_prompt "sync\r"
+
+close
+
+exit 0
