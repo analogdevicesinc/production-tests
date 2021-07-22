@@ -4,8 +4,6 @@ import math
 import matplotlib.pyplot as plt
 import libm2k
 import time
-from multiprocessing.pool import ThreadPool
-import threading
 import os
 from pandas import DataFrame
 import pandas

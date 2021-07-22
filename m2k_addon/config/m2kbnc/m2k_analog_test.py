@@ -1,10 +1,10 @@
 import sys
 import unittest
 import libm2k
-import shapefile #import shape_gen, ref_shape_gen, shape_name
-from analog_functions import  test_amplitude, test_shape,  test_offset, test_analog_trigger
-from analog_functions import  set_samplerates_for_shapetest
-from analog_functions import compare_in_out_frequency
+from shapefile import shape_gen, ref_shape_gen, shape_name
+from m2kbnc.analog_functions import  test_amplitude, test_shape,  test_offset, test_analog_trigger
+from m2kbnc.analog_functions import  set_samplerates_for_shapetest
+from m2kbnc.analog_functions import compare_in_out_frequency
 import reset_def_values as reset
 from open_context_and_files import ctx, ain, aout, trig, results_dir, results_file, csv_path, calibration, create_dir
 import logging

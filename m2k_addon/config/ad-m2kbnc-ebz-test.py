@@ -4,12 +4,11 @@ import unittest
 import HtmlTestRunner
 import logging
 import sys
-import RPi.GPIO as GPIO
-from m2k_analog_test import B_AnalogTests
-from m2k_digital_test import C_DigitalTests
-from m2k_powersupply_test import A_PowerSupplyTests
+from m2kbnc.m2k_analog_test import AnalogTests
+from m2k_digital_test import DigitalTests
+from m2k_powersupply_test import PowerSupplyTests
 
-from open_context_and_files import ctx, results_dir, open_context, create_dir
+from open_context_and_files import ctx, results_dir, open_context, calibrate, create_dir
 
 
 logger = logging.getLogger()
@@ -26,9 +25,9 @@ def run_test_suite():
     
     
     m2k_test_suite=unittest.TestSuite()
-    m2k_test_suite.addTest(A_PowerSupplyTests())
-    m2k_test_suite.addTest(B_AnalogTests())
-    m2k_test_suite.addTest(C_DigitalTests())
+    m2k_test_suite.addTest(PowerSupplyTests())
+    m2k_test_suite.addTest(AnalogTests())
+    m2k_test_suite.addTest(DigitalTests())
     result= unittest.main(testRunner=HtmlTestRunner.HTMLTestRunner(output=str(results_dir), report_title="ADALM2000 libm2k test results",report_name='M2K_test_results',open_in_browser=True, combine_reports=True))
     m2k_test_suite.run(result)
     return
@@ -46,11 +45,12 @@ if __name__ =="__main__":
     ctx=libm2k.m2kOpen()
     ctx.calibrate()
 
-    logging.getLogger().info("\n\n*** Connect the AD-M2KPWR-EBZ  to the test setup and press enter to continue the tests ***")
+    logging.getLogger().info("\n\n*** Connect the AD-M2KBNC-EBZ  to the test setup and press enter to continue the tests ***")
     input()
+
     run_test_suite()
 
 
 
-GPIO.cleanup()
+
 libm2k.contextClose(ctx, True)
