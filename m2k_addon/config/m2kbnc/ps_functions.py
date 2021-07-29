@@ -6,7 +6,7 @@ import random
 import logging
 
 def config_for_ps_test(ps,ain):
-    """Retrieve the Power supply object and enabe the power supply channels
+    """Retrieve the Power supply object and enabe the power supply channelswri
     Arguments:
         ps-- Power Supply object
         ain  -- AnalogIn object\n
@@ -23,7 +23,7 @@ def config_for_ps_test(ps,ain):
         ain.enableChannel(libm2k.ANALOG_IN_CHANNEL_2, True)
     return
 
-def ps_test_positive(ps,ain, file):
+def ps_test_positive(ps, ain):
     """Tests the positive power supply
     Arguments:
         ps -- Power Supply object
@@ -31,7 +31,6 @@ def ps_test_positive(ps,ain, file):
     Returns:
         pos_supply-- Vector that  holds 1 if the  voltage value read on the channel equals the voltage sent
     """
-    file.write("\n\nPositive power supply test:\n")
     voltage=0
     t=0.1 #threshold value 
     pos_supply=[]
@@ -40,8 +39,8 @@ def ps_test_positive(ps,ain, file):
         ps.pushChannel(libm2k.ANALOG_IN_CHANNEL_1, voltage)
         time.sleep(0.2)
         read_voltage=(ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1])
-        file.write("Sent voltage: "+str(voltage)+"\n")
-        file.write("Read voltage: "+str(read_voltage)+"\n")
+        logging.getLogger().info("Sent: " + str(voltage) + "V read: " + 
+                        str(read_voltage) + "V")
         if(read_voltage>=(voltage-(t*voltage)) and read_voltage<=(voltage+(t*voltage))):
             pos_supply=np.append(pos_supply,1)
         else:
@@ -51,7 +50,7 @@ def ps_test_positive(ps,ain, file):
     return pos_supply
 
 
-def ps_test_negative(ps,ain, file):
+def ps_test_negative(ps, ain):
     """Tests the negativepower supply
     Arguments:
         ps -- Power Supply object
@@ -59,7 +58,6 @@ def ps_test_negative(ps,ain, file):
     Returns:
         neg_supply-- Vector that  holds 1 if the  voltage value read on the channel equals the voltage sent
     """
-    file.write("\n\nNegative power supply test:\n")
     voltage=0
     neg_supply=[]
     t=0.2 #threshold value (read voltage should be in the +_10% range)
@@ -68,8 +66,8 @@ def ps_test_negative(ps,ain, file):
         ps.pushChannel(libm2k.ANALOG_IN_CHANNEL_2, voltage)
         time.sleep(0.2)
         read_voltage=(ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_2])
-        file.write("Sent voltage: "+str(voltage)+"\n")
-        file.write("Read voltage: "+str(read_voltage)+"\n")
+        logging.getLogger().info("Sent: " + str(voltage) + "V read: " + 
+                        str(read_voltage) + "V")
         if(read_voltage<=(voltage+(t*voltage)) and read_voltage>=(voltage-(t*voltage))):
             neg_supply=np.append(neg_supply,1)
         else:
@@ -89,8 +87,7 @@ def  switch_to_pot_control(ps):
     logging.getLogger().info("\n After switching the jumpers, press ENTER to continue the test\n")
     input()
     return
-def ps_test_positive_with_potentiometer(ps, ain, file):
-    file.write("\n\nPositive power supply - potentiometer test:\n")
+def ps_test_positive_with_potentiometer(ps, ain):
     pot_pos_supply=[]
     voltage=0
     logging.getLogger().info("\n\n*** For this test will use POT+ ***")
@@ -98,7 +95,7 @@ def ps_test_positive_with_potentiometer(ps, ain, file):
     input()
     
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1]
-    file.write("Read voltage: "+str(voltage)+"\n")
+    logging.getLogger().info("Read: " + str(voltage) + "V")
     if (voltage>1) and (voltage <2):
         pot_pos_supply=np.append(pot_pos_supply,1)
     else:
@@ -107,7 +104,7 @@ def ps_test_positive_with_potentiometer(ps, ain, file):
     logging.getLogger().info("\nMake sure the arrow is pointing to 15V and press enter")
     input()
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1]
-    file.write("Read voltage: "+str(voltage)+"\n")
+    logging.getLogger().info("Read: " + str(voltage) + "V")
     if (voltage>4) and (voltage <5):
         pot_pos_supply=np.append(pot_pos_supply,1)
     else:
@@ -117,8 +114,7 @@ def ps_test_positive_with_potentiometer(ps, ain, file):
     return pot_pos_supply
 
 
-def ps_test_negative_with_potentiometer(ps, ain, file):
-    file.write("\n\nNegative power supply - potentiometer test:\n")
+def ps_test_negative_with_potentiometer(ps, ain):
     pot_neg_supply=[]
     voltage=0
     logging.getLogger().info("\n\n *** For this test will use POT- ***")
@@ -126,7 +122,7 @@ def ps_test_negative_with_potentiometer(ps, ain, file):
     input()
     
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_2]
-    file.write("Read voltage: "+str(voltage)+"\n")
+    logging.getLogger().info("Read: " + str(voltage) + "V")
     if (voltage<-1) and (voltage>-2):
         pot_neg_supply=np.append(pot_neg_supply,1)
     else:
@@ -136,7 +132,7 @@ def ps_test_negative_with_potentiometer(ps, ain, file):
     logging.getLogger().info("\nMake sure the arrow is pointing to -15V and press enter")
     input()
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_2]
-    file.write("Read voltage: "+str(voltage)+"\n")
+    logging.getLogger().info("Read: " + str(voltage) + "V")
     if (voltage<-4) and (voltage>-5):
         pot_neg_supply=np.append(pot_neg_supply,1)
     else:

@@ -46,6 +46,7 @@ def open_context():
     except:
         trig=0
 
+    ctx.setTimeout(5000)
     return ctx, ain, aout, trig
 
 def create_dir(timestamp):
@@ -58,8 +59,7 @@ def create_dir(timestamp):
 
     results_dir="results"+str(timestamp)
     path = os.path.join(path, results_dir)
-    os.mkdir(path)
-    
+    #os.mkdir(path)
     return results_dir
 
 
@@ -72,8 +72,9 @@ ps=ctx.getPowerSupply()
 
 timestamp=time.strftime("_%H-%M-%S_%Y-%m-%d")#reate timestamp
 results_dir=create_dir(timestamp) #create new directory 
-results_file=open(str(results_dir)+'/results_'+timestamp+'.txt','w') #create new file where the computed values can be found
-csv_path=str(results_dir)+'/csv_'
-results_file.write("\nADALM2000 Libm2k Tests- Result Values \n\n")
+results_file = ""
+#results_file=open(str(results_dir)+'/results_'+timestamp+'.txt','w') #create new file where the computed values can be found
+#csv_path=str(results_dir)+'/csv_'
+#results_file.write("\nADALM2000 Libm2k Tests- Result Values \n\n")
 
 

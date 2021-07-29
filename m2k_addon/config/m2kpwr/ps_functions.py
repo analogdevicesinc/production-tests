@@ -9,17 +9,15 @@ import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BCM)
 
-
-
 R1=12# pin32
 R2=24# pin18
 R3=4 # pin 7
 R4=2 # pin 3
+GPIO.setwarnings(False)
 GPIO.setup(R1,GPIO.OUT)
 GPIO.setup(R2,GPIO.OUT)
 GPIO.setup(R3,GPIO.OUT)
 GPIO.setup(R4,GPIO.OUT)
-GPIO.setwarnings(False)
 
 
 def config_for_ps_test(ps,ain):
@@ -33,9 +31,9 @@ def config_for_ps_test(ps,ain):
     ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_1, True)
     ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_2,True)
 
-    if ain.isChannelEnabled(libm2k.ANALOG_IN_CHANNEL_1)==False:
+    if ain.isChannelEnabled(libm2k.ANALOG_IN_CHANNEL_1) == False:
         ain.enableChannel(libm2k.ANALOG_IN_CHANNEL_1, True)
-    if ain.isChannelEnabled(libm2k.ANALOG_IN_CHANNEL_2)==False:
+    if ain.isChannelEnabled(libm2k.ANALOG_IN_CHANNEL_2) == False:
         ain.enableChannel(libm2k.ANALOG_IN_CHANNEL_2, True)
         
     ain.setRange(libm2k.ANALOG_IN_CHANNEL_1,libm2k.PLUS_MINUS_25V)
@@ -43,7 +41,7 @@ def config_for_ps_test(ps,ain):
     GPIO.output(R1,True)
     return
 
-def ps_test_positive(ps,ain, file):
+def ps_test_positive(ps, ain):
     """Tests the positive power supply
     Arguments:
         ps -- Power Supply object
@@ -51,21 +49,14 @@ def ps_test_positive(ps,ain, file):
     Returns:
         pos_supply-- Vector that  holds 1 if the  voltage value read on the channel equals the voltage sent
     """
-    
-
-    
-    
-    file.write("\n\nPositive power supply test:\n")
     voltage=1
 
-
-    
     t=0.2 #threshold value 
     pos_supply=[]
     
    
-    while voltage<=5:
-        if voltage<=3:
+    while voltage <= 5:
+        if voltage <= 3:
             GPIO.output(R2,True)
             GPIO.output(R3,True)
             GPIO.output(R4,True)
@@ -73,38 +64,30 @@ def ps_test_positive(ps,ain, file):
             GPIO.output(R2,True)
             GPIO.output(R3,True)
             GPIO.output(R4,False)
-           
-        
+
         ps.pushChannel(libm2k.ANALOG_IN_CHANNEL_1, voltage)
         
         time.sleep(1)
-
-       
         read_voltage=(ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1])
-        logging.getLogger().info(read_voltage)
-        
-        
-        file.write("Sent voltage: "+str(voltage)+"\n")
-        file.write("Read voltage: "+str(read_voltage)+"\n")
+        logging.getLogger().info("Sent: " + str(voltage) + "V read: " + 
+                        str(read_voltage) + "V")
 
         if(read_voltage>=(voltage-t) and read_voltage<=(voltage+t)):
             pos_supply=np.append(pos_supply,1)
         else:
             pos_supply=np.append(pos_supply,0)
-        voltage=voltage+1
+        voltage = voltage + 1
     logging.getLogger().info(pos_supply)
-    
-    
+
     GPIO.output(R2, False)
+    GPIO.output(R3, False)
     GPIO.output(R4, False)
-    GPIO.output(R4, False)
-    
     ps.pushChannel(libm2k.ANALOG_IN_CHANNEL_1, 0)
     ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_1, False)
     return pos_supply
 
 
-def ps_test_negative(ps,ain, file):
+def ps_test_negative(ps, ain):
     """Tests the negativepower supply
     Arguments:
         ps -- Power Supply object
@@ -112,9 +95,6 @@ def ps_test_negative(ps,ain, file):
     Returns:
         neg_supply-- Vector that  holds 1 if the  voltage value read on the channel equals the voltage sent
     """
-    
-    
-    file.write("\n\nNegative power supply test:\n")
     voltage=-1
     neg_supply=[]
     t=0.2 #threshold value 
@@ -133,11 +113,8 @@ def ps_test_negative(ps,ain, file):
         time.sleep(1)
 
         read_voltage=(ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_2])
-        logging.getLogger().info(read_voltage)
-        
-
-        file.write("Sent voltage: "+str(voltage)+"\n")
-        file.write("Read voltage: "+str(read_voltage)+"\n")
+        logging.getLogger().info("Sent: " + str(voltage) + "V read: " + 
+                        str(read_voltage) + "V")
  
         if(read_voltage<=(voltage+t) and read_voltage>=(voltage-t)):
             neg_supply=np.append(neg_supply,1)
@@ -156,34 +133,30 @@ def ps_test_negative(ps,ain, file):
     ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_2, False)
     return neg_supply
 
-def  switch_to_pot_control(ps):
-    
-    ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_1,False)
-    ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_2,False)
-    logging.getLogger().info("\n\n*** Switch jumper P6 from M2k+ position to POT+ position ***")
-    logging.getLogger().info("\n\n*** Switch jumper P7 from M2k- position to POT- position ***")
-    logging.getLogger().info("\n After switching the jumpers, press ENTER to continue the test\n")
+def switch_to_pot_control(ps):
+    ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_1, False)
+    ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_2, False)
+    logging.getLogger().info("*** Switch jumper P6 from M2k+ position to POT+ position")
+    logging.getLogger().info("*** Switch jumper P7 from M2k- position to POT- position")
+    logging.getLogger().info("*** Press enter to continue the test")
     input()
     return
-def ps_test_positive_with_potentiometer(ps, ain, file):
+
+def ps_test_positive_with_potentiometer(ps, ain):
     
     GPIO.output(R2,True)
     GPIO.output(R3,True)
     GPIO.output(R4,True)
-    
-    file.write("\n\nPositive power supply - potentiometer test:\n")
+
     pot_pos_supply=[]
     voltage=0
-    logging.getLogger().info("\n\n*** For this test will use POT+ (R20) ***")
-    logging.getLogger().info("Make sure the arrow is pointing to 1.5V and press enter")
+    logging.getLogger().info("*** For this test will use POT+ (R20)")
+    logging.getLogger().info("*** Make sure the arrow is pointing to 1.5V")
+    logging.getLogger().info("*** Press enter to continue the test")
     input()
-
-
-        
-    voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1]
-    logging.getLogger().info(voltage)
-        
-    file.write("Read voltage: "+str(voltage)+"\n")
+ 
+    voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1]      
+    logging.getLogger().info("Read: " + str(voltage) + "V")
     if (voltage>1) and (voltage <2):
         pot_pos_supply=np.append(pot_pos_supply,1)
     else:
@@ -193,22 +166,16 @@ def ps_test_positive_with_potentiometer(ps, ain, file):
     GPIO.output(R3,False)
     GPIO.output(R4,False)
  
-    logging.getLogger().info("\nMake sure the arrow is pointing to 15V and press enter")
-
+    logging.getLogger().info("*** Make sure the arrow is pointing to 15V")
+    logging.getLogger().info("*** Press enter to continue the test")
     input()
-   
-        
+  
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1]
-    
-    logging.getLogger().info(voltage)
-
-    file.write("Read voltage: "+str(voltage)+"\n")
+    logging.getLogger().info("Read: " + str(voltage) + "V")
     if (voltage>13) and (voltage <15):
         pot_pos_supply=np.append(pot_pos_supply,1)
     else:
         pot_pos_supply=np.append(pot_pos_supply,0)
-    
-    
     
     GPIO.output(R2,False)
     GPIO.output(R3,False)
@@ -219,28 +186,21 @@ def ps_test_positive_with_potentiometer(ps, ain, file):
     return pot_pos_supply
 
 
-def ps_test_negative_with_potentiometer(ps, ain, file):
-    
-    
+def ps_test_negative_with_potentiometer(ps, ain):
     GPIO.output(R2,True)
     GPIO.output(R3,True)
     GPIO.output(R4,True)
-    
-    file.write("\n\nNegative power supply - potentiometer test:\n")
+
     pot_neg_supply=[]
     voltage=0
     
-    logging.getLogger().info("\n\n *** For this test will use POT- (R19) ***")
-    logging.getLogger().info("Make sure the arrow is pointing to -1.5V and press enter")
+    logging.getLogger().info("*** For this test will use POT- (R19)")
+    logging.getLogger().info("*** Make sure the arrow is pointing to -1.5V")
+    logging.getLogger().info("*** Press enter to continue the test")
     
-    input()
-
-
-        
+    input()   
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_2]
-    logging.getLogger().info(voltage)
-
-    file.write("Read voltage: "+str(voltage)+"\n")
+    logging.getLogger().info("Read: " + str(voltage) + "V")
     if (voltage<-1) and (voltage>-2):
         pot_neg_supply=np.append(pot_neg_supply,1)
     else:
@@ -249,46 +209,41 @@ def ps_test_negative_with_potentiometer(ps, ain, file):
     GPIO.output(R3,False)
     GPIO.output(R4,False)
 
-    logging.getLogger().info("\nMake sure the arrow is pointing to -15V and press enter")
-  
-    
-    
-   
+    logging.getLogger().info("*** Make sure the arrow is pointing to -15V")
+    logging.getLogger().info("*** Press enter to continue the test")
     input()
-
-
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_2]
-    logging.getLogger().info(voltage)
-    
-    file.write("Read voltage: "+str(voltage)+"\n")
+    logging.getLogger().info("Read: " + str(voltage) + "V")
+
     if (voltage<-13) and (voltage>-15):
         pot_neg_supply=np.append(pot_neg_supply,1)
     else:
         pot_neg_supply=np.append(pot_neg_supply,0)
-        
-        
+  
     GPIO.output(R1,False)
     GPIO.output(R2,False)
     GPIO.output(R3,False)
     GPIO.output(R4,False)
-    
     logging.getLogger().info(pot_neg_supply)
     return pot_neg_supply
    
 
 
 def test_external_connector():
-    logging.getLogger().info("\n\n\n Connect a voltage source 4.5-18V to the 2 terminal screw connector")
-    logging.getLogger().info("If LED DS3 is ON,  press 1 ")
-    logging.getLogger().info("Press Enter to continue")
-    ext_pwr=input()
-    return ext_pwr
+    logging.getLogger().info("*** Connect a voltage source 4.5-18V to the 2 terminal screw connector")
+    logging.getLogger().info("*** Is LED DS3 ON? [Y/n]")
+    ext_pwr = input()
+    if ext_pwr in ["no", "n"]:
+	    return False
+    else:
+	    return True
 
     
 def test_usbTypeC_connector():
-    #logging.getLogger().info("\n\n\n***! Disconnect the external power !***")
-    logging.getLogger().info("\nPlug in the USB-TypeC ")
-    logging.getLogger().info("\nIf LED DS3 is ON, press 1 ")
-    logging.getLogger().info("Press Enter to continue")
-    usb_pwr=input()
-    return usb_pwr
+    logging.getLogger().info("*** Plug in the USB-TypeC")
+    logging.getLogger().info("*** Is LED DS3 ON? [Y/n]")
+    usb_pwr = input()
+    if usb_pwr in ["no", "n"]:
+	    return False
+    else:
+	    return True
