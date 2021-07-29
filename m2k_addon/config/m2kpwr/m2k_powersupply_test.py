@@ -1,92 +1,140 @@
-import unittest
 from open_context_and_files import ain, aout, ctx, results_file, ps
 import reset_def_values as reset
-from ps_functions import ps_test_negative, ps_test_positive, config_for_ps_test, ps_test_negative_with_potentiometer, ps_test_positive_with_potentiometer, switch_to_pot_control, test_external_connector
-import ps_functions as ps_functions
+from m2kpwr.ps_functions import ps_test_negative, ps_test_positive, config_for_ps_test, ps_test_negative_with_potentiometer, ps_test_positive_with_potentiometer, switch_to_pot_control, test_external_connector
+import m2kpwr.ps_functions as ps_functions
 import logging
 import sys
 import time
+from utils import util_yes_no, util_test_wrapper
 
 
-
-class A_PowerSupplyTests(unittest.TestCase):
+class PowerSupplyTests():
     """Class Where are defined all test methods for Positive PowerSupply and Negative PowerSupply
     """
-    @classmethod
-    def setUpClass(self):
+    def _setUpClass(self):
         #print on the terminal some info 
         #ctx.calibrate()
-        logging.getLogger().info("\n\n*** Power Supplies ***\n")
+        logging.getLogger().info("\nPOWER SUPPLIES SEGMENT")
 
-    
-        #input() #wait for user input
-   # def test_1_external_power_connector(self):
-    #    ext_pwr=ps_functions.test_external_connector()
-       # with self.subTest(msg='Test if the external connector  works'):
-           # self.assertEqual(ext_pwr,'1','The board is supplied')
-#
-    def test_2_usbTypeC_power_connector(self):
+ 
+    def _test_1_usbTypeC_power_connector(self):
+        usb_pwr = ps_functions.test_usbTypeC_connector()
+        test_str = " Test if the USB type C connector works"
+        if not usb_pwr:
+            logging.getLogger().info("FAILED:" + test_str)
+            return False
+        logging.getLogger().info("PASSED:" +  test_str)
+        return True
 
-        usb_pwr=ps_functions.test_usbTypeC_connector()
-        with self.subTest(msg='Test if the USB type C connector works'):
-            self.assertIsNotNone(usb_pwr,'The board is supplied')
-
-
-    def test_3_enable_m2k(self):
-        """Verifies if the Power Supply object was succesfully retrieved from the context
-        Enables analog channels to test the output voltages
+    def _test_2_positive_power_supply(self):
+        """Verifies functionality of the positive power supply controlled with m2k
         """
+        test_ok = True
         reset.analog_in(ain)
         config_for_ps_test(ps, ain)
-        state=ps.anyChannelEnabled()
-        with self.subTest(msg='Test if the Power Supplies are enabled'):
-            self.assertTrue(state,'Power supplies were not enabled')
+        state = ps.anyChannelEnabled()
+        test_str = " Power Supplies are not enabled"
+        if not state:
+            test_ok = False
+            logging.getLogger().info("FAILED:" + test_str)
 
-
-    def test_4_positive_power_supply(self):
-        """Verifies functionality of the positive power supply controlled with m2k
-         
-        """
-
+        test_str = " Test the positive Power Supply"
+        pos_supply = ps_test_positive(ps, ain)
+        for i in range(len(pos_supply)):
+            if pos_supply[i]:
+                logging.getLogger().info("PASSED:" + test_str)
+            else:
+                test_ok = False
+                logging.getLogger().info("FAILED:" + test_str)
+        return test_ok
         
-        pos_supply=ps_test_positive(ps, ain, results_file)
-        
-        with self.subTest(msg='Test the positive Power Supply '):
 
-            self.assertTrue(all(pos_supply),  'Pos supply values not in range' )
-
-    def test_5_negative_power_supply(self):
+    def _test_3_negative_power_supply(self):
         """Verifies the  functionality of the negative power supply controlled with m2k
         """
+        test_ok = True
+        reset.analog_in(ain)
+        config_for_ps_test(ps, ain)
+        state = ps.anyChannelEnabled()
+        test_str = " Power Supplies are not enabled"
+        if not state:
+            test_ok = False
+            logging.getLogger().info("FAILED:" + test_str)
+
+        test_str = " Test the negative Power Supply"
+        neg_supply=ps_test_negative(ps, ain)
+        for i in range(len(neg_supply)):
+            if neg_supply[i]:
+                logging.getLogger().info("PASSED:" + test_str)
+            else:
+                test_ok = False
+                logging.getLogger().info("FAILED:" + test_str)
+        return test_ok
     
-        neg_supply=ps_test_negative(ps, ain,results_file)
-        with self.subTest(msg='Test the negative  Power Supply'):
-            self.assertTrue(all(neg_supply),  'Neg supply values not in range' )
     
-    
-    def test_6_disable_m2k(self):
+    def _test_4_disable_m2k(self):
         """Disables power supply channes as they are not further used in this test
         """
+        test_ok = True
+        test_str = " Disable M2k power supplies"
         switch_to_pot_control(ps)
-        state=ps.anyChannelEnabled()
-        
-        with self.subTest(msg='Disable M2k power supplies'):
-            self.assertFalse(state,  'The supplies were not disabled' )
+        state = ps.anyChannelEnabled()
+        if not state:
+            logging.getLogger().info("PASSED:" + test_str)
+        else:
+            test_ok = False
+            logging.getLogger().info("FAILED:" + test_str)
+        return test_ok
 
 
-    def test_7_positive_power_supply_pot(self):
+    def _test_5_positive_power_supply_pot(self):
         """Verifies functionality of the positive power supply controlled with the potentiometer
         """
-        pos_supply_pot=ps_test_positive_with_potentiometer(ps, ain, results_file)
-        with self.subTest(msg='Test the potentiometer control of the positive Power Supply'):
+        test_ok = True
+        test_str = " Test the potentiometer control of the positive Power Supply"
+        pos_supply_pot=ps_test_positive_with_potentiometer(ps, ain)
+        for i in range(len(pos_supply_pot)):
+            if pos_supply_pot[i]:
+                logging.getLogger().info("PASSED:" + test_str)
+            else:
+                test_ok = False
+                logging.getLogger().info("FAILED:" + test_str)
+        return test_ok
 
-            self.assertEqual(all(pos_supply_pot), 1,  'Pos Supply values not in range' )        
-            
-    def test_8_negative_power_supply_pot(self):
+         
+    def _test_6_negative_power_supply_pot(self):
         """Verifies functionality of the negative power supply controlled with the potentiometer
         """
-        neg_supply_pot=ps_test_negative_with_potentiometer(ps, ain,results_file)
+        test_ok = True
+        test_str = " Test the potentiometer control of the negative Power Supply"
+        neg_supply_pot=ps_test_negative_with_potentiometer(ps, ain)
+        for i in range(len(neg_supply_pot)):
+            if neg_supply_pot[i]:
+                logging.getLogger().info("PASSED:" + test_str)
+            else:
+                test_ok = False
+                logging.getLogger().info("FAILED:" + test_str)
+        return test_ok
 
-        
-        with self.subTest(msg='Test the potentiometer control of the negative  Power Supply'):
-            self.assertEqual(all(neg_supply_pot), 1,  'Neg supply values not in range' )
+
+    def run_tests(self):
+        self._setUpClass()
+        t_res = util_test_wrapper(self._test_1_usbTypeC_power_connector, 1, "Check the USB TypeC")
+        if not t_res:
+            return t_res
+        t_res = util_test_wrapper(self._test_2_positive_power_supply, 2, "Verify M2K positive power supply")
+        if not t_res:
+            return t_res
+        t_res = util_test_wrapper(self._test_3_negative_power_supply, 3, "Verify M2K negative power supply")
+        if not t_res:
+            return t_res
+        t_res = util_test_wrapper(self._test_4_disable_m2k, 4, "Disable M2K power supplies")
+        if not t_res:
+            return t_res
+        t_res = util_test_wrapper(self._test_5_positive_power_supply_pot, 5, "Control positive power supply with the potentiometer")
+        if not t_res:
+            return t_res
+        t_res = util_test_wrapper(self._test_6_negative_power_supply_pot, 6, "Control negative power supply with the potentiometer")
+        if not t_res:
+            return t_res
+        return True

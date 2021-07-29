@@ -48,11 +48,7 @@ handle_error_state() {
 	show_leds
 	inc_fail_stats "$serial"
 	console_ascii_failed
-	disable_all_usb_ports
-	for svc in networking dhcpcd ; do
-		[ -f /etc/init.d/$svc ] || continue
-		/etc/init.d/$svc restart
-	done
+
 	if [ -n "$serial" ] ; then
 		cat "$LOGFILE" > "$LOGDIR/failed_${serial}_${RUN_TIMESTAMP}.log"
 	else
@@ -126,19 +122,12 @@ wait_for_firmware_files() {
 #----------------------------------#
 
 production() {
-	local TARGET="$1"
-	local mode="$2"
-
-	[ -n "$TARGET" ] || {
-		echo_red "No target specified"
-        	return 1
-	}
-	local target_upper=$(toupper "$TARGET")
+	local mode="$1"
 
 	cd "$SCRIPT_DIR"
 	
-	source $SCRIPT_DIR/config/$TARGET/jig_pins_config
-	#source $SCRIPT_DIR/config/$TARGET/postflash.sh
+	source $SCRIPT_DIR/lib/m2k_addon_tests.sh
+	source $SCRIPT_DIR/lib/m2k_check.sh
 
 	# State variables; are set during state transitions
 	local PASSED=0
@@ -164,9 +153,6 @@ production() {
 	mkdir -p $LOGDIR
 	exec &> >(tee -a "$LOGFILE")
 
-	echo_green "Initializing FTDI pins to default state"
-	init_pins
-
 	while true ; do
 
 		if [ "$mode" == "single" ] ; then
@@ -175,36 +161,24 @@ production() {
 		fi
 
 		mkdir -p $LOGDIR
-
-		toggle_pins A
-
-		wait_for_firmware_files "$TARGET"
-		echo_green "${target_upper} firmware version: ${FW_VERSION}"
-
 		sync
+		echo_green "Waiting for start command [bnc/pwr]:"
+		
+		while true
+		do
+			read -p "" BOARD
+			case $BOARD in
+			 [bB][nN][cC])  #echo_green "BNC adapter"
+						 break;;
+			 [pP][wW][rR])  #echo_red "PWR adapter"
+						 break;;
+			 * )         echo_green "Please enter BNC or PWR!"
+			esac
+		done
 
-		wait_for_eeprom_vars
-
-		show_ready_state || {
-			echo_red "Cannot enter READY state"
-			sleep 1
-			continue
-		}
-
-		echo_green "Waiting for start button"
-
-		[ "$mode" == "single" ] || \
-			wait_pins D "$START_BUTTON $REBOOT_BUTTON" || {
-			echo_red "Waiting for start button failed..."
-			handle_error_state
-			sleep 1
-			continue
-		}
 		RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
 
 		! check_and_reboot "$LOGFILE" || break
-
-		show_start_state
 
 		if [ -f "$STATSFILE" ] ; then
 			source $STATSFILE
@@ -212,17 +186,35 @@ production() {
 		[ -n "$PASSED_CNT" ] || PASSED_CNT=0
 		[ -n "$FAILED_CNT" ] || FAILED_CNT=0
 
-		# post_flash must export the `BOARD_SERIAL` variable
-		post_flash || {
-			echo_red "Post-flash step failed..."
+		# TODO: handle the M2K calibration here (check if already calibrated)
+		# then don't calibrate again
+		# display M2K info here, fw version, calibration params, etc;
+		m2k_pre_check || {
+			echo_red "M2K pre-check step failed..."
 			handle_error_state "$BOARD_SERIAL"
 			sleep 1
 			continue
 		}
-		disable_all_usb_ports
-		inc_pass_stats "$BOARD_SERIAL"
+		
+		
+		BOARD="${BOARD,,}"
+		board_upcase="${BOARD^^}"
+		
+		addon_test_${BOARD} || {
+			handle_error_state "$BOARD_SERIAL"
+			sleep 1
+			continue
+		}
+		
+		terminate_any_lingering_stuff
+		echo
+		echo_green "PASSED ALL TESTS"
+
+		#disable_all_usb_ports
+		#inc_pass_stats "$BOARD_SERIAL"
 		cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
 		cat /dev/null > "$LOGFILE"
 		PASSED=1
+		console_ascii_passed
 	done
 }
