@@ -71,7 +71,6 @@ pin_ctrl() {
 	local lockfile="/tmp/pin_ctrl_lock"
 	(
 		flock -e 200
-		ft4232h_pin_ctrl $@
 	) 200>$lockfile
 }
 

@@ -8,28 +8,9 @@ set -e
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/lib/utils.sh
-source $SCRIPT_DIR/lib/update_release.sh
+#source $SCRIPT_DIR/lib/update_release.sh
 
-SUPPORTED_BOARDS="pluto m2k"
-
-PATH="$SCRIPT_DIR/work/openocd-0.10.0/installed/bin:$PATH"
-
-UDEV_RULES_FILE="50-ftdi-test.rules"
-
-INIT_PINS_SCRIPT="$SCRIPT_DIR"/init.sh
-
-# Note: the Pluto RevC (or D) has an FTDI UART on the board at USB ID 0403:6015, we need to map it
-UDEV_SECTION='
-SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0403\", ATTRS{idProduct}==\"6015\", MODE=\"660\", SYMLINK+=\"ttyPluto%n\"
-
-SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", ATTRS{serial}==\"Test-Slot-A\", SYMLINK+=\"ttyTest-A%n\"
-SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", ATTRS{serial}==\"Test-Slot-B\", SYMLINK+=\"ttyTest-B%n\"
-SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", ATTRS{serial}==\"Test-Slot-C\", SYMLINK+=\"ttyTest-C%n\"
-SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", ATTRS{serial}==\"Test-Slot-D\", SYMLINK+=\"ttyTest-D%n\"
-SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"0456\", ATTRS{idProduct}==\"f001\", MODE=\"660\", GROUP=\"plugdev\"
-'
-
-UDEV_SECTION_PINS="SUBSYSTEM==\\\"usb\\\", ATTRS{idVendor}==\\\"0456\\\", ATTRS{idProduct}==\\\"f001\\\", MODE=\\\"660\\\", RUN+=\\\"$INIT_PINS_SCRIPT\\\""
+SUPPORTED_BOARDS="m2k_addon"
 
 #----------------------------------#
 # Functions section                #
@@ -50,43 +31,15 @@ setup_apt_install_prereqs() {
 	sudo_required
 	sudo -s <<-EOF
 	apt-get -y update
-	apt-get -y install swig libftdi-dev bc sshpass openocd \
-		cmake build-essential git libxml2-dev bison flex \
-		libfftw3-dev expect usbutils dfu-util screen \
-		wget unzip curl xfce4 \
+	apt-get -y install swig libftdi-dev bc \
+		cmake build-essential git libxml2-dev \
+		usbutils wget unzip curl xfce4 \
 		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal \
 		openssh-server gpg thunar-volman
+	python3 -m pip install setuptools numpy matplotlib \
+		scipy pandas html-testRunner pdoc3 colorlog logging
 	/etc/init.d/htpdate restart
 	EOF
-}
-
-build_openocd_0_10_0() {
-	local url=https://sourceforge.net/projects/openocd/files/openocd/0.10.0/openocd-0.10.0.tar.gz/download
-
-	mkdir -p work
-	wget "$url" -O work/openocd-0.10.0.tar.gz
-
-	sudo apt-get -y install libjim-dev
-
-	pushd work/
-	tar -xvf openocd-0.10.0.tar.gz
-	pushd openocd-0.10.0
-
-	./configure --enable-ftdi --disable-internal-jimtcl --prefix="$(pwd)/installed"
-	make -j3
-	make install
-
-	popd
-	popd
-}
-
-setup_openocd() {
-	openocd_is_minimum_required || {
-		echo_red "OpenOCD needs to be at least version 0.10.0"
-		# if  we have apt-get, we can try to build it and install deps too
-		type apt-get &> /dev/null || exit 1
-		build_openocd_0_10_0
-	}
 }
 
 check_udev_on_system() {
@@ -108,8 +61,6 @@ setup_sync_udev_rules_file() {
 	sudo_required
 	check_udev_on_system || exit 1
 	sudo -s <<-EOF
-		echo -n "$UDEV_SECTION" > "/etc/udev/rules.d/$UDEV_RULES_FILE"
-		echo "$UDEV_SECTION_PINS" >> "/etc/udev/rules.d/$UDEV_RULES_FILE"
 		udevadm control --reload-rules
 		udevadm trigger
 	EOF
@@ -125,18 +76,6 @@ __common_build_tool() {
 		c_files="$c_files work/$c_file"
 	done
 	gcc $c_files -o "work/$tool" $cflags $ldflags
-}
-
-setup_ft4232h_tool() {
-	local tool="ft4232h_pin_ctrl"
-	local tool_c="${tool}.c ad7616.c platform_drivers.c"
-	local cflags="-I./src -Werror -Wall"
-	local ldflags="-lftdi"
-
-	tool_c="${tool_c} ft4232h_bitbang.c ft4232h_spi_adc.c ft4232h_spi_eeprom.c"
-	tool_c="${tool_c} ft4232h_spi_gpio_exp.c"
-
-	__common_build_tool
 }
 
 __download_github_common() {
@@ -162,99 +101,42 @@ __download_github_common() {
 setup_libiio() {
 	[ ! -d "work/libiio" ] || return 0
 
-	__download_github_common libiio
+	#__download_github_common libiio
+	git clone https://github.com/analogdevicesinc/libiio work/libiio
 
 	pushd work/libiio
 	mkdir -p build
 	pushd build
 
-	cmake ..
+	cmake -DHAVE_DNS_SD=OFF -DHAVE_AVAHI=OFF ..
 	make -j3
 
+	# TEMP: the install is needed to replace the iiod
+	# the system iiod uses DNS SD; the new installed version will disable the DNS SD
+	sudo make install
+	
 	popd
 	popd
 }
 
 setup_libm2k() {
-	if [ "${BOARD}" != "m2k" ] ; then
-		echo_blue "Not installing libm2k ; board needs to be 'm2k'"
-		return 0
-	fi
-
 	[ ! -d "work/libm2k" ] || return 0
 
-	__download_github_common libm2k
+	#__download_github_common libm2k
+	git clone https://github.com/analogdevicesinc/libm2k work/libm2k
 
 	pushd work/libm2k
 	mkdir -p build
 	pushd build
 
-	cmake -DENABLE_PYTHON=ON -DENABLE_CSHARP=OFF -DIIO_INCLUDE_DIRS=../../libiio/ -DIIO_LIBRARIES=../../libiio/build/libiio.so ..
+	cmake -DENABLE_TOOLS=ON -DENABLE_PYTHON=ON -DENABLE_CSHARP=OFF -DIIO_INCLUDE_DIRS=../../libiio/ -DIIO_LIBRARIES=../../libiio/build/libiio.so ..
 	make -j3
 
+	# TEMP: the install is needed to replace the broken m2kcli
+	sudo make install
+	
 	popd
 	popd
-}
-
-setup_plutosdr_scripts() {
-	local cflags="-I../libiio -Wall -Wextra"
-	local ldflags="-L../libiio/build -lfftw3 -lpthread -liio -lm"
-
-	if [ "${BOARD}" != "pluto" ] ; then
-		echo_blue "Not installing plutosdr_scripts ; board needs to be 'pluto'"
-		return 0
-	fi
-
-	setup_libiio
-
-	[ -d work/plutosdr_scripts ] || \
-		git clone \
-			https://github.com/analogdevicesinc/plutosdr_scripts \
-			work/plutosdr_scripts
-
-	pushd work/plutosdr_scripts
-
-	gcc -g -o cal_ad9361 cal_ad9361.c $cflags $ldflags
-
-	popd
-}
-
-# Note: This code isn't used anymore; but we're keeping it around, in case it
-#       may become useful again later
-__disabled_call_home_logic() {
-	mkdir -p "$HOME/.ssh"
-	cat "$SCRIPT_DIR/config/jig_id.pub" >> "$HOME/.ssh/authorized_keys"
-	sudo chown "$USER.$USER" "$HOME/.ssh/authorized_keys"
-	chmod 0600 "$HOME/.ssh/authorized_keys"
-
-	sudo chown "$USER.$USER" "$SCRIPT_DIR/config/jig_id"
-	chmod 0600 "$SCRIPT_DIR/config/jig_id"
-	cat > $autostart_path/call-home.desktop <<-EOF
-[Desktop Entry]
-Encoding=UTF-8
-Version=0.9.4
-Type=Application
-Name=call-home
-Comment=call-home
-Exec=/bin/bash $SCRIPT_DIR/call_home
-StartupNotify=false
-Terminal=false
-Hidden=false
-	EOF
-
-	cat > $autostart_path/auto-upload-logs.desktop <<-EOF
-[Desktop Entry]
-Encoding=UTF-8
-Version=0.9.4
-Type=Application
-Name=auto-save-logs
-Comment=auto-save-logs
-Exec=/bin/bash $SCRIPT_DIR/autoupload_logs.sh
-StartupNotify=false
-Terminal=false
-Hidden=false
-	EOF
-
 }
 
 setup_write_autostart_config() {
@@ -310,15 +192,6 @@ StartupNotify=false
 Terminal=false
 Hidden=false
 	EOF
-}
-
-board_is_supported() {
-	local board="$1"
-	[ -n "$board" ] || return 1
-	for b in $SUPPORTED_BOARDS ; do
-		[ "$b" != "$board" ] || return 0
-	done
-	return 1
 }
 
 xfconf_has_cap() {
@@ -402,33 +275,6 @@ setup_disable_lxde_automount() {
 	popd
 }
 
-setup_pi_boot_config() {
-	[ "$BOARD" == "pluto" ] || return 0
-
-	[ -f /boot/config.txt ] || return 0
-
-	local tmp=$(mktemp)
-	cat >> $tmp <<-EOF
-# --- added by setup_env.sh
-hdmi_force_hotplug=1
-hdmi_group=2
-hdmi_mode=87
-hdmi_cvt=800 480 60 6 0 0 0
-hdmi_drive=1
-max_usb_current=1
-
-dtoverlay=pi3-disable-wifi
-dtoverlay=pi3-disable-bt
-# --- end setup_env.sh
-	EOF
-
-	sudo -s <<-EOF
-		sed -i -e "/^# --- added by setup_env.sh/,/^# --- end setup_env.sh/d" /boot/config.txt
-		cat $tmp >> /boot/config.txt
-		rm -f $tmp
-	EOF
-}
-
 setup_disable_pi_screen_blanking() {
 	local pi_serial="$(pi_serial)"
 	[ -n "$pi_serial" ] || return 0
@@ -466,10 +312,6 @@ setup_misc_profile_cleanup() {
 	EOF
 }
 
-setup_release_files() {
-	./update_${BOARD}_release.sh
-}
-
 setup_usbreset_tool() {
 	local tool="usbreset"
 	local tool_c="${tool}.c"
@@ -495,6 +337,15 @@ source "$SCRIPT_DIR/vars.sh"
 	EOF
 }
 
+board_is_supported() {
+	local board="$1"
+	[ -n "$board" ] || return 1
+	for b in $SUPPORTED_BOARDS ; do
+		[ "$b" != "$board" ] || return 0
+	done
+	return 1
+}
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -517,9 +368,9 @@ board_is_supported "$BOARD" || {
 pushd $SCRIPT_DIR
 
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config apt_install_prereqs"
-STEPS="$STEPS xfce4_power_manager_settings thunar_volman disable_lxde_automount openocd ft4232h_tool"
-STEPS="$STEPS libiio libm2k plutosdr_scripts sync_udev_rules_file write_autostart_config"
-STEPS="$STEPS pi_boot_config disable_pi_screen_blanking usbreset_tool release_files"
+STEPS="$STEPS xfce4_power_manager_settings thunar_volman disable_lxde_automount"
+STEPS="$STEPS libiio libm2k sync_udev_rules_file write_autostart_config"
+STEPS="$STEPS disable_pi_screen_blanking usbreset_tool"
 STEPS="$STEPS zerotier_vpn"
 
 RAN_ONCE=0
@@ -531,7 +382,7 @@ for step in $STEPS ; do
 done
 
 if [ "$RAN_ONCE" == "0" ] ; then
-	echo_red "Invalid build target '$TARGET'; valid targets are 'jig' or:"
+	echo_red "Invalid build target '$TARGET'; Valid targets are 'jig' or:"
 	for step in $STEPS ; do
 		echo_red "    $step"
 	done
