@@ -28,7 +28,8 @@ def shape_gen(n):
     #generate rising ramp
     rising_ramp=np.linspace(-1,1,n)
 
-    #generate falling ramp
+    #generate falling ramp 
+    
     falling_ramp=np.linspace(1,-1,n)
 
   
