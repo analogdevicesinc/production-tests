@@ -51,7 +51,7 @@ def ps_test_positive(ps, ain):
     """
     voltage=1
 
-    t=0.2 #threshold value 
+    t=0.1 #threshold value 
     pos_supply=[]
     
    
@@ -97,7 +97,7 @@ def ps_test_negative(ps, ain):
     """
     voltage=-1
     neg_supply=[]
-    t=0.2 #threshold value 
+    t=0.1 #threshold value 
 
     while voltage>=-5:
         if voltage>=-3:
@@ -125,6 +125,7 @@ def ps_test_negative(ps, ain):
     
     logging.getLogger().info(neg_supply)
     
+    GPIO.output(R1,False)
     GPIO.output(R2,False)
     GPIO.output(R3,False)
     GPIO.output(R3,False)
@@ -136,107 +137,92 @@ def ps_test_negative(ps, ain):
 def switch_to_pot_control(ps):
     ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_1, False)
     ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_2, False)
-    logging.getLogger().info("*** Switch jumper P6 from M2k+ position to POT+ position")
-    logging.getLogger().info("*** Switch jumper P7 from M2k- position to POT- position")
-    logging.getLogger().info("*** Press enter to continue the test")
-    input()
+    logging.getLogger().info("*** Switch jumper P6 from M2K+ position to POT+ (R20) position")
+    logging.getLogger().info("*** Switch jumper P7 from M2K- position to POT- (R19) position")
+    
+    
     return
 
-def ps_test_positive_with_potentiometer(ps, ain):
-    
+def ps_test_potentiometer_lower_limit(ps, ain):
+    switch_to_pot_control(ps)
+    GPIO.output(R1,True)
     GPIO.output(R2,True)
     GPIO.output(R3,True)
     GPIO.output(R4,True)
 
-    pot_pos_supply=[]
+    pot_lower_limit=[]
     voltage=0
-    logging.getLogger().info("*** For this test will use POT+ (R20)")
-    logging.getLogger().info("*** Make sure the arrow is pointing to 1.5V")
+
+    logging.getLogger().info("*** Make sure the arrow of POT+ (R20) is pointing to 1.5V")
+
+    logging.getLogger().info("*** Make sure the arrow of POT- (R19) is pointing to -1.5V")
     logging.getLogger().info("*** Press enter to continue the test")
     input()
  
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1]      
     logging.getLogger().info("Read: " + str(voltage) + "V")
     if (voltage>1) and (voltage <2):
-        pot_pos_supply=np.append(pot_pos_supply,1)
+        pot_lower_limit=np.append(pot_lower_limit,1)
     else:
-        pot_pos_supply=np.append(pot_pos_supply,0)
+        pot_lower_limit=np.append(pot_lower_limit,0)
         
+ 
+
+    voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_2]
+    logging.getLogger().info("Read: " + str(voltage) + "V")
+    if (voltage<-1) and (voltage>-2):
+        pot_lower_limit=np.append(pot_lower_limit,1)
+    else:
+        pot_lower_limit=np.append(pot_lower_limit,0)
     
+
     GPIO.output(R3,False)
     GPIO.output(R4,False)
- 
-    logging.getLogger().info("*** Make sure the arrow is pointing to 15V")
+    
+    logging.getLogger().info(pot_lower_limit)
+    return pot_lower_limit
+
+
+def ps_test_potentiometer_upper_limit(ps, ain):
+  
+
+    pot_upper_limit=[]
+    voltage=0
+   
+
+    logging.getLogger().info("*** Make sure the arrow of POT+ (R20) points to 15V")
+    logging.getLogger().info("*** Make sure the arrow of POT- (R19) points to -15V")
     logging.getLogger().info("*** Press enter to continue the test")
     input()
   
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1]
     logging.getLogger().info("Read: " + str(voltage) + "V")
     if (voltage>13) and (voltage <15):
-        pot_pos_supply=np.append(pot_pos_supply,1)
+        pot_upper_limit=np.append(pot_upper_limit,1)
     else:
-        pot_pos_supply=np.append(pot_pos_supply,0)
-    
-    GPIO.output(R2,False)
-    GPIO.output(R3,False)
-    GPIO.output(R4,False)
-    
-    
-    logging.getLogger().info(pot_pos_supply)
-    return pot_pos_supply
+        pot_upper_limit=np.append(pot_upper_limit,0)
 
-
-def ps_test_negative_with_potentiometer(ps, ain):
-    GPIO.output(R2,True)
-    GPIO.output(R3,True)
-    GPIO.output(R4,True)
-
-    pot_neg_supply=[]
-    voltage=0
-    
-    logging.getLogger().info("*** For this test will use POT- (R19)")
-    logging.getLogger().info("*** Make sure the arrow is pointing to -1.5V")
-    logging.getLogger().info("*** Press enter to continue the test")
-    
-    input()   
-    voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_2]
-    logging.getLogger().info("Read: " + str(voltage) + "V")
-    if (voltage<-1) and (voltage>-2):
-        pot_neg_supply=np.append(pot_neg_supply,1)
-    else:
-        pot_neg_supply=np.append(pot_neg_supply,0)
-    
-    GPIO.output(R3,False)
-    GPIO.output(R4,False)
-
-    logging.getLogger().info("*** Make sure the arrow is pointing to -15V")
-    logging.getLogger().info("*** Press enter to continue the test")
-    input()
+   
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_2]
     logging.getLogger().info("Read: " + str(voltage) + "V")
 
     if (voltage<-13) and (voltage>-15):
-        pot_neg_supply=np.append(pot_neg_supply,1)
+        pot_upper_limit=np.append(pot_upper_limit,1)
     else:
-        pot_neg_supply=np.append(pot_neg_supply,0)
+        pot_upper_limit=np.append(pot_upper_limit,0)
   
     GPIO.output(R1,False)
     GPIO.output(R2,False)
     GPIO.output(R3,False)
     GPIO.output(R4,False)
-    logging.getLogger().info(pot_neg_supply)
-    return pot_neg_supply
+    logging.getLogger().info(pot_upper_limit)
+    
+    
+    
+    return pot_upper_limit
    
 
 
-def test_external_connector():
-    logging.getLogger().info("*** Connect a voltage source 4.5-18V to the 2 terminal screw connector")
-    logging.getLogger().info("*** Is LED DS3 ON? [Y/n]")
-    ext_pwr = input()
-    if ext_pwr in ["no", "n"]:
-	    return False
-    else:
-	    return True
 
     
 def test_usbTypeC_connector():

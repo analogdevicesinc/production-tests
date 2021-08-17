@@ -11,13 +11,13 @@ class DigitalTests():
     def _setUpClass(self):
         logging.getLogger().info("\nDIGITAL SEGMENT\n")
 
-    def _test_input8_15_output0_7_digital_channels(self):
+    def _test_input15_8_output0_7_digital_channels(self):
         test_ok = True
-        ch_8_15_input = ch_0_7_digital_output(dig)
+        ch_15_8_input = ch_0_7_digital_output(dig)
 
         for i in range(8):
-            test_str = " Test output " + str(i) + "; input " + str(i + 8)
-            if ch_8_15_input[i] == 1:
+            test_str = " Test output " + str(i) + "; input " + str(15-i)
+            if ch_15_8_input[i] == 1:
                 logging.getLogger().info("PASSED:" + test_str)
             else:
                 test_ok = False
@@ -25,13 +25,13 @@ class DigitalTests():
         return test_ok
                
 
-    def _test_input0_7_output8_15_digital_channels(self):
+    def _test_input0_7_output15_8_digital_channels(self):
         test_ok = True
-        ch_0_7_input=ch_8_15_digital_output(dig)
+        ch_7_0_input=ch_8_15_digital_output(dig)
         
         for i in range(8):
-            test_str = " Test output " + str(i + 8) + "; input " + str(i)
-            if ch_0_7_input[i] == 1:
+            test_str = " Test output " + str(i + 8) + "; input " + str(7-i)
+            if ch_7_0_input[i] == 1:
                 logging.getLogger().info("PASSED:" + test_str)
             else:
                 test_ok = False
@@ -41,11 +41,10 @@ class DigitalTests():
 
     def run_tests(self):
         self._setUpClass()
-        t_res = util_test_wrapper(self._test_input8_15_output0_7_digital_channels, 1, "Digital output 0-7, input 8-15")
+        t_res = util_test_wrapper(self._test_input15_8_output0_7_digital_channels, 1, "Digital output 0-7, input 15-8")
         if not t_res:
             return t_res
-        t_res = util_test_wrapper(self._test_input0_7_output8_15_digital_channels, 2, "Digital output 8-15, input 0-7")
+        t_res = util_test_wrapper(self._test_input0_7_output15_8_digital_channels, 2, "Digital output 8-15, input 7-0")
         if not t_res:
             return t_res
         return True
-
