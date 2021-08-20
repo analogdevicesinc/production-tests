@@ -238,6 +238,8 @@ def test_shape(channel, out_data, ref_data, ain, aout, trig, ch_ratio, shapename
             input_data = ain.getSamples(n)[channel]
         except:
             print('Timeout occured')
+            ain.stopAcquisition()
+            continue
 
         ain.stopAcquisition()
         if gen_reports:
@@ -319,6 +321,9 @@ def test_analog_trigger(channel, trig, aout, ain):
                 input_data = ain.getSamples(round(n / 4))[channel]
             except:
                 print('Timeout occured')
+                ain.stopAcquisition()
+                continue
+
             ain.stopAcquisition()
             if gen_reports:
                 if channel == 0:
@@ -348,6 +353,8 @@ def test_analog_trigger(channel, trig, aout, ain):
                 input_data = ain.getSamples(round(n / 4))[channel]
             except:
                 print('Timeout occured')
+                ain.stopAcquisition()
+                continue
             ain.stopAcquisition()
             if gen_reports:
                 if channel == 0:
