@@ -8,13 +8,13 @@ def util_yes_no(user_input):
 	else:
 		out = user_input
 	logging.getLogger().info(out)
-	logging.getLogger().info("[Y/n]")
+	logging.getLogger().info("[y/N]")
 	response = input()
 	response = response.lower()
-	if response in ["no", "n"]:
-	   return False
-	else:
+	if response in ["yes", "y"]:
 	   return True
+	else:
+	   return False
 			
 def util_test_wrapper(test_method, test_nb, test_name, no_retry = False):
 	test_ok = False

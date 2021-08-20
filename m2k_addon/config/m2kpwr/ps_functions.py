@@ -227,9 +227,9 @@ def ps_test_potentiometer_upper_limit(ps, ain):
     
 def test_usbTypeC_connector():
     logging.getLogger().info("*** Plug in the USB-TypeC")
-    logging.getLogger().info("*** Is LED DS3 ON? [Y/n]")
+    logging.getLogger().info("*** Is LED DS3 ON? [y/N]")
     usb_pwr = input()
-    if usb_pwr in ["no", "n"]:
-	    return False
-    else:
+    if usb_pwr in ["yes", "y"]:
 	    return True
+    else:
+	    return False

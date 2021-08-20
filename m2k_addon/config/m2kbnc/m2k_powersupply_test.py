@@ -41,7 +41,7 @@ class PowerSupplyTests():
         """
         test_ok = True
         #logging.getLogger().info("*** Positive supply")
-        logging.getLogger().info("*** Is LED POS ON? [Y/n]")
+        logging.getLogger().info("*** Is LED POS ON? [y/N]")
         test_str = " Test the positive Power Supply"
         ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_1, True)
         ps.pushChannel(libm2k.ANALOG_IN_CHANNEL_1, 5)
@@ -49,11 +49,11 @@ class PowerSupplyTests():
         pos_supply = input()
         pos_supply = pos_supply.lower()
         ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_1, False)
-        if pos_supply in ["no", "n"]:
+        if pos_supply in ["yes", "y"]:
+            logging.getLogger().info("PASSED:" + test_str)
+        else:
             test_ok = False
             logging.getLogger().info("FAILED:" + test_str)
-        else:
-            logging.getLogger().info("PASSED:" + test_str)
         return test_ok
 
 
@@ -62,7 +62,7 @@ class PowerSupplyTests():
         """
         test_ok = True
         #logging.getLogger().info("*** Negative supply")
-        logging.getLogger().info("*** Is LED NEG ON? [Y/n]")
+        logging.getLogger().info("*** Is LED NEG ON? [y/N]")
         test_str = " Test the positive Negative Supply"
         ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_2, True)
         ps.pushChannel(libm2k.ANALOG_IN_CHANNEL_2, -5)
@@ -70,11 +70,11 @@ class PowerSupplyTests():
         neg_supply = input()
         neg_supply = neg_supply.lower()
         ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_2, False)
-        if neg_supply in ["no", "n"]:
+        if neg_supply in ["yes", "y"]:
+            logging.getLogger().info("PASSED:" + test_str)
+        else:
             test_ok = False
             logging.getLogger().info("FAILED:" + test_str)
-        else:
-            logging.getLogger().info("PASSED:" + test_str)
         return test_ok
 
 
