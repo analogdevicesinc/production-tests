@@ -146,6 +146,7 @@ production() {
 	local ERRORSFILE=$LOGDIR/_errors.log # errors that cannot be mapped to any device (because no S/N)
 	local STATSFILE=$LOGDIR/_stats.log # stats ; how many passes/fails
 	local RESULTSFILE=$LOGDIR/_results.log # format is "<BOARD S/N> = OK/FAILED"
+	local PREVIOUSCMD=""
 
 	# Remove temp log file start (if it exists)
 	rm -f "$LOGFILE"
@@ -162,19 +163,25 @@ production() {
 
 		mkdir -p $LOGDIR
 		sync
-		echo_green "Waiting for start command [bnc/pwr]:"
-		
-		while true
-		do
-			read -p "" BOARD
-			case $BOARD in
-			 [bB][nN][cC])  #echo_green "BNC adapter"
-						 break;;
-			 [pP][wW][rR])  #echo_red "PWR adapter"
-						 break;;
-			 * )         echo_green "Please enter BNC or PWR!"
-			esac
-		done
+
+		if [ "$PREVIOUSCMD" == "" ]; then
+			echo_green "Waiting for start command [bnc/pwr]:"
+			while true
+			do
+				read -p "" BOARD
+				PREVIOUSCMD="$BOARD"
+				case $BOARD in
+				[bB][nN][cC])  #echo_green "BNC adapter"
+							break;;
+				[pP][wW][rR])  #echo_red "PWR adapter"
+							break;;
+				* )         echo_green "Please enter BNC or PWR!"
+				esac
+			done
+		else
+			echo_green "Running previous command: " "$PREVIOUSCMD"
+			BOARD="$PREVIOUSCMD"
+		fi
 
 		RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
 
