@@ -42,8 +42,15 @@ def main():
     """Main file where tests for all segments are called. The test classes are organized in a test suite.
     """
     logging.getLogger().info("\n*** Connect the AD-M2KBNC-EBZ to the test setup"
-                            "\n*** Set the switch to B" 
+                            "\n*** Set the switch S1 from the TEST JIG board in position B" 
+                            "\n*** Make sure all jumpers are placed on DC coupling"
+                            "\n*** Make sure that BNC cables connect the following:"
+                            "\n*** W1 ====> 1+"
+                            "\n*** W2 ====> 2+"                            
                             "\n*** Press enter to continue the tests")
+                            
+                            
+
     input()
     test_result = run_test_suite()
     libm2k.contextClose(ctx, True)

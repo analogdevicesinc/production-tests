@@ -18,7 +18,7 @@ def analog_in(ain):
     ain.setOversamplingRatio(1)
     ain.setSampleRate(100000000)
     #ain.stopAcquisition()
-    #ain.setKernelBuffersCount(1)
+    ain.setKernelBuffersCount(1)
 
 
     return
