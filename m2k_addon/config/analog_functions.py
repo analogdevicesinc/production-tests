@@ -13,6 +13,7 @@ import random
 import sys
 import reset_def_values as reset
 from open_context_and_files import ctx
+import logging
 
 # dicts that will be saved to csv files
 shape_csv_vals = {}
@@ -42,9 +43,9 @@ def set_trig_for_signalshape_test(i,  channel, trig, delay):
     elif i == 2:
         set_trig(trig, channel, delay, libm2k.RISING_EDGE_ANALOG, -0.98)
     elif i == 3:
-        set_trig(trig, channel, 1, libm2k.RISING_EDGE_ANALOG, -1.1)
+        set_trig(trig, channel, 1, libm2k.RISING_EDGE_ANALOG, -1)
     elif i == 4:
-        set_trig(trig, channel, 1, libm2k.FALLING_EDGE_ANALOG, 1.1)
+        set_trig(trig, channel, 1, libm2k.FALLING_EDGE_ANALOG, 1)
 
     return
 
@@ -469,27 +470,39 @@ def test_offset(out_data, n, ain, aout, trig, channel):
     test_name = "offset"
     data_string = []
     ain.setRange(channel, libm2k.PLUS_MINUS_25V)
-    offset = np.arange(-4, 4.5, 0.5)  # offset values between -5 and 5 with a step of 1V
-    in_offset = np.array([])
+    offset = np.arange(-4, 4.5, 0.5)  # offset values between -4 and 4 with a step of 0.5V
 
+    in_offset = np.array([])
+    
     data_string.append("Offset values set:")
     data_string.append(str(offset))
+    
+ 
     for i in offset:
         set_trig(trig, channel, 0, libm2k.FALLING_EDGE_ANALOG, i + 0.1)
         sum = 0
         o_buffer = i + out_data  # add the output data to the offset value
         aout.push(channel, o_buffer)  # push the buffer
-        # get samples for amplitude multiplied with i
+        time.sleep(0.2)
+        #get samples for amplitude multiplied with i
         try:
             input_data = ain.getSamples(n)
+            
         except:
             print('Timeout occured')
+            ain.stopAcquisition()
+            aout.stop(channel)
+            aout.enableChannel(channel, True)
+            return 0
+            
         ain.stopAcquisition()
 
         for s in input_data[channel]:
             sum = sum + s
-        average = round(sum / n, 1)  # compute the average value of a period of the acquired signal
+        average = round(sum / n, 2)  # compute the average value of a period of the acquired signal
         in_offset = np.append(in_offset, average)  # put all the average values in a vector
+        
+        
         data_string.append("Offset values computed:")
         data_string.append(str(in_offset))
         if gen_reports:
@@ -501,6 +514,8 @@ def test_offset(out_data, n, ain, aout, trig, channel):
             else:
                 plot_to_file('Signal offset  on channel 1', input_data[channel], dir_name, 'offsets_ch1.png')
             # file.write("Offset values computed: \n" + str(in_offset) + "\n")
+
+   
     if gen_reports:
         write_file(file, test_name, channel, data_string)
     corr_offset, _ = pearsonr(offset, in_offset)  # compare the original offset vector with the average values obtained

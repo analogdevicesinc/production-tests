@@ -40,7 +40,7 @@ def main():
 
     """
     logging.getLogger().info("\n*** Connect the AD-M2KPWR-EBZ to the test setup"
-                            "\n*** Set the switch to A" 
+                            "\n*** Set the switch S1 on the TEST JIG board in position A" 
                             "\n*** Make sure the jumpers are in positions M2K+ and M2K-"
                             "\n*** Make sure the potentiometers are in positions 1.5V and -1.5V" 
                             "\n*** Press enter to continue the tests")

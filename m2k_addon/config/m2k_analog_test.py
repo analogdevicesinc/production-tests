@@ -16,12 +16,12 @@ class AnalogTests():
     def _setUpClass(self, is_bnc):
         #print on the terminal some info 
         logging.getLogger().info("\nANALOG SEGMENT")
-        if is_bnc:
-            logging.getLogger().info("Connections-through a BNC cable:")
-            logging.getLogger().info("W1 ====> 1+")
-            logging.getLogger().info("W2 ====> 2+")
-            logging.getLogger().info("Press enter to continue")
-            input()
+        #if is_bnc:
+         #   logging.getLogger().info("Make sure that BNC cables connect the following:")
+          #  logging.getLogger().info("W1 ====> 1+")
+          #  logging.getLogger().info("W2 ====> 2+")
+          #  logging.getLogger().info("Press enter to continue")
+          #  input()
 
 
     def _test_1_analog_objects(self):
@@ -133,14 +133,18 @@ class AnalogTests():
         offset_ch0 = test_offset(buffer0[0], in0_buffer_samples, ain, aout, trig, libm2k.ANALOG_IN_CHANNEL_1)
         offset_ch1 = test_offset(buffer0[0], in1_buffer_samples, ain, aout, trig, libm2k.ANALOG_IN_CHANNEL_2)
         offset_coefficients=(offset_ch0, offset_ch1)
+        logging.getLogger().info("offset_coefficients")
+
+        logging.getLogger().info(offset_coefficients)
 
         for i in range(2):
             test_str = " Test different signal offsets on ch " + str(i)
-            if offset_coefficients[i] > 0.9:
+            if offset_coefficients[i] > 0.95:
                 logging.getLogger().info("PASSED:" + test_str)
             else:
                 test_ok = False
                 logging.getLogger().info("FAILED:" + test_str)
+                logging.getLogger().info("CHECK JUMPERS POSITION")
         return test_ok
 
     def _test_6_frequency(self):
