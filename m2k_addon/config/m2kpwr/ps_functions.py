@@ -36,9 +36,7 @@ def config_for_ps_test(ps,ain):
     if ain.isChannelEnabled(libm2k.ANALOG_IN_CHANNEL_2) == False:
         ain.enableChannel(libm2k.ANALOG_IN_CHANNEL_2, True)
         
-    ain.setRange(libm2k.ANALOG_IN_CHANNEL_1,libm2k.PLUS_MINUS_25V)
-    ain.setRange(libm2k.ANALOG_IN_CHANNEL_2,libm2k.PLUS_MINUS_25V)
-    GPIO.output(R1,True)
+    
     return
 
 def ps_test_positive(ps, ain):
@@ -57,10 +55,14 @@ def ps_test_positive(ps, ain):
    
     while voltage <= 5:
         if voltage <= 3:
+            ain.setRange(libm2k.ANALOG_IN_CHANNEL_1,libm2k.PLUS_MINUS_2_5V)
+            GPIO.output(R1,True)
             GPIO.output(R2,True)
             GPIO.output(R3,True)
             GPIO.output(R4,True)
         else:
+            ain.setRange(libm2k.ANALOG_IN_CHANNEL_1,libm2k.PLUS_MINUS_25V)
+            GPIO.output(R1,True)
             GPIO.output(R2,True)
             GPIO.output(R3,True)
             GPIO.output(R4,False)
@@ -77,8 +79,12 @@ def ps_test_positive(ps, ain):
         else:
             pos_supply=np.append(pos_supply,0)
         voltage = voltage + 1
+     
+        
     logging.getLogger().info(pos_supply)
-
+    
+    
+    GPIO.output(R1, False)
     GPIO.output(R2, False)
     GPIO.output(R3, False)
     GPIO.output(R4, False)
@@ -101,10 +107,14 @@ def ps_test_negative(ps, ain):
 
     while voltage>=-5:
         if voltage>=-3:
+            ain.setRange(libm2k.ANALOG_IN_CHANNEL_2,libm2k.PLUS_MINUS_2_5V)
+            GPIO.output(R1,True)
             GPIO.output(R2,True)
             GPIO.output(R3,True)
             GPIO.output(R4,True)
         else:
+            ain.setRange(libm2k.ANALOG_IN_CHANNEL_2,libm2k.PLUS_MINUS_25V)
+            GPIO.output(R1,True)
             GPIO.output(R2,True)
             GPIO.output(R3,True)
             GPIO.output(R4,False)
@@ -145,6 +155,9 @@ def switch_to_pot_control(ps):
 
 def ps_test_potentiometer_lower_limit(ps, ain):
     switch_to_pot_control(ps)
+    
+    ain.setRange(libm2k.ANALOG_IN_CHANNEL_1,libm2k.PLUS_MINUS_2_5V)
+    ain.setRange(libm2k.ANALOG_IN_CHANNEL_2,libm2k.PLUS_MINUS_2_5V)
     GPIO.output(R1,True)
     GPIO.output(R2,True)
     GPIO.output(R3,True)
@@ -158,8 +171,9 @@ def ps_test_potentiometer_lower_limit(ps, ain):
     logging.getLogger().info("*** Make sure the arrow of POT- (R19) is pointing to -1.5V")
     logging.getLogger().info("*** Press enter to continue the test")
     input()
- 
-    voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1]      
+
+    
+    voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1]
     logging.getLogger().info("Read: " + str(voltage) + "V")
     if (voltage>1) and (voltage <2):
         pot_lower_limit=np.append(pot_lower_limit,1)
@@ -174,8 +188,9 @@ def ps_test_potentiometer_lower_limit(ps, ain):
         pot_lower_limit=np.append(pot_lower_limit,1)
     else:
         pot_lower_limit=np.append(pot_lower_limit,0)
-    
-
+    ain.stopAcquisition()
+    GPIO.output(R1,False)
+    GPIO.output(R2,False)
     GPIO.output(R3,False)
     GPIO.output(R4,False)
     
@@ -184,20 +199,31 @@ def ps_test_potentiometer_lower_limit(ps, ain):
 
 
 def ps_test_potentiometer_upper_limit(ps, ain):
-  
+    switch_to_pot_control(ps)
+    ain.setRange(libm2k.ANALOG_IN_CHANNEL_1,libm2k.PLUS_MINUS_25V)
+    ain.setRange(libm2k.ANALOG_IN_CHANNEL_2,libm2k.PLUS_MINUS_25V)
+    GPIO.output(R1,True)
+    GPIO.output(R2,True)
+    ain.setKernelBuffersCount(1)
 
     pot_upper_limit=[]
-    voltage=0
-   
 
     logging.getLogger().info("*** Make sure the arrow of POT+ (R20) points to 15V")
     logging.getLogger().info("*** Make sure the arrow of POT- (R19) points to -15V")
     logging.getLogger().info("*** Press enter to continue the test")
+    
     input()
+    
   
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_1]
     logging.getLogger().info("Read: " + str(voltage) + "V")
-    if (voltage>13) and (voltage <15):
+    
+    
+ 
+    
+    if (voltage>14.5) and (voltage <16.5):
+        
+        
         pot_upper_limit=np.append(pot_upper_limit,1)
     else:
         pot_upper_limit=np.append(pot_upper_limit,0)
@@ -206,15 +232,15 @@ def ps_test_potentiometer_upper_limit(ps, ain):
     voltage=ain.getVoltage()[libm2k.ANALOG_IN_CHANNEL_2]
     logging.getLogger().info("Read: " + str(voltage) + "V")
 
-    if (voltage<-13) and (voltage>-15):
+    if (voltage<-14.5) and (voltage>-16.5):
         pot_upper_limit=np.append(pot_upper_limit,1)
     else:
         pot_upper_limit=np.append(pot_upper_limit,0)
   
+    ain.stopAcquisition() 
     GPIO.output(R1,False)
     GPIO.output(R2,False)
-    GPIO.output(R3,False)
-    GPIO.output(R4,False)
+  
     logging.getLogger().info(pot_upper_limit)
     
     
