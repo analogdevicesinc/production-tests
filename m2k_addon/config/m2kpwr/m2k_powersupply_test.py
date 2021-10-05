@@ -24,10 +24,11 @@ class PowerSupplyTests():
             logging.getLogger().info("FAILED:" + test_str)
             return False
         logging.getLogger().info("PASSED:" +  test_str)
+        
         return True
         
         
-    def _test_2_pot_lower_limit(self):
+    def _test_3_pot_lower_limit(self):
         """Verifies functionality of the positive power supply controlled with the potentiometer
         """
         test_ok = True
@@ -44,7 +45,7 @@ class PowerSupplyTests():
         return test_ok
 
          
-    def _test_3_pot_upper_limit(self):
+    def _test_2_pot_upper_limit(self):
         """Verifies functionality of the negative power supply controlled with the potentiometer
         """
         test_ok = True
@@ -58,18 +59,21 @@ class PowerSupplyTests():
                 logging.getLogger().info("FAILED:" + test_str)
                 
                 
-        logging.getLogger().info("\n\n\n*** Switch back jumper P6 from POT+ (R20) position to M2K+ position")
-        logging.getLogger().info("*** Switch back jumper P7 from POT- (R19) position to M2K- position")
-        logging.getLogger().info("*** Make sure the arrow of POT+ points to 1.5V")
-        logging.getLogger().info("*** Make sure the arrow of POT+ points to -1.5V")
-        logging.getLogger().info("*** Press enter to continue the test")
-        input()
+        
+        
         return test_ok
     
 
     def _test_4_positive_power_supply(self):
         """Verifies functionality of the positive power supply controlled with m2k
         """
+        logging.getLogger().info("\n\n\n*** Switch back jumper P6 from POT+ (R20) position to M2K+ position")
+        logging.getLogger().info("*** Switch back jumper P7 from POT- (R19) position to M2K- position")
+        logging.getLogger().info("*** Make sure the arrow of POT+ points to 1.5V")
+        logging.getLogger().info("*** Make sure the arrow of POT+ points to -1.5V")
+        logging.getLogger().info("*** Press enter to continue the test")
+        input()
+        
         test_ok = True
         reset.analog_in(ain)
         config_for_ps_test(ps, ain)
@@ -135,12 +139,14 @@ class PowerSupplyTests():
         t_res = util_test_wrapper(self._test_1_usbTypeC_power_connector, 1, "Check the USB TypeC")
         if not t_res:
             return t_res
-        t_res = util_test_wrapper(self._test_2_pot_lower_limit, 2, "Verify potentiometer lower setting")
+        t_res = util_test_wrapper(self._test_2_pot_upper_limit, 2, "Verify potentiometer upper setting")
         if not t_res:
             return t_res
-        t_res = util_test_wrapper(self._test_3_pot_upper_limit, 3, "Verify potentiometer upper setting")
+        t_res = util_test_wrapper(self._test_3_pot_lower_limit, 3, "Verify potentiometer lower setting")
+        
         if not t_res:
             return t_res
+        
         t_res = util_test_wrapper(self._test_4_positive_power_supply, 4, "Verify M2K positive power supply")
         if not t_res:
             return t_res
