@@ -31,7 +31,6 @@ def run_test_suite():
     m2kbnc_digital_tests = DigitalTests()
     test_dig = m2kbnc_digital_tests.run_tests()
     if not test_dig:
-    
         return test_dig
     return True
 

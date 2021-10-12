@@ -43,9 +43,9 @@ def set_trig_for_signalshape_test(i,  channel, trig, delay):
     elif i == 2:
         set_trig(trig, channel, delay, libm2k.RISING_EDGE_ANALOG, -0.98)
     elif i == 3:
-        set_trig(trig, channel, 1, libm2k.RISING_EDGE_ANALOG, -1)
+        set_trig(trig, channel, delay, libm2k.RISING_EDGE_ANALOG, -0.97)
     elif i == 4:
-        set_trig(trig, channel, 1, libm2k.FALLING_EDGE_ANALOG, 1)
+        set_trig(trig, channel, delay, libm2k.FALLING_EDGE_ANALOG, 0.97)
 
     return
 
@@ -122,6 +122,7 @@ def test_amplitude(out_data, ref_data, n, ain, aout, channel, trig):
         corr_amplitude_max -- correlation coefficient between the vector that holds the maximum amplitude values in the input signal and the vector that holds the maximum amplitude values in the reference signal
         corr_amplitude_min -- correlation coefficient between the vector that holds the minimum amplitude values in the input signal and the vector that holds the maximum amplitude values in the reference signal
     """
+    timeout_error = False
     if gen_reports:
         from create_files import results_file, results_dir, csv, open_files_and_dirs
         if results_file is None:
@@ -154,6 +155,9 @@ def test_amplitude(out_data, ref_data, n, ain, aout, channel, trig):
             input_data = ain.getSamples(n)
         except:
             print('Timeout occured')
+            ain.stopAcquisition()
+            timeout_error = True
+            continue
         ain.stopAcquisition()
 
         # generate the buffer that should be received and is compared to the actual input data
@@ -192,7 +196,7 @@ def test_amplitude(out_data, ref_data, n, ain, aout, channel, trig):
         write_file(file, test_name, channel, data_string)
     aout.stop(channel)
     aout.enableChannel(channel, True)
-    return corr_amplitude_max, corr_amplitude_min
+    return (corr_amplitude_max, corr_amplitude_min), timeout_error
 
 
 def test_shape(channel, out_data, ref_data, ain, aout, trig, ch_ratio, shapename):
@@ -212,6 +216,7 @@ def test_shape(channel, out_data, ref_data, ain, aout, trig, ch_ratio, shapename
         corr_shape_vect-- vector that holds the correlation coefficients between the input data and the reference data for each signal shape
         phase_diff_vect-- vector that holds the phase difference between the input data and the reference data for each signal shape
     """
+    timeout_error = False
     if gen_reports:
         from create_files import results_file, results_dir, csv, open_files_and_dirs
         if results_file is None:
@@ -240,6 +245,7 @@ def test_shape(channel, out_data, ref_data, ain, aout, trig, ch_ratio, shapename
         except:
             print('Timeout occured')
             ain.stopAcquisition()
+            timeout_error = True
             continue
 
         ain.stopAcquisition()
@@ -267,7 +273,7 @@ def test_shape(channel, out_data, ref_data, ain, aout, trig, ch_ratio, shapename
     aout.stop(channel)
     aout.enableChannel(channel, True)
 
-    return corr_shape_vect, phase_diff_vect
+    return corr_shape_vect, phase_diff_vect, timeout_error
 
 
 def test_analog_trigger(channel, trig, aout, ain):
@@ -456,6 +462,7 @@ def test_offset(out_data, n, ain, aout, trig, channel):
     Returns
         corr_offset -- Correlation coefficient between the computed offset vector and the defined offset vector 
     """
+    timeout_error = False
     if gen_reports:
         from create_files import results_file, results_dir, csv, open_files_and_dirs
         if results_file is None:
@@ -487,13 +494,11 @@ def test_offset(out_data, n, ain, aout, trig, channel):
         #get samples for amplitude multiplied with i
         try:
             input_data = ain.getSamples(n)
-            
         except:
             print('Timeout occured')
             ain.stopAcquisition()
-            aout.stop(channel)
-            aout.enableChannel(channel, True)
-            return 0
+            timeout_error = True
+            continue
             
         ain.stopAcquisition()
 
@@ -523,7 +528,7 @@ def test_offset(out_data, n, ain, aout, trig, channel):
             
     aout.stop(channel)
     aout.enableChannel(channel, True)
-    return corr_offset
+    return corr_offset, timeout_error
 
 
 def test_voltmeter_functionality(channel, ain, aout, ctx):
@@ -598,6 +603,7 @@ def compute_frequency(channel, ain, aout, trig):
         ofreqs-- Vector that holds the frequencies of the output buffers
         ifreqs-- Vector that holds the frequencies of the input buffers
     """
+    timeout_error = False
     if gen_reports:
         from create_files import results_file, results_dir, csv, open_files_and_dirs
         if results_file is None:
@@ -654,6 +660,10 @@ def compute_frequency(channel, ain, aout, trig):
                     input_data = ain.getSamples(round(in_nr_samples))[channel]
                 except:
                     print('Timeout occured')
+                    ain.stopAcquisition()
+                    timeout_error = True
+                    continue
+
                 ain.stopAcquisition()
                 corr, _ = pearsonr(ref_data, input_data)  # compare the acquired signal with the expected signal
 
@@ -671,7 +681,7 @@ def compute_frequency(channel, ain, aout, trig):
 
     aout.stop(channel)
     aout.enableChannel(channel, True)
-    return ofreqs, ifreqs
+    return timeout_error, ofreqs, ifreqs
 
 
 def compare_in_out_frequency(channel, ain, aout, trig):
@@ -688,7 +698,7 @@ def compare_in_out_frequency(channel, ain, aout, trig):
         freq_test--Vector that holds 1 if the corresponding in and out frequencies are equal and 0 otherwise
     """
     freq_test = []  # create an array that will hold 1 if the frequencies are equal and 0 otherwise
-    out_freq, in_freq = compute_frequency(channel, ain, aout, trig)  # compute input and output frequencies
+    timeout_error, out_freq, in_freq = compute_frequency(channel, ain, aout, trig)  # compute input and output frequencies
     if len(out_freq) == len(in_freq):  # make sure that for each out freq there is a corresponding input freq
         for i in range(len(out_freq)):
             if in_freq[i] < 100:  # according to the frequency value, check their equality
@@ -713,7 +723,7 @@ def compare_in_out_frequency(channel, ain, aout, trig):
                     freq_test = np.append(freq_test, 0)
     aout.stop(channel)
     aout.enableChannel(channel, True)
-    return freq_test
+    return timeout_error, freq_test
 
 
 def plot_to_file(title, data, dir_name, filename, xlabel=None, ylabel=None, data1=None):
