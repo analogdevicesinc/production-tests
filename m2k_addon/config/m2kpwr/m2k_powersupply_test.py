@@ -5,6 +5,7 @@ import m2kpwr.ps_functions as ps_functions
 import logging
 import sys
 import time
+import libm2k
 from utils import util_yes_no, util_test_wrapper
 
 
@@ -122,7 +123,8 @@ class PowerSupplyTests():
         """
         test_ok = True
         test_str = " Disable M2k power supplies"
-        switch_to_pot_control(ps)
+        ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_1, False)
+        ps.enableChannel(libm2k.ANALOG_IN_CHANNEL_2, False)
         state = ps.anyChannelEnabled()
         if not state:
             logging.getLogger().info("PASSED:" + test_str)
