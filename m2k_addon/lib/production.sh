@@ -223,5 +223,8 @@ production() {
 		cat /dev/null > "$LOGFILE"
 		PASSED=1
 		console_ascii_passed
+		echo_green "UNPLUG THE AD-M2K${board_upcase}-EBZ board"
+		echo_green "Press enter to continue the tests"
+		read line
 	done
 }
