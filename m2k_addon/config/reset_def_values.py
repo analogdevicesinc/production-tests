@@ -53,7 +53,7 @@ def trigger(trig):
     trig.setAnalogCondition(libm2k.ANALOG_IN_CHANNEL_1,libm2k.RISING_EDGE_ANALOG)
     trig.setAnalogCondition(libm2k.ANALOG_IN_CHANNEL_2,libm2k.RISING_EDGE_ANALOG)
     trig.setAnalogMode(libm2k.ANALOG_IN_CHANNEL_1,libm2k.ALWAYS)
-    trig.setAnalogMode(libm2k.ANALOG_IN_CHANNEL_1,libm2k.ALWAYS)
+    trig.setAnalogMode(libm2k.ANALOG_IN_CHANNEL_2,libm2k.ALWAYS)
     trig.setAnalogSource(libm2k.CHANNEL_1)
     trig.setAnalogSourceChannel(libm2k.ANALOG_IN_CHANNEL_1)
     trig.setAnalogDelay(0)
