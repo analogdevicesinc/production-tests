@@ -1,7 +1,7 @@
 import sys
 import libm2k
 from shapefile import shape_gen, ref_shape_gen, shape_name
-from analog_functions import  test_amplitude, test_shape,  test_offset, test_analog_trigger
+from analog_functions import  test_amplitude, test_shape,  test_offset
 from analog_functions import  set_samplerates_for_shapetest
 from analog_functions import compare_in_out_frequency
 import reset_def_values as reset
@@ -57,7 +57,7 @@ class AnalogTests():
 
         #coorrelation coefficient vector for signals acquired on channel0 
         #correlation coeff >0.7 there is a strong positive linear relationship between the 2 signals
-        corr_shape_vect0, phase_diff_vect0 = test_shape(libm2k.ANALOG_IN_CHANNEL_1, buffer0, ref_shape_buf0, ain, aout,
+        corr_shape_vect0, phase_diff_vect0, timeout_error = test_shape(libm2k.ANALOG_IN_CHANNEL_1, buffer0, ref_shape_buf0, ain, aout,
                                                         trig, ch0_sample_ratio, shapename)
 
         for i in range(len(corr_shape_vect0)):
@@ -67,7 +67,7 @@ class AnalogTests():
             else:
                 test_ok = False
                 logging.getLogger().info("FAILED:" + test_str)
-        return test_ok
+        return test_ok and not timeout_error
 
 
     def _test_3_shapes_ch1(self):
@@ -81,7 +81,7 @@ class AnalogTests():
         shapename=shape_name()#names of generated signals
         buffer1=shape_gen(out1_buffer_samples)
         ref_shape_buf1=ref_shape_gen(in1_buffer_samples)
-        corr_shape_vect1, phase_diff_vect1 = test_shape(libm2k.ANALOG_IN_CHANNEL_2, buffer1, ref_shape_buf1, ain, aout,
+        corr_shape_vect1, phase_diff_vect1, timeout_error = test_shape(libm2k.ANALOG_IN_CHANNEL_2, buffer1, ref_shape_buf1, ain, aout,
                                                         trig, ch1_sample_ratio, shapename)
         for i in range(len(corr_shape_vect1)):
             test_str = " sent " + str(shapename[i]) + " signal shape on aout ch1 and received on ain ch1"
@@ -90,7 +90,7 @@ class AnalogTests():
             else:
                 test_ok = False
                 logging.getLogger().info("FAILED:" + test_str)
-        return test_ok
+        return test_ok and not timeout_error
 
 
     def _test_4_amplitude(self):
@@ -105,11 +105,11 @@ class AnalogTests():
         ref_shape_buf0=ref_shape_gen(in0_buffer_samples)
         buffer1=shape_gen(out1_buffer_samples)
         ref_shape_buf1=ref_shape_gen(in1_buffer_samples)
-        amp_coeff_ch0 = test_amplitude(buffer0[0], ref_shape_buf0[0], in0_buffer_samples, ain, aout,
+        amp_coeff_ch0, timeout_error_ch0 = test_amplitude(buffer0[0], ref_shape_buf0[0], in0_buffer_samples, ain, aout,
                                        libm2k.ANALOG_IN_CHANNEL_1, trig)
-        amp_coeff_ch1 = test_amplitude(buffer1[0], ref_shape_buf1[0], in1_buffer_samples, ain, aout,
+        amp_coeff_ch1, timeout_error_ch1 = test_amplitude(buffer1[0], ref_shape_buf1[0], in1_buffer_samples, ain, aout,
                                        libm2k.ANALOG_IN_CHANNEL_2, trig)
-        amplitude_coefficients=(amp_coeff_ch0,amp_coeff_ch1)
+        amplitude_coefficients=(amp_coeff_ch0, amp_coeff_ch1)
 
         for i in range(2):
             test_str = " Test different signal amplitudes on ch " + str(i)
@@ -119,7 +119,7 @@ class AnalogTests():
             else:
                 test_ok = False
                 logging.getLogger().info("FAILED:" + test_str)
-        return test_ok
+        return test_ok and not timeout_error_ch0 and not timeout_error_ch1
 
     def _test_5_offset(self):
         """Verifies that all the elements of a vector that holds the offset coefficients are greater than 0.9. The vector is returned by test_offset()
@@ -130,8 +130,8 @@ class AnalogTests():
         reset.trigger(trig)
         out0_buffer_samples, out1_buffer_samples, ch0_sample_ratio, ch1_sample_ratio, in0_buffer_samples, in1_buffer_samples=set_samplerates_for_shapetest(ain, aout)
         buffer0=shape_gen(out0_buffer_samples)
-        offset_ch0 = test_offset(buffer0[0], in0_buffer_samples, ain, aout, trig, libm2k.ANALOG_IN_CHANNEL_1)
-        offset_ch1 = test_offset(buffer0[0], in1_buffer_samples, ain, aout, trig, libm2k.ANALOG_IN_CHANNEL_2)
+        offset_ch0, timeout_error_ch0 = test_offset(buffer0[0], in0_buffer_samples, ain, aout, trig, libm2k.ANALOG_IN_CHANNEL_1)
+        offset_ch1, timeout_error_ch1 = test_offset(buffer0[0], in1_buffer_samples, ain, aout, trig, libm2k.ANALOG_IN_CHANNEL_2)
         offset_coefficients=(offset_ch0, offset_ch1)
         logging.getLogger().info("offset_coefficients")
 
@@ -145,7 +145,7 @@ class AnalogTests():
                 test_ok = False
                 logging.getLogger().info("FAILED:" + test_str)
                 logging.getLogger().info("CHECK JUMPERS POSITION")
-        return test_ok
+        return test_ok and not timeout_error_ch0 and not timeout_error_ch1
 
     def _test_6_frequency(self):
         """Verifies if a frequency sent on aout channels is the same on ain channels, for different values of the ADC and DAC sample rates.
@@ -154,9 +154,10 @@ class AnalogTests():
         test_ok = True
         reset.analog_in(ain)
         reset.analog_out(aout)
-        reset.trigger(trig)       
-        frequency_test = [compare_in_out_frequency(libm2k.ANALOG_IN_CHANNEL_1, ain, aout, trig),
-                          compare_in_out_frequency(libm2k.ANALOG_IN_CHANNEL_2, ain, aout, trig)]
+        reset.trigger(trig)   
+        timeout_error0, freq_test_ch0 = compare_in_out_frequency(libm2k.ANALOG_IN_CHANNEL_1, ain, aout, trig)
+        timeout_error1, freq_test_ch1 = compare_in_out_frequency(libm2k.ANALOG_IN_CHANNEL_2, ain, aout, trig)
+        frequency_test = [freq_test_ch0, freq_test_ch1]
 
         for i in range(2):
             test_str = " Test if in and out frequencies correspond on channel " + str(i)
@@ -166,7 +167,7 @@ class AnalogTests():
                 else:
                     test_ok = False
                     logging.getLogger().info("FAILED:" + test_str)
-        return test_ok
+        return test_ok and not timeout_error0 and not timeout_error1
 
     def run_tests(self, is_bnc = True):
         self._setUpClass(is_bnc)
