@@ -35,9 +35,10 @@ setup_apt_install_prereqs() {
 		cmake build-essential git libxml2-dev \
 		usbutils wget unzip curl xfce4 \
 		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal \
-		openssh-server gpg thunar-volman
+		openssh-server gpg thunar-volman python3-pandas python3-scipy \
+		python3-colorlog
 	python3 -m pip install setuptools numpy matplotlib \
-		scipy pandas html-testRunner pdoc3 colorlog logging
+		pdoc3 logging
 	/etc/init.d/htpdate restart
 	EOF
 }
