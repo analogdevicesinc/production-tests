@@ -210,6 +210,9 @@ production() {
 		addon_test_${BOARD} || {
 			handle_error_state "$BOARD_SERIAL"
 			sleep 1
+			echo_red "UNPLUG THE AD-M2K${board_upcase}-EBZ board"
+			echo_red "Press enter to continue the tests"
+			read line
 			continue
 		}
 		
