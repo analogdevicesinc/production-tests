@@ -1,7 +1,6 @@
 #! /usr/bin/python3
 import libm2k
 import unittest
-import HtmlTestRunner
 import logging
 import sys
 from m2k_analog_test import AnalogTests

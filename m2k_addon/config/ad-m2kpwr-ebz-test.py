@@ -1,6 +1,5 @@
 #! /usr/bin/python3
 import libm2k
-import HtmlTestRunner
 import logging
 import sys
 import RPi.GPIO as GPIO
