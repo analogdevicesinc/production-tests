@@ -23,7 +23,7 @@ get_board_serial() {
 }
 
 get_fmcomms_serial() {
-	BOARD_SERIAL=$(ssh_cmd "fru-dump -i /sys/devices/platform/amba/ff030000.i2c/i2c-1/i2c-8/8-0052/eeprom -b | grep 'Serial Number' | cut -d' ' -f3 | tr -d '[:cntrl:]'")
+	BOARD_SERIAL=$(ssh_cmd "fru-dump -i /sys/bus/i2c/devices/8-0052/eeprom -b | grep 'Serial Number' | cut -d' ' -f3 | tr -d '[:cntrl:]'")
 }
 
 dut_date_sync() {
