@@ -9,7 +9,7 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/lib/utils.sh
 
-SUPPORTED_BOARDS="ADV9009_CRR-SOM"
+SUPPORTED_BOARDS="ADV9361_CRR-SOM"
 
 INIT_PINS_SCRIPT="$SCRIPT_DIR"/init.sh
 
