@@ -78,13 +78,15 @@ if [ "$answer" -ne 0 ] && [ -z "$4" ]
 then
 	until [ "$answer" -eq 0 ]
 	do
+		let "FAIL_COUNT+=1"
 		YES_no "${RED}TEST FAILED${NC} - Do you want to repeat test?"
 		if [ $? -eq 1 ]
 		then
 			YES_no "Do you want to close the test?"
 			if [ $? -eq 0 ]
 			then
-				exit 1
+				FAIL_COUNT=255
+				exit 255
 			else
 				break
 			fi
@@ -95,4 +97,8 @@ then
 fi
 
 proceed_if_ok $answer "${RED}FAIL${NC}" "${GREEN}OK${NC}"
+}
+
+function failed_no(){
+	return $FAIL_COUNT
 }
