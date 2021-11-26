@@ -16,6 +16,7 @@ show_start_state() {
 	READY=0
 	FAILED=0
 	PROGRESS=1
+	PASSED_TESTS=0
 }
 
 get_board_serial() {
@@ -66,7 +67,7 @@ inc_pass_stats() {
 }
 
 console_ascii_passed() {
-	echo_green "$(cat $SCRIPT_DIR/lib/passed.ascii)"
+	echo_green "$(cat $SCRIPT_DIR/lib/passed.ascii)" && echo_green "$PASSED_TESTS/35"
 }
 
 console_ascii_failed() {
@@ -186,12 +187,19 @@ production() {
 
         case $MODE in
                 "ADRV Carrier Test")
-                        $SCRIPT_DIR/adrv_crr_test/test_usb_periph.sh &&
-                        $SCRIPT_DIR/adrv_crr_test/test_uart.sh &&
+                        $SCRIPT_DIR/adrv_crr_test/test_usb_periph.sh
+						FAILED_USB=$?
+                        $SCRIPT_DIR/adrv_crr_test/test_uart.sh
+						FAILED_UART=$?
                         ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"
-                        if [ $? -ne 0 ]; then
+						FAILED_TESTS=$?
+						echo $FAILED_TESTS
+						echo $FAILED_USB
+						echo $FAILED_UART
+                        if [ $FAILED_TESTS -eq 255 ] || [ $FAILED_USB -eq 255 ] || [ $FAILED_UART -eq 255 ]; then
                                 handle_error_state "$BOARD_SERIAL"
                         fi
+						PASSED_TESTS=$((35 - FAILED_TESTS - FAILED_USB - FAILED_UART))
                         ;;
                 "ADRV SOM Test")
                         ssh_cmd "sudo /home/analog/adrv_som_test/som_test.sh"
