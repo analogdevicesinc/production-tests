@@ -88,12 +88,14 @@ then
 				FAIL_COUNT=255
 				exit 255
 			else
+				
 				break
 			fi
 		fi
 		eval "$3"
 		answer=$?
 	done
+	FAIL_COUNT=0
 fi
 
 proceed_if_ok $answer "${RED}FAIL${NC}" "${GREEN}OK${NC}"

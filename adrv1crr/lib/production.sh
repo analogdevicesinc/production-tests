@@ -16,7 +16,7 @@ show_start_state() {
 	READY=0
 	FAILED=0
 	PROGRESS=1
-	PASSED_TESTS=0
+	FAILED_NO=0
 }
 
 get_board_serial() {
@@ -67,11 +67,15 @@ inc_pass_stats() {
 }
 
 console_ascii_passed() {
-	echo_green "$(cat $SCRIPT_DIR/lib/passed.ascii)" && echo_green "$PASSED_TESTS/35"
+	echo_green "$(cat $SCRIPT_DIR/lib/passed.ascii)"
 }
 
 console_ascii_failed() {
 	echo_red "$(cat $SCRIPT_DIR/lib/failed.ascii)"
+	if [ FAILED_TESTS -ne 255 ] && [ FAILED_UART -ne 255 ] && [ FAILED_USB -ne 255 ]; then
+		FAILED_NO=&((FAILED_TESTS + FAILED_UART + FAILED_USB))
+		echo_red "$FAILED_NO TESTS FAILED"
+	fi
 }
 
 wait_for_eeprom_vars() {
@@ -184,6 +188,11 @@ production() {
 	# TBD ready state - connection, other settings
 
 	RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
+	timedatectl | grep "synchronized: yes"
+	SYNCHRONIZATION=$?
+	if [ SYNCHRONIZATION -ne 0 ]; then
+		echo_red "Your time and date is not up-to-date. The times of the logs will be inaccurate"
+	fi
 
         case $MODE in
                 "ADRV Carrier Test")
@@ -193,13 +202,10 @@ production() {
 						FAILED_UART=$?
                         ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"
 						FAILED_TESTS=$?
-						echo $FAILED_TESTS
-						echo $FAILED_USB
-						echo $FAILED_UART
-                        if [ $FAILED_TESTS -eq 255 ] || [ $FAILED_USB -eq 255 ] || [ $FAILED_UART -eq 255 ]; then
+                        if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_USB -ne 0 ] || [ $FAILED_UART -ne 0 ]; then
+								FAILED_NO=$((FAILED_TESTS + FAILED_USB + FAILED_UART))
                                 handle_error_state "$BOARD_SERIAL"
                         fi
-						PASSED_TESTS=$((35 - FAILED_TESTS - FAILED_USB - FAILED_UART))
                         ;;
                 "ADRV SOM Test")
                         ssh_cmd "sudo /home/analog/adrv_som_test/som_test.sh"
