@@ -20,7 +20,7 @@ show_start_state() {
 }
 
 get_board_serial() {
-	BOARD_SERIAL=$(ssh_cmd "dmesg | grep SPI-NOR-UniqueID | cut -d' ' -f9 | tr -d '[:cntrl:]'")
+	BOARD_SERIAL=$(ssh_cmd "dmesg | grep SPI-NOR-UniqueID | cut -d' ' -f9 | tr -d '[:cntrl:]'") # to be updated with a serial number from carrier
 }
 
 get_fmcomms_serial() {
@@ -37,10 +37,10 @@ handle_error_state() {
 	FAILED=1
 	inc_fail_stats "$serial"
 	console_ascii_failed
-	if [ -n "$serial" ] ; then
+	if [ $SYNCHRONIZATION -eq 0 ]; then 
 		cat "$LOGFILE" > "$LOGDIR/failed_${serial}_${RUN_TIMESTAMP}.log"
 	else
-		cat "$LOGFILE" > "${ERRORSFILE}_${RUN_TIMESTAMP}"
+		cat "$LOGFILE" > "$LOGDIR/no_date_failed_${serial}_${RUN_TIMESTAMP}.log"
 	fi
 	cat /dev/null > "$LOGFILE"
 }
@@ -72,8 +72,8 @@ console_ascii_passed() {
 
 console_ascii_failed() {
 	echo_red "$(cat $SCRIPT_DIR/lib/failed.ascii)"
-	if [ FAILED_TESTS -ne 255 ] && [ FAILED_UART -ne 255 ] && [ FAILED_USB -ne 255 ]; then
-		FAILED_NO=&((FAILED_TESTS + FAILED_UART + FAILED_USB))
+	if [ $FAILED_TESTS -ne 255 ] && [ $FAILED_UART -ne 255 ] && [ $FAILED_USB -ne 255 ]; then
+		FAILED_NO=$(( FAILED_TESTS + FAILED_UART + FAILED_USB ))
 		echo_red "$FAILED_NO TESTS FAILED"
 	fi
 }
@@ -190,8 +190,8 @@ production() {
 	RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
 	timedatectl | grep "synchronized: yes"
 	SYNCHRONIZATION=$?
-	if [ SYNCHRONIZATION -ne 0 ]; then
-		echo_red "Your time and date is not up-to-date. The times of the logs will be inaccurate"
+	if [ $SYNCHRONIZATION -ne 0 ]; then
+		echo_red "Your time and date is not up-to-date. The times of the logs will be inaccurate. The corresponding log files will begin with \"no_date\""
 	fi
 
         case $MODE in
@@ -203,22 +203,6 @@ production() {
                         ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"
 						FAILED_TESTS=$?
                         if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_USB -ne 0 ] || [ $FAILED_UART -ne 0 ]; then
-								FAILED_NO=$((FAILED_TESTS + FAILED_USB + FAILED_UART))
-                                handle_error_state "$BOARD_SERIAL"
-                        fi
-                        ;;
-                "ADRV SOM Test")
-                        ssh_cmd "sudo /home/analog/adrv_som_test/som_test.sh"
-                        if [ $? -ne 0 ]; then
-                                handle_error_state "$BOARD_SERIAL"
-                        fi
-                        ;;
-                "ADRV FMCOMMS8 RF test")
-                        ssh_cmd "sudo /home/analog/adrv_fmcomms8_test/fmcomms8_test.sh"
-			RESULT=$?
-			get_fmcomms_serial
-			python3 -m pytest --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg_fmcomms8.py -v
-                        if [ $? -ne 0 ] || [ $RESULT -ne 0 ]; then
                                 handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
@@ -230,9 +214,13 @@ production() {
         fi
 
 	if [ "$FAILED" == "0" ] ; then
-        	inc_pass_stats "$BOARD_SERIAL"
-        	cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
-        	cat /dev/null > "$LOGFILE"
+			inc_pass_stats "$BOARD_SERIAL"
+			if [ $SYNCHRONIZATION -eq 0 ]; then
+				cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
+			else
+				cat "$LOGFILE" > "$LOGDIR/no_date_passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
+			fi
+			cat /dev/null > "$LOGFILE"
 	fi
 }
 
