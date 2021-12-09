@@ -78,7 +78,6 @@ if [ "$answer" -ne 0 ] && [ -z "$4" ]
 then
 	until [ "$answer" -eq 0 ]
 	do
-		let "FAIL_COUNT+=1"
 		YES_no "${RED}TEST FAILED${NC} - Do you want to repeat test?"
 		if [ $? -eq 1 ]
 		then
@@ -88,14 +87,13 @@ then
 				FAIL_COUNT=255
 				exit 255
 			else
-				
+				let "FAIL_COUNT+=1"
 				break
 			fi
 		fi
 		eval "$3"
 		answer=$?
 	done
-	FAIL_COUNT=0
 fi
 
 proceed_if_ok $answer "${RED}FAIL${NC}" "${GREEN}OK${NC}"

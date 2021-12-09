@@ -72,8 +72,8 @@ console_ascii_passed() {
 
 console_ascii_failed() {
 	echo_red "$(cat $SCRIPT_DIR/lib/failed.ascii)"
-	if [ FAILED_TESTS -ne 255 ] && [ FAILED_UART -ne 255 ] && [ FAILED_USB -ne 255 ]; then
-		FAILED_NO=&((FAILED_TESTS + FAILED_UART + FAILED_USB))
+	if [ $FAILED_TESTS -ne 255 ] && [ $FAILED_UART -ne 255 ] && [ $FAILED_USB -ne 255 ]; then
+		FAILED_NO=$(( FAILED_TESTS + FAILED_UART + FAILED_USB ))
 		echo_red "$FAILED_NO TESTS FAILED"
 	fi
 }
@@ -190,7 +190,7 @@ production() {
 	RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
 	timedatectl | grep "synchronized: yes"
 	SYNCHRONIZATION=$?
-	if [ SYNCHRONIZATION -ne 0 ]; then
+	if [ $SYNCHRONIZATION -ne 0 ]; then
 		echo_red "Your time and date is not up-to-date. The times of the logs will be inaccurate"
 	fi
 
@@ -203,7 +203,6 @@ production() {
                         ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"
 						FAILED_TESTS=$?
                         if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_USB -ne 0 ] || [ $FAILED_UART -ne 0 ]; then
-								FAILED_NO=$((FAILED_TESTS + FAILED_USB + FAILED_UART))
                                 handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
