@@ -12,22 +12,22 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="02"
 SHORT_DESC="double press BT0 - timeout 10 seconds" 
-CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 2 \"type 1 (EV_KEY), code 105 (KEY_LEFT), value 1\" > /dev/null"
+CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 1 (EV_KEY), code 105 (KEY_LEFT), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="03"
 SHORT_DESC="double press BT1 - timeout 10 seconds" 
-CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 2 \"type 1 (EV_KEY), code 106 (KEY_RIGHT), value 1\" > /dev/null"
+CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 1 (EV_KEY), code 106 (KEY_RIGHT), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="04"
 SHORT_DESC="double press BT2 - timeout 10 seconds" 
-CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 2 \"type 1 (EV_KEY), code 28 (KEY_ENTER), value 1\" > /dev/null"
+CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 1 (EV_KEY), code 28 (KEY_ENTER), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="05"
 SHORT_DESC="double press BT3 - timeout 10 seconds" 
-CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 2 \"type 1 (EV_KEY), code 1 (KEY_ESC), value 1\" > /dev/null"
+CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 1 (EV_KEY), code 1 (KEY_ESC), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="06"
