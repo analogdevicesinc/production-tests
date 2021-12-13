@@ -17,15 +17,14 @@ show_start_state() {
 	FAILED=0
 	PROGRESS=1
 	FAILED_NO=0
-	IS_OKBOARD=1
 }
 
 get_board_serial() {
+	IS_OKBOARD=1
 	while [ $IS_OKBOARD -ne 0 ]; do
 		echo "Please use the scanner to scan the QR/Barcode on your carrier"
 		read BOARD_SERIAL
-		echo $BOARD_SERIAL | grep "S[0-9][0-9]" | grep "SN" &>/dev/null
-		IS_OKBOARD=$?
+		IS_OKBOARD=$(echo $BOARD_SERIAL | grep "S[0-9][0-9]" | grep "SN" &>/dev/null)
 	done
 	#BOARD_SERIAL=$(ssh_cmd "dmesg | grep SPI-NOR-UniqueID | cut -d' ' -f9 | tr -d '[:cntrl:]'") # to be updated with a serial number from carrier
 }
