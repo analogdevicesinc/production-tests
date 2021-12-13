@@ -17,10 +17,16 @@ show_start_state() {
 	FAILED=0
 	PROGRESS=1
 	FAILED_NO=0
+	IS_OKBOARD=1
 }
 
 get_board_serial() {
-	BOARD_SERIAL=$(ssh_cmd "dmesg | grep SPI-NOR-UniqueID | cut -d' ' -f9 | tr -d '[:cntrl:]'") # to be updated with a serial number from carrier
+	while [ $IS_OKBOARD -ne 0 ]; do
+		echo "Please use the scanner to scan the QR/Barcode on your carrier"
+		read BOARD_SERIAL
+		IS_OKBOARD=$(echo $BOARD_SERIAL | grep "S[0-9][0-9]" | grep "SN" &>/dev/null)
+	done
+	#BOARD_SERIAL=$(ssh_cmd "dmesg | grep SPI-NOR-UniqueID | cut -d' ' -f9 | tr -d '[:cntrl:]'") # to be updated with a serial number from carrier
 }
 
 get_fmcomms_serial() {
@@ -188,6 +194,7 @@ production() {
 	# TBD ready state - connection, other settings
 
 	RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
+
 	timedatectl | grep "synchronized: yes"
 	SYNCHRONIZATION=$?
 	if [ $SYNCHRONIZATION -ne 0 ]; then
@@ -198,9 +205,13 @@ production() {
                 "ADRV Carrier Test")
                         $SCRIPT_DIR/adrv_crr_test/test_usb_periph.sh
 						FAILED_USB=$?
-                        $SCRIPT_DIR/adrv_crr_test/test_uart.sh
-						FAILED_UART=$?
-                        ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"
+						if [ $FAILED_USB -ne 255 ]; then
+                        	$SCRIPT_DIR/adrv_crr_test/test_uart.sh
+							FAILED_UART=$?
+							if [ $FAILED_UART -ne 255 ]; then
+                        		ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"
+							fi
+						fi
 						FAILED_TESTS=$?
                         if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_USB -ne 0 ] || [ $FAILED_UART -ne 0 ]; then
                                 handle_error_state "$BOARD_SERIAL"
