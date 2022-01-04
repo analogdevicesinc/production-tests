@@ -14,7 +14,7 @@ source $SCRIPT_DIR/lib/utils.sh
 
 while true; do
 	echo_blue "Please enter your choice: "
-	options=("FMCOMMS4 Test" "Power-Off Pi" "Power-Off ADRV")
+	options=("FMCOMMS4 Test" "DCXO Test" "Power-Off Pi" "Power-Off ADRV")
 	select opt in "${options[@]}"; do
     		case $REPLY in
 			1)
@@ -24,10 +24,15 @@ while true; do
 				production "crr" "$opt"
 				break ;;
 			2)
+				wait_for_board_online
+				echo_blue "Starting FMCOMMS4 Calibration Test"
+				production "crr" "$opt"
+				break ;;
+			3)
 				enforce_root
 				poweroff
 				break 2 ;;
-			3)
+			4)
 				wait_for_board_online
 				ssh_cmd "sudo poweroff &>/dev/null"
 				break ;;
