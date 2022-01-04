@@ -210,6 +210,13 @@ production() {
                                 handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
+				"DCXO Test")
+						get_fmcomms_serial
+                        ssh_cmd "/home/analog/fmcomms4/dcxo_test.sh"
+                        if [ $? -ne 0 ]; then
+                                handle_error_state "$BOARD_SERIAL"
+                        fi
+                        ;;
                 *) echo "invalid option $MODE" ;;
         esac
 
