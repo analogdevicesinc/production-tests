@@ -27,11 +27,10 @@ get_board_serial() {
 		echo $BOARD_SERIAL | grep "S[0-9][0-9]" | grep "SN" &>/dev/null
 		IS_OKBOARD=$?
 	done
-	#BOARD_SERIAL=$(ssh_cmd "dmesg | grep SPI-NOR-UniqueID | cut -d' ' -f9 | tr -d '[:cntrl:]'") # to be updated with a serial number from carrier
 }
 
 get_fmcomms_serial() {
-	BOARD_SERIAL=$(ssh_cmd "fru-dump -i /sys/devices/platform/amba/ff030000.i2c/i2c-1/i2c-8/8-0052/eeprom -b | grep 'Serial Number' | cut -d' ' -f3 | tr -d '[:cntrl:]'")
+	BOARD_SERIAL=$(ssh_cmd "sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Serial Number' | cut -d' ' -f3 | tr -d '[:cntrl:]'")
 }
 
 dut_date_sync() {
@@ -48,6 +47,19 @@ handle_error_state() {
 		cat "$LOGFILE" > "$LOGDIR/failed_${serial}_${RUN_TIMESTAMP}.log"
 	else
 		cat "$LOGFILE" > "$LOGDIR/no_date_failed_${serial}_${RUN_TIMESTAMP}.log"
+	fi
+	cat /dev/null > "$LOGFILE"
+}
+
+handle_skipped_state() {
+	local serial="$1"
+	FAILED=1
+	inc_fail_stats "$serial"
+	echo_blue "CALIBRATION WAS SKIPPED. POSSIBLY DUE TO INCOMPATIBLE DEVICE OR LONG INITIALIZATION. PLEASE MAKE SURE YOU USE THE SPECIFIED FREQUENCY COUNTER HAMEG HM8123, 5.12 AND TRY AGAIN"
+	if [ $SYNCHRONIZATION -eq 0 ]; then 
+		cat "$LOGFILE" > "$LOGDIR/skipped_${serial}_${RUN_TIMESTAMP}.log"
+	else
+		cat "$LOGFILE" > "$LOGDIR/no_date_skipped_${serial}_${RUN_TIMESTAMP}.log"
 	fi
 	cat /dev/null > "$LOGFILE"
 }
@@ -79,10 +91,6 @@ console_ascii_passed() {
 
 console_ascii_failed() {
 	echo_red "$(cat $SCRIPT_DIR/lib/failed.ascii)"
-	if [ $FAILED_TESTS -ne 255 ] && [ $FAILED_UART -ne 255 ] && [ $FAILED_USB -ne 255 ]; then
-		FAILED_NO=$(( FAILED_TESTS + FAILED_UART + FAILED_USB ))
-		echo_red "$FAILED_NO TESTS FAILED"
-	fi
 }
 
 wait_for_eeprom_vars() {
@@ -204,17 +212,29 @@ production() {
 
         case $MODE in
                 "FMCOMMS4 Test")
-						get_fmcomms_serial
-                        ssh_cmd "/home/analog/fmcomms4/rf_test.sh"
+						ssh_cmd "sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Tuning' | cut -d' ' -f4 | tr -d '[:cntrl:]'"
+						CALIB_DONE=$?
+
+						if [ $CALIB_DONE -ne 0 ]; then
+							printf "\033[1;31mPlease run calibration first\033[m\n"
+							handle_error_state "$BOARD_SERIAL"
+						fi
+                        $SCRIPT_DIR/fmcomms4/rf_test.sh
                         if [ $? -ne 0 ]; then
                                 handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
-				"DCXO Test")
-						get_fmcomms_serial
-                        ssh_cmd "/home/analog/fmcomms4/dcxo_test.sh"
-                        if [ $? -ne 0 ]; then
-                                handle_error_state "$BOARD_SERIAL"
+				"DCXO Calibration Test")
+                        $SCRIPT_DIR/fmcomms4/dcxo_test.sh
+						res=$?
+                        if [ $res -eq 2 ]; then
+                                handle_skipped_state "$BOARD_SERIAL"
+						else
+							if [ $res -eq 1 ]; then
+								handle_error_state "$BOARD_SERIAL"
+							else
+								echo_red "Now please procced with the FMCOMMS4 tests (2)"
+							fi
                         fi
                         ;;
                 *) echo "invalid option $MODE" ;;

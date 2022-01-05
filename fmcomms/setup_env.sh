@@ -112,6 +112,9 @@ setup_pyadi-iio() {
 	pushd work
 	pushd pyadi-iio
 	git checkout fmcomms_scpi
+	#install all necessary libraries to run the tests
+	pip3 install -r requirements_prod_test.txt
+	sudo apt-get install libatlas-base-dev
 
 	popd
 	popd
