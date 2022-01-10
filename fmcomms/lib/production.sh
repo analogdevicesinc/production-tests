@@ -219,10 +219,11 @@ production() {
                         ;;
 				"DCXO Calibration Test")
                         ssh_cmd "/home/analog/fmcomms4/dcxo_test.sh"
-                        if [ $? -eq 2 ]; then
+						res=$?
+                        if [ $res -eq 2 ]; then
                                 handle_skipped_state "$BOARD_SERIAL"
 						else
-							if [ $? -eq 1 ]; then
+							if [ $res -eq 1 ]; then
 								handle_error_state "$BOARD_SERIAL"
 							else
 								echo_red "Now please procced with the FMCOMMS4 tests (2)"
