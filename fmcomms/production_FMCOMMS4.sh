@@ -14,14 +14,13 @@ source $SCRIPT_DIR/lib/utils.sh
 
 while true; do
 	echo_blue "Please enter your choice: "
-	options=("DCXO Test" "FMCOMMS4 Test" "Power-Off Pi" "Power-Off Carrier")
+	options=("DCXO Calibration Test" "FMCOMMS4 Test" "Power-Off Pi" "Power-Off Carrier")
 	select opt in "${options[@]}"; do
     		case $REPLY in
 			1)
 				wait_for_board_online
 				echo_blue "Starting FMCOMMS4 Calibration Test"
 				production "crr" "$opt"
-				echo_red "Now proceed with the FMCOMMS4 Tests (2)"
 				break ;;
 			2)
 				wait_for_board_online
