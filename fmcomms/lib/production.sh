@@ -30,7 +30,7 @@ get_board_serial() {
 }
 
 get_fmcomms_serial() {
-	BOARD_SERIAL=$(ssh_cmd "fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Serial Number' | cut -d' ' -f3 | tr -d '[:cntrl:]'")
+	BOARD_SERIAL=$(ssh_cmd "sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Serial Number' | cut -d' ' -f3 | tr -d '[:cntrl:]'")
 }
 
 dut_date_sync() {
@@ -47,6 +47,19 @@ handle_error_state() {
 		cat "$LOGFILE" > "$LOGDIR/failed_${serial}_${RUN_TIMESTAMP}.log"
 	else
 		cat "$LOGFILE" > "$LOGDIR/no_date_failed_${serial}_${RUN_TIMESTAMP}.log"
+	fi
+	cat /dev/null > "$LOGFILE"
+}
+
+handle_skipped_state() {
+	local serial="$1"
+	FAILED=1
+	inc_fail_stats "$serial"
+	echo_blue "CALIBRATION WAS SKIPPED. POSSIBLY DUE TO INCOMPATIBLE DEVICE OR LONG INITIALIZATION. PLEASE MAKE SURE YOU USE THE SPECIFIED FREQUENCY COUNTER HAMEG HM8123, 5.12 AND TRY AGAIN"
+	if [ $SYNCHRONIZATION -eq 0 ]; then 
+		cat "$LOGFILE" > "$LOGDIR/skipped_${serial}_${RUN_TIMESTAMP}.log"
+	else
+		cat "$LOGFILE" > "$LOGDIR/no_date_skipped_${serial}_${RUN_TIMESTAMP}.log"
 	fi
 	cat /dev/null > "$LOGFILE"
 }
@@ -78,10 +91,6 @@ console_ascii_passed() {
 
 console_ascii_failed() {
 	echo_red "$(cat $SCRIPT_DIR/lib/failed.ascii)"
-	if [ $FAILED_TESTS -ne 255 ] && [ $FAILED_UART -ne 255 ] && [ $FAILED_USB -ne 255 ]; then
-		FAILED_NO=$(( FAILED_TESTS + FAILED_UART + FAILED_USB ))
-		echo_red "$FAILED_NO TESTS FAILED"
-	fi
 }
 
 wait_for_eeprom_vars() {
@@ -212,8 +221,14 @@ production() {
 				"DCXO Test")
 						get_fmcomms_serial
                         ssh_cmd "/home/analog/fmcomms4/dcxo_test.sh"
-                        if [ $? -ne 0 ]; then
-                                handle_error_state "$BOARD_SERIAL"
+                        if [ $? -eq 2 ]; then
+                                handle_skipped_state "$BOARD_SERIAL"
+						else
+							if [ $? -eq 1 ]; then
+								handle_error_state "$BOARD_SERIAL"
+							else
+								echo_red "Now please procced with the FMCOMMS4 tests (2)"
+							fi
                         fi
                         ;;
                 *) echo "invalid option $MODE" ;;
