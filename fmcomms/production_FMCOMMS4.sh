@@ -19,6 +19,7 @@ while true; do
     		case $REPLY in
 			1)
 				wait_for_board_online
+				get_board_serial
 				echo_blue "Starting FMCOMMS4 Calibration Test"
 				production "crr" "$opt"
 				break ;;
@@ -36,7 +37,7 @@ while true; do
 				wait_for_board_online
 				ssh_cmd "sudo poweroff &>/dev/null"
 				break ;;
-        		*) echo "invalid option $REPLY";;
+			*) echo "invalid option $REPLY";;
     		esac
 	done
 done
