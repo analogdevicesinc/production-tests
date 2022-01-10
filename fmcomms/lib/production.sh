@@ -218,7 +218,7 @@ production() {
                                 handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
-				"DCXO Test")
+				"DCXO Calibration Test")
 						get_fmcomms_serial
                         ssh_cmd "/home/analog/fmcomms4/dcxo_test.sh"
                         if [ $? -eq 2 ]; then
