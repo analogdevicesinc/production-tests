@@ -1,5 +1,7 @@
 ANSWER=1
 
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
 sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Tuning' | cut -d' ' -f4 | tr -d '[:cntrl:]'
 CALIB_DONE=$?
 
@@ -9,6 +11,6 @@ if [ $CALIB_DONE -ne 0 ]; then
 fi
 
 echo
-python3 -m pytest --color yes -vs $SCRIPT_DIR/work/pyadi-iio/test/test_fmcomms4_prod.py --uri="ip:analog.local" --adi-hw-map --hw=fmcomms4
+python3 -m pytest --color yes -vs $SCRIPT_DIR/../work/pyadi-iio/test/test_fmcomms4_prod.py --uri="ip:analog.local" --adi-hw-map --hw=fmcomms4
 ANSWER=$?
 exit $ANSWER
