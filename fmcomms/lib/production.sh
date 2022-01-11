@@ -212,13 +212,13 @@ production() {
 
         case $MODE in
                 "FMCOMMS4 Test")
-                        ssh_cmd "/home/analog/fmcomms4/rf_test.sh"
+                        $SCRIPT_DIR/fmcomms/fmcomms4/rf_test.sh
                         if [ $? -ne 0 ]; then
                                 handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
 				"DCXO Calibration Test")
-                        ssh_cmd "/home/analog/fmcomms4/dcxo_test.sh"
+                        $SCRIPT_DIR/fmcomms/fmcomms4/dcxo_test.sh
 						res=$?
                         if [ $res -eq 2 ]; then
                                 handle_skipped_state "$BOARD_SERIAL"
