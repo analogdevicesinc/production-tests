@@ -1,5 +1,5 @@
 import libm2k
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import time
 import numpy as np
 from math import pi
@@ -121,21 +121,21 @@ def main():
     freq = 1 / timespan_crossings
 
     ### Plot area
-    plt.plot(y, 'b')
-    for i in zero_indices:
-        plt.plot(i+1, y[i+1], 'go')
-        plt.plot(i, y[i], 'ro')
+    # plt.plot(y, 'b')
+    # for i in zero_indices:
+    #     plt.plot(i+1, y[i+1], 'go')
+    #     plt.plot(i, y[i], 'ro')
 
-    plt.plot(min_v, 'yo')
-    plt.plot(max_v, 'yo')
+    # plt.plot(min_v, 'yo')
+    # plt.plot(max_v, 'yo')
 
-    print("period: " + str(timespan_crossings))
-    print("freq: " + str(freq))
-    print("max " + str(max_v))
-    print("min " + str(min_v))
-    print("peak2peak " + str(peak2peak))
+    #print("period: " + str(timespan_crossings))
+    print(int(freq))
+    # print("max " + str(max_v))
+    # print("min " + str(min_v))
+    # print("peak2peak " + str(peak2peak))
 
-    plt.show()
+    # plt.show()
     libm2k.contextClose(ctx)
 
 main()
