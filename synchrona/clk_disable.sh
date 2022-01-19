@@ -8,18 +8,19 @@ TEST_NAME="TEST_CLK_OUTPUTS"
 clk_test()
 {
     local reg_nr CLK_FREQ
-    local ret=0
+    local ret1=0
     reg_nr=$1
 
-    echo reg_nr 0xc1 > /sys/kernel/debug/iio/iio\:device0/direct_reg_access
-    CLK_FREQ=\$(python3 $SCRIPT_DIR/m2k-frequency-estimator.py)
-    echo reg_nr 0xc0 > /sys/kernel/debug/iio/iio\:device0/direct_reg_access
+    sudo echo $reg_nr 0xc1 > /sys/kernel/debug/iio/iio\:device0/direct_reg_access
+    CLK_FREQ=$( python3 $SCRIPT_DIR/m2k-frequency-estimator.py )
+    echo $CLK_FREQ
+    sudo echo $reg_nr 0xc0 > /sys/kernel/debug/iio/iio\:device0/direct_reg_access
 
-    if [[ CLK_FREQ -ne 10000000 ]]; then
-        ret = 1
+    if [[ $CLK_FREQ -ne 10000000 ]]; then
+        ret1=1
     fi
 
-    return $(( ret ))
+    return $(( ret1 ))
 }
 
 echo "Disabling all outputs"
