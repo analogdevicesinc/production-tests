@@ -130,7 +130,7 @@ def main():
     # plt.plot(max_v, 'yo')
 
     #print("period: " + str(timespan_crossings))
-    print(str(freq))
+    print(int(freq))
     # print("max " + str(max_v))
     # print("min " + str(min_v))
     # print("peak2peak " + str(peak2peak))
