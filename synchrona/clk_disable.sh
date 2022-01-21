@@ -44,6 +44,8 @@ clk_test_cmos()
     if [[ $CLK_FREQ -ne 10000000 ]]; then
         ret1=1
     fi
+
+    return $(( ret1 ))
 }
 
 echo "Disabling all outputs"
@@ -124,12 +126,12 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="07"
 SHORT_DESC="TEST OUTPUT CHANNEL 07 - P. Make sure cable is connected!"
-CMD="wait_enter && clk_test_cmos 0x014a 0 0x0152"
+CMD="wait_enter && clk_test_cmos 0x014a 1 0x0152"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="07"
 SHORT_DESC="TEST OUTPUT CHANNEL 07 - N. Make sure cable is connected!"
-CMD="wait_enter && clk_test_cmos 0x014a 1 0x0152"
+CMD="wait_enter && clk_test_cmos 0x014a 0 0x0152"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="08"
@@ -162,42 +164,42 @@ SHORT_DESC="TEST OUTPUT CHANNEL 10 - N. Make sure cable is connected!"
 CMD="wait_enter && clk_test 0x00fa"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-# TEST_ID="11"
-# SHORT_DESC="TEST OUTPUT CHANNEL 11 - P. Make sure cable is connected!"
-# CMD="wait_enter && clk_test 0x00c8"
-# run_test $TEST_ID "$SHORT_DESC" "$CMD"
+TEST_ID="11"
+SHORT_DESC="TEST OUTPUT CHANNEL 11 - P. Make sure cable is connected!"
+CMD="wait_enter && clk_test 0x00c8"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-# TEST_ID="11"
-# SHORT_DESC="TEST OUTPUT CHANNEL 11 - N. Make sure cable is connected!"
-# CMD="wait_enter && clk_test 0x00c8"
-# run_test $TEST_ID "$SHORT_DESC" "$CMD"
+TEST_ID="11"
+SHORT_DESC="TEST OUTPUT CHANNEL 11 - N. Make sure cable is connected!"
+CMD="wait_enter && clk_test 0x00c8"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-# TEST_ID="12"
-# SHORT_DESC="TEST OUTPUT CHANNEL 12 - P. Make sure cable is connected!"
-# CMD="wait_enter && clk_test 0x00d2"
-# run_test $TEST_ID "$SHORT_DESC" "$CMD"
+TEST_ID="12"
+SHORT_DESC="TEST OUTPUT CHANNEL 12 - P. Make sure cable is connected!"
+CMD="wait_enter && clk_test 0x00d2"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-# TEST_ID="12"
-# SHORT_DESC="TEST OUTPUT CHANNEL 12 - N. Make sure cable is connected!"
-# CMD="wait_enter && clk_test 0x00d2"
-# run_test $TEST_ID "$SHORT_DESC" "$CMD"
+TEST_ID="12"
+SHORT_DESC="TEST OUTPUT CHANNEL 12 - N. Make sure cable is connected!"
+CMD="wait_enter && clk_test 0x00d2"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-# TEST_ID="13"
-# SHORT_DESC="TEST OUTPUT CHANNEL 13 - P. Make sure cable is connected!"
-# CMD="wait_enter && clk_test 0x00e6"
-# run_test $TEST_ID "$SHORT_DESC" "$CMD"
+TEST_ID="13"
+SHORT_DESC="TEST OUTPUT CHANNEL 13 - P. Make sure cable is connected!"
+CMD="wait_enter && clk_test 0x00e6"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-# TEST_ID="13"
-# SHORT_DESC="TEST OUTPUT CHANNEL 13 - N. Make sure cable is connected!"
-# CMD="wait_enter && clk_test 0x00e6"
-# run_test $TEST_ID "$SHORT_DESC" "$CMD"
+TEST_ID="13"
+SHORT_DESC="TEST OUTPUT CHANNEL 13 - N. Make sure cable is connected!"
+CMD="wait_enter && clk_test 0x00e6"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-# TEST_ID="14"
-# SHORT_DESC="TEST OUTPUT CHANNEL 14 - P. Make sure cable is connected!"
-# CMD="wait_enter && clk_test 0x00dc"
-# run_test $TEST_ID "$SHORT_DESC" "$CMD"
+TEST_ID="14"
+SHORT_DESC="TEST OUTPUT CHANNEL 14 - P. Make sure cable is connected!"
+CMD="wait_enter && clk_test 0x00dc"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-# TEST_ID="14"
-# SHORT_DESC="TEST OUTPUT CHANNEL 14 - N. Make sure cable is connected!"
-# CMD="wait_enter && clk_test 0x00dc"
-# run_test $TEST_ID "$SHORT_DESC" "$CMD"
+TEST_ID="14"
+SHORT_DESC="TEST OUTPUT CHANNEL 14 - N. Make sure cable is connected!"
+CMD="wait_enter && clk_test 0x00dc"
+run_test $TEST_ID "$SHORT_DESC" "$CMD"
