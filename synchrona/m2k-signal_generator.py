@@ -156,8 +156,8 @@ else:
     
     aout.setSampleRate(clock_ch, samp_rate)
     aout.push(clock_ch, buffer)
-    input()
-
+    
+time.sleep(20)
 
 aout.stop()
 libm2k.contextClose(ctx)
