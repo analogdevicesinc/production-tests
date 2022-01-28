@@ -1,6 +1,5 @@
 import libm2k
 import time
-import matplotlib.pyplot as plt
 import numpy as np
 import math
 import sys
@@ -65,7 +64,7 @@ def square_buffer_generator(channel, freq, ampl, offset, phase):
        samp = math.sin(((i + phase_in_samples)/samples_per_period) * 2*math.pi)
        #samp = signal.square()
        buffer.append(offset + ampl * (1 if samp > 0 else 0))
-    print("Generating done")
+    #print("Generating done")
     return sample_rate, buffer
 
 
@@ -157,7 +156,7 @@ else:
     
     aout.setSampleRate(clock_ch, samp_rate)
     aout.push(clock_ch, buffer)
-    input("Press enter to stop.")
+    input()
 
 
 aout.stop()
