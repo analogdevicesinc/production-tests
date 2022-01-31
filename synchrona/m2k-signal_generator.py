@@ -120,7 +120,7 @@ def sin_buffer_generator(channel, freq, ampl, offset, phase):
     for i in range(nr_of_samples):
        samp = math.sin(((i + phase_in_samples)/samples_per_period) * 2*math.pi)
        buffer.append(offset + ampl * samp)
-    print("Generating done")
+    #print("Generating done")
     return sample_rate, buffer
 
 ctx = libm2k.m2kOpen()
