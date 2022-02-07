@@ -21,7 +21,6 @@ SPI2_DEVICE_NR=`ls -l /sys/bus/iio/devices/ | grep "$SPI2_ADDRESS" | grep -Eo '[
 I2C1_DEVICE_NR=`ls -l /sys/bus/iio/devices/ | grep "$I2C1_ADDRESS" | grep -Eo '[0-9]+$'`
 I2C2_DEVICE_NR=`ls -l /sys/bus/iio/devices/ | grep "$I2C2_ADDRESS" | grep -Eo '[0-9]+$'`
 
-
 if [ $(id -u) -ne 0 ] ; then
 	echo "Please run as root"
 	exit 1
