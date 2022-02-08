@@ -48,6 +48,7 @@ clk_test_cmos()
     return $(( ret1 ))
 }
 
+dtoverlay /boot/overlays/sync_default/rpi-ad9545-hmc7044.dtbo
 echo "Disabling all outputs"
 echo 0x00c8 0xc0 > /sys/kernel/debug/iio/iio\:device0/direct_reg_access #ch11
 echo 0x00d2 0xc0 > /sys/kernel/debug/iio/iio\:device0/direct_reg_access #ch12
