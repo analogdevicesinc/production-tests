@@ -9,7 +9,7 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/lib/utils.sh
 
-SUPPORTED_BOARDS="SYNNCHRONA"
+SUPPORTED_BOARDS="SYNCHRONA"
 
 INIT_PINS_SCRIPT="$SCRIPT_DIR"/init.sh
 
