@@ -200,7 +200,14 @@ production() {
 
 	case $MODE in
 			"Synchrona Production Test")
-				ssh_cmd "sudo /home/analog/synchrona_test/sync_test.sh"
+				ssh_cmd "sudo /home/analog/synch/sync_test.sh" &&
+				$SCRIPT_DIR/synch/uart_test.sh &&
+				$SCRIPT_DIR/synch/spi_test.sh &&
+				$SCRIPT_DIR/synch/misc_test.sh
+				if [ $? -ne 0 ]; then
+						handle_error_state "$BOARD_SERIAL"
+				fi
+				;;
 					
 			*) echo "invalid option $MODE" ;;
 	esac
