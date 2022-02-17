@@ -117,12 +117,12 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="06"
 SHORT_DESC="TEST OUTPUT CHANNEL 06 - P. Make sure cable is connected!"
-CMD="wait_enter && clk_test_cmos 0x0104 0 0x010c"
+CMD="wait_enter && clk_test_cmos 0x0104 1 0x010c"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="06"
 SHORT_DESC="TEST OUTPUT CHANNEL 06 - N. Make sure cable is connected!"
-CMD="wait_enter && clk_test_cmos 0x0104 1 0x010c"
+CMD="wait_enter && clk_test_cmos 0x0104 0 0x010c"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="07"
