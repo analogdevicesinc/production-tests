@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source $SCRIPT_DIR/config.sh
+source $SCRIPT_DIR/print/print_basic.sh
 
 #----------------------------------#
 # Functions section                #
@@ -208,7 +209,6 @@ production() {
 						handle_error_state "$BOARD_SERIAL"
 				fi
 				;;
-					
 			*) echo "invalid option $MODE" ;;
 	esac
 
@@ -218,6 +218,8 @@ production() {
 
 	if [ "$FAILED" == "0" ] ; then
 			inc_pass_stats "$BOARD_SERIAL"
+			populate_label_fields $BOARD_SERIAL
+			print_label
 			if [ $SYNCHRONIZATION -eq 0 ]; then
 				cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
 			else
