@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 populate_label_fields()
 {
@@ -18,7 +19,7 @@ print_label()
 {
     rm -rf /tmp/back.pdf
 
-    glabels-3-batch -o /tmp/back.pdf -i /tmp/csvfile.csv ./print/synchrona_back.glabels
+    glabels-3-batch -o /tmp/back.pdf -i /tmp/csvfile.csv $SCRIPT_DIR/synchrona_back.glabels
     cancel -a -x
     lpr -PLabelWriter-450-Turbo /tmp/back.pdf
 }
