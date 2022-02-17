@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source $SCRIPT_DIR/config.sh
+source $SCRIPT_DIR/print/print_basic.sh
 
 #----------------------------------#
 # Functions section                #
