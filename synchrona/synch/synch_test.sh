@@ -18,17 +18,3 @@ source $SCRIPT_DIR/test_i2c_temp.sh
 answer=$?
 proceed_if_ok $answer
 
-# echo
-# source $SCRIPT_DIR/test_clk.sh
-# answer=$?
-# proceed_if_ok $answer
-
-# echo
-# source $SCRIPT_DIR/test_eth.sh
-# answer=$?
-# proceed_if_ok $answer
-
-# echo
-# source $SCRIPT_DIR/test_usb.sh
-# answer=$?
-# proceed_if_ok $answer
