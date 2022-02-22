@@ -203,7 +203,7 @@ production() {
 
 	case $MODE in
 			"Synchrona Production Test")
-				ssh_cmd "sudo /home/analog/synch/synch_test.sh \$BOARD_SERIAL" &&
+				ssh_cmd "sudo /home/analog/synch/synch_test.sh $BOARD_SERIAL" &&
 				$SCRIPT_DIR/synch/uart_test.sh &&
 				$SCRIPT_DIR/synch/spi_test.sh &&
 				$SCRIPT_DIR/synch/misc_test.sh
