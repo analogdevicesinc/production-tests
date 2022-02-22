@@ -203,14 +203,15 @@ production() {
 
 	case $MODE in
 			"Synchrona Production Test")
-				ssh_cmd "sudo /home/analog/synch/synch_test.sh" &&
+				ssh_cmd "sudo /home/analog/synch/synch_test.sh \$BOARD_SERIAL" &&
 				$SCRIPT_DIR/synch/uart_test.sh &&
 				$SCRIPT_DIR/synch/spi_test.sh &&
 				$SCRIPT_DIR/synch/misc_test.sh
-				BIN_PATH="/lib/firmware/raspberrypi/bootloader/stable/pieeprom-2021-07-06.bin" #latest rpi stable image
 				if [ $? -ne 0 ]; then
 						handle_error_state "$BOARD_SERIAL"
 				fi
+
+				BIN_PATH="/lib/firmware/raspberrypi/bootloader/stable/pieeprom-2021-07-06.bin" #latest rpi stable image
 				;;
 			*) echo "invalid option $MODE" ;;
 	esac
@@ -221,8 +222,6 @@ production() {
 
 	if [ "$FAILED" == "0" ] ; then
 			inc_pass_stats "$BOARD_SERIAL"
-			python3 $SCRIPT_DIR/synch/bin_write $BOARD_SERIAL
-			rpi-eeprom-update -d -f $BIN_PATH
 			populate_label_fields $BOARD_SERIAL
 			print_label
 			if [ $SYNCHRONIZATION -eq 0 ]; then
