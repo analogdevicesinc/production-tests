@@ -13,7 +13,7 @@ CMD="wait_enter &&"
 CMD+="sudo dtoverlay -r; sudo dtoverlay $SCRIPT_DIR/rpi-ad9545-hmc7044.dtbo;"
 CMD+="python3 $SCRIPT_DIR/m2k-signal_generator.py sqr &"
 CMD+="sleep 3;" #this way cat doesn't happen to fast and we can check lock state
-CMD+="sudo cat /sys/kernel/debug/clk/PLL1/PLL1 | grep \"PLL status: Locked\" && sudo cat /sys/kernel/debug/iio/iio\:device0/status | grep -B 10 \"PLL1 & PLL2 Locked\" | grep \"CLKIN2\""
+CMD+="sudo cat /sys/kernel/debug/clk/PLL0/PLL0 | grep \"PLL status: Locked\" && sudo cat /sys/kernel/debug/iio/iio\:device0/status | grep -B 10 \"PLL1 & PLL2 Locked\" | grep \"CLKIN2\""
 run_test "$TEST_ID" "$SHORT_DESC" "$CMD"
 
 TEST_ID="02"
