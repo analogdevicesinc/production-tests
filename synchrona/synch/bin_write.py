@@ -5,8 +5,7 @@ if(len(sys.argv) < 2):
     exit()
 
 serialnum = sys.argv[1]
-with open("pieeprom-2021-04-29.bin", "r+b") as fh:
-    fh.seek(0x7fff0)
+with open("pieeprom-2021-07-06.bin", "r+b") as fh:
+    fh.seek(0x7ffe0)
     fh.write(serialnum.encode('ascii'))
-
 
