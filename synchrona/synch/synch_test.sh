@@ -22,4 +22,4 @@ proceed_if_ok $answer
 
 
 python3 $SCRIPT_DIR/bin_write.py $BOARD_SERIAL
-rpi-eeprom-update -d -f $SCRIPT_DIR/pieeprom-2021-04-29.bin
+rpi-eeprom-update -d -f $SCRIPT_DIR/pieeprom-2021-07-06.bin
