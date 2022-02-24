@@ -141,15 +141,19 @@ aout.enableChannel(clock_ch, True)
 if(len(sys.argv) < 2):
     print("Usage: python3 m2k-test.py [sig_mod]")
     print("Where [sig_mod] from [ sin | pps | sqr ]")
+    sleep_time=0
 else:
     if sys.argv[1] == "pps":
         samp_rate, buffer, osr = pps2_buffer_generator(0, 1, 3, 0, 0, 1)
+        sleep_time=12
         aout.setOversamplingRatio(clock_ch, int(osr))
     elif sys.argv[1] == "sin":
         samp_rate, buffer =  sin_buffer_generator(0, 10000000, 1.2, 0.6, 0)
+        sleep_time=5
         aout.setOversamplingRatio(clock_ch, 1)
     elif sys.argv[1] == "sqr":
-        samp_rate, buffer = square_buffer_generator(0, 10000000, 1.8, 0, 0)
+        samp_rate, buffer = sin_buffer_generator(0, 10000000, 1.8, 0.9, 0)
+        sleep_time=7
         aout.setOversamplingRatio(clock_ch, 1)
     else:
         print("Usage [sig_mod] from [ sin | pps | sqr ]")
@@ -157,7 +161,7 @@ else:
     aout.setSampleRate(clock_ch, samp_rate)
     aout.push(clock_ch, buffer)
     
-time.sleep(20)
+time.sleep(sleep_time)
 
 aout.stop()
 libm2k.contextClose(ctx)
