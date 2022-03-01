@@ -69,6 +69,7 @@ fi
 }
 
 function run_test() { # params test_number short_desc test_cmd not_retest
+echo $TEST_NAME"_"$1
 TIMED_LOG_SUFFIX=$TEST_NAME"_"$1
 timed_log "$2"
 eval "$3"
@@ -95,4 +96,5 @@ then
 fi
 
 proceed_if_ok $answer "${RED}FAIL${NC}" "${GREEN}OK${NC}"
+echo "----------------------------------------------------------------------------------"
 }
