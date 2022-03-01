@@ -21,5 +21,5 @@ answer=$?
 proceed_if_ok $answer
 
 
-fru-dump -i $SCRIPT_DIR/pieeprom-2021-07-06.bin -o $SCRIPT_DIR/pieeprom-2021-07-06.bin -d now -s $BOARD_SERIAL
+sudo fru-dump -i $SCRIPT_DIR/pieeprom-2021-07-06.bin -o $SCRIPT_DIR/pieeprom-2021-07-06.bin -d now -s $BOARD_SERIAL
 rpi-eeprom-update -d -f $SCRIPT_DIR/pieeprom-2021-07-06.bin

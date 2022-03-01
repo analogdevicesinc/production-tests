@@ -1,7 +1,7 @@
 import libm2k
-#import matplotlib.pyplot as plt
 import time
 import numpy as np
+import sys
 from math import pi
 from scipy.signal import find_peaks
 
@@ -130,10 +130,12 @@ def main():
     # plt.plot(max_v, 'yo')
 
     #print("period: " + str(timespan_crossings))
+    if peak2peak < 1.3 and len(sys.argv) < 2:
+        freq = 0
     print(int(freq))
     # print("max " + str(max_v))
-    # print("min " + str(min_v))
-    # print("peak2peak " + str(peak2peak))
+    # # print("min " + str(min_v))
+    # print("peak2peak ", str(peak2peak))
 
     # plt.show()
     libm2k.contextClose(ctx)
