@@ -82,6 +82,10 @@ console_ascii_passed() {
 
 console_ascii_failed() {
 	echo_red "$(cat $SCRIPT_DIR/lib/failed.ascii)"
+	if [ $FAILED_TESTS -ne 255 ] && [ $FAILED_UART -ne 255 ] && [ $FAILED_SPI -ne 255 ] && [ $FAILED_MISC -ne 255 ]; then
+		FAILED_NO=$(( FAILED_TESTS + FAILED_UART + FAILED_SPI + FAILED_MISC ))
+		echo_red "$FAILED_NO TESTS FAILED"
+	fi
 }
 
 wait_for_eeprom_vars() {
@@ -203,11 +207,21 @@ production() {
 
 	case $MODE in
 			"Synchrona Production Test")
-				ssh_cmd "sudo /home/analog/synch/synch_test.sh $BOARD_SERIAL" &&
-				$SCRIPT_DIR/synch/uart_test.sh &&
-				$SCRIPT_DIR/synch/spi_test.sh &&
-				$SCRIPT_DIR/synch/misc_test.sh
-				if [ $? -ne 0 ]; then
+				ssh_cmd "sudo /home/analog/synch/synch_test.sh $BOARD_SERIAL"
+				FAILED_TESTS=$?
+				if [ $FAILED_TESTS -ne 255 ]; then
+					$SCRIPT_DIR/synch/uart_test.sh 
+					FAILED_UART=$?
+					if [ $FAILED_UART -ne 255 ]; then
+						$SCRIPT_DIR/synch/spi_test.sh
+						FAILED_SPI=$?
+						if [ $FAILED_SPI -ne 255 ]; then
+							$SCRIPT_DIR/synch/misc_test.sh
+							FAILED_MISC=$?
+						fi
+					fi
+				fi
+				if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_SPI -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
 						handle_error_state "$BOARD_SERIAL"
 				fi
 

@@ -3,6 +3,7 @@
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 BOARD_SERIAL=$1
+FAIL_COUNT=0
 
 source $SCRIPT_DIR/test_util.sh
 
@@ -23,3 +24,7 @@ proceed_if_ok $answer
 
 sudo fru-dump -i $SCRIPT_DIR/pieeprom-2021-07-06.bin -o $SCRIPT_DIR/pieeprom-2021-07-06.bin -d now -s $BOARD_SERIAL
 rpi-eeprom-update -d -f $SCRIPT_DIR/pieeprom-2021-07-06.bin
+
+failed_no
+answer=$?
+exit $answer

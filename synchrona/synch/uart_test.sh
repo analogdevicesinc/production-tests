@@ -15,6 +15,6 @@ SHORT_DESC="Check UART communication"
 CMD="\$SCRIPT_DIR/test_uart.expect"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-# failed_no
-# answer=$?
-# exit $answer
+failed_no
+answer=$?
+exit $answer

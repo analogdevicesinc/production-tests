@@ -21,3 +21,6 @@ CMD="sshpass -p analog ssh -q -t -oConnectTimeout=10 -oStrictHostKeyChecking=no 
 CMD+="YES_no 'Device should be turned off. Check if fan is off, STAT2 is off and STAT1 has turned red'"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
+failed_no
+answer=$?
+exit $answer
