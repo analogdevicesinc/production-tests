@@ -49,8 +49,10 @@ handle_error_state() {
 	console_ascii_failed
 	if [ $SYNCHRONIZATION -eq 0 ]; then 
 		cat "$LOGFILE" > "$LOGDIR/failed_${serial}_${RUN_TIMESTAMP}.log"
+		telemetry prod-synchrona-upload --tdir $LOGDIR
 	else
 		cat "$LOGFILE" > "$LOGDIR/no_date_failed_${serial}_${RUN_TIMESTAMP}.log"
+		telemetry prod-synchrona-upload --tdir $LOGDIR
 	fi
 	cat /dev/null > "$LOGFILE"
 }
@@ -195,6 +197,11 @@ production() {
 
 	sync
 
+	export DBSERVER="cluster0.oiqey.mongodb.net"
+	export DBUSERNAME="dev_production_test"
+	export DBPASSWORD="c6Wiiv4xLTbQadFr"
+	export DBNAME="dev_production_test"
+
 	# TBD ready state - connection, other settings
 
 	RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
@@ -240,8 +247,10 @@ production() {
 			print_label
 			if [ $SYNCHRONIZATION -eq 0 ]; then
 				cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
+				telemetry prod-synchrona-upload --tdir $LOGDIR
 			else
 				cat "$LOGFILE" > "$LOGDIR/no_date_passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
+				telemetry prod-synchrona-upload --tdir $LOGDIR
 			fi
 			cat /dev/null > "$LOGFILE"
 	fi
