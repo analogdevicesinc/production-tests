@@ -1,6 +1,16 @@
 START_BUTTON=pin1
+REBOOT_BUTTON="pin7"
 
 PASSED_LED=pin3
 FAILED_LED=pin4
 READY_LED=pin5
 PROGRESS_LED=pin2
+
+__check_and_reboot() {
+	local logfile=$1
+	if grep -q "Button pressed 0x80" $logfile ; then
+		shutdown now
+		return 0
+	fi
+	return 1
+}
