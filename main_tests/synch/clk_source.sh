@@ -1,0 +1,50 @@
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
+source $SCRIPT_DIR/test_util.sh
+
+TEST_NAME="TEST_CLOCK_IN"
+
+echo "Testing Back Pannel"
+
+TEST_ID="01"
+SHORT_DESC="Test input REF_IN. Please make sure cable is connected!"
+#CMD="wait_enter && test_clkin sqr"
+CMD="wait_enter &&"
+CMD+="sudo dtoverlay -r; sudo dtoverlay $SCRIPT_DIR/rpi-ad9545-hmc7044.dtbo;"
+CMD+="python3 $SCRIPT_DIR/m2k-signal_generator.py sqr &"
+CMD+="sleep 5;" #this way cat doesn't happen to fast and we can check lock state
+CMD+="sudo cat /sys/kernel/debug/clk/PLL0/PLL0 | grep \"PLL status: Locked\" && sudo cat /sys/kernel/debug/iio/iio\:device0/status | grep \"PLL1 & PLL2 Locked\" &&"
+CMD+="sudo cat /sys/kernel/debug/iio/iio\:device0/status | grep \"CLKIN2\""
+run_test "$TEST_ID" "$SHORT_DESC" "$CMD"
+
+TEST_ID="02"
+SHORT_DESC="Test input PPS. Please make sure cable is connected!"
+CMD="wait_enter &&"
+CMD+="sudo dtoverlay -r; sudo dtoverlay $SCRIPT_DIR/rpi-ad9545-hmc7044.dtbo;"
+CMD+="python3 $SCRIPT_DIR/m2k-signal_generator.py pps &"
+CMD+="sleep 3;"
+CMD+="$SCRIPT_DIR/rebind.sh;"
+CMD+="sleep 7;"
+CMD+="sudo cat /sys/kernel/debug/clk/Ref-BB-Div/Ref-BB-Div | grep \"Reference: Valid\" && sudo cat /sys/kernel/debug/iio/iio\:device0/status | grep \"PLL1 & PLL2 Locked\" &&"
+CMD+="sudo cat /sys/kernel/debug/iio/iio\:device0/status | grep \"CLKIN2\""
+run_test "$TEST_ID" "$SHORT_DESC" "$CMD"
+
+TEST_ID="03" 
+SHORT_DESC="Test input CH2. Please connect cables from M2K BNC Adapter Board to CH2 inputs"
+CMD="wait_enter &&"
+CMD+="sudo dtoverlay -r; sudo dtoverlay $SCRIPT_DIR/rpi-ad9545-hmc7044-no-ad.dtbo;"
+CMD+="python3 $SCRIPT_DIR/m2k-signal_generator.py sin &"
+CMD+="sleep 3;"
+CMD+="sudo cat /sys/kernel/debug/iio/iio\:device0/status | grep -B 10 \"PLL1 & PLL2 Locked\" &&"
+CMD+="sudo cat /sys/kernel/debug/iio/iio\:device0/status | grep \"CLKIN1\""
+run_test "$TEST_ID" "$SHORT_DESC" "$CMD"
+
+TEST_ID="04"
+SHORT_DESC="Test input CH3. Please connect cables from M2K BNC Adapter Board to both CH3 inputs"
+CMD="wait_enter &&"
+CMD+="sudo dtoverlay -r; sudo dtoverlay $SCRIPT_DIR/rpi-ad9545-hmc7044-no-ad.dtbo;"
+CMD+="python3 $SCRIPT_DIR/m2k-signal_generator.py sin &"
+CMD+="sleep 3;"
+CMD+="sudo cat /sys/kernel/debug/iio/iio\:device0/status | grep -B 10 \"PLL1 & PLL2 Locked\" &&"
+CMD+="sudo cat /sys/kernel/debug/iio/iio\:device0/status | grep \"CLKIN0\""
+run_test "$TEST_ID" "$SHORT_DESC" "$CMD"
