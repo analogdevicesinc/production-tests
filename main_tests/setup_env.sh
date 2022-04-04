@@ -131,7 +131,14 @@ setup_pyadi-iio() {
 
 	pushd work
 	pushd pyadi-iio
-	git checkout som-testing-fmcomms8
+
+	if [ $BOARD == "ADV9009_CRR-SOM" ]; then
+		git checkout som-testing-fmcomms8
+	else
+		git checkout fmcomms_scpi
+		pip3 install -r requirements_prod_test.txt
+		sudo apt-get install libatlas-base-dev
+	fi
 
 	popd
 	popd
