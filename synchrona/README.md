@@ -1,2 +1,0 @@
-SYNCHRONA production test scripts
-======================================

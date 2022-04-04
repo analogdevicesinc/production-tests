@@ -11,6 +11,7 @@
 #define CLK1_REG_ADDR	0x44
 #define CLK2_REG_ADDR	0x48
 #define CLK3_REG_ADDR	0x4C
+#define CLK4_REG_ADDR	0x50
 
 #define AXI_CLK_SPEED_MHZ	100
 
@@ -43,11 +44,13 @@ int main(int argc, char *argv[]) {
 		reg_addr = CLK2_REG_ADDR;
 	else if (strcmp("CLK3", argv[1]) == 0)
 		reg_addr = CLK3_REG_ADDR;
+	else if (strcmp("CLK4", argv[1]) == 0)
+		reg_addr = CLK4_REG_ADDR;
 	else {
 		printf("Usage: %s [test_clk CLK0|CLK1|CLK2|CLK3]\n", argv[0]);
 		return -1;
 	}
-	
+
 	if ((argc == 3) && (strcmp("verbose", argv[2]) == 0))
 		verbose = true;
 	
@@ -57,7 +60,7 @@ int main(int argc, char *argv[]) {
 	off_t page_offset = offset - page_base;
 
 	int fd = open("/dev/mem", O_RDWR|O_SYNC);
-	void* mem = mmap(NULL, page_offset + reg_addr, PROT_READ | PROT_WRITE,
+	void* mem = mmap(NULL, page_offset + CLK4_REG_ADDR, PROT_READ | PROT_WRITE,
 			    MAP_SHARED, fd, page_base);
 
 	if (mem == MAP_FAILED) {
@@ -73,7 +76,7 @@ int main(int argc, char *argv[]) {
 		printf("%d\n", ret);
 
 	close(fd);
-	munmap(mem, page_offset + reg_addr);
+	munmap(mem, page_offset + CLK4_REG_ADDR);
 
 	return 0;
 }

@@ -237,14 +237,14 @@ production() {
 							fi
                         fi
                         ;;
-				"ADRV Carrier Test")
-                        $SCRIPT_DIR/adrv_crr_test/test_usb_periph.sh
+				"ADRV1 Carrier Test")
+                        $SCRIPT_DIR/adrv1_crr_test/test_usb_periph.sh
 						FAILED_USB=$?
 						if [ $FAILED_USB -ne 255 ]; then
-                        	$SCRIPT_DIR/adrv_crr_test/test_uart.sh
+                        	$SCRIPT_DIR/adrv1_crr_test/test_uart.sh
 							FAILED_UART=$?
 							if [ $FAILED_UART -ne 255 ]; then
-                        		ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"
+                        		ssh_cmd "sudo /home/analog/adrv1_crr_test/crr_test.sh"
 							fi
 						fi
 						FAILED_TESTS=$?
@@ -283,6 +283,29 @@ production() {
 						# fi
                         $SCRIPT_DIR/adrv9361_bob/rf_test.sh
                         if [ $? -ne 0 ]; then
+                                handle_error_state "$BOARD_SERIAL"
+                        fi
+                        ;;
+				"ADRV Carrier Test")
+                        $SCRIPT_DIR/adrv_crr_test/test_usb_periph.sh &&
+                        $SCRIPT_DIR/adrv_crr_test/test_uart.sh &&
+                        ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"
+                        if [ $? -ne 0 ]; then
+                                handle_error_state "$BOARD_SERIAL"
+                        fi
+                        ;;
+                "ADRV SOM Test")
+                        ssh_cmd "sudo /home/analog/adrv_som_test/som_test.sh"
+                        if [ $? -ne 0 ]; then
+                                handle_error_state "$BOARD_SERIAL"
+                        fi
+                        ;;
+                "ADRV FMCOMMS8 RF test")
+                        ssh_cmd "sudo /home/analog/adrv_fmcomms8_test/fmcomms8_test.sh"
+						RESULT=$?
+						get_fmcomms_serial
+						python3 -m pytest --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg_fmcomms8.py -v
+                        if [ $? -ne 0 ] || [ $RESULT -ne 0 ]; then
                                 handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;

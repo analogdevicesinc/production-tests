@@ -84,10 +84,8 @@ then
 			YES_no "Do you want to close the test?"
 			if [ $? -eq 0 ]
 			then
-				FAIL_COUNT=255
-				exit 255
+				exit 1
 			else
-				let "FAIL_COUNT+=1"
 				break
 			fi
 		fi
@@ -97,8 +95,4 @@ then
 fi
 
 proceed_if_ok $answer "${RED}FAIL${NC}" "${GREEN}OK${NC}"
-}
-
-function failed_no(){
-	return $FAIL_COUNT
 }
