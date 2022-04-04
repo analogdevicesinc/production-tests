@@ -3,7 +3,6 @@
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/test_util.sh
-FAIL_COUNT=0
 
 TEST_NAME="TEST_UART_COMM"
 
@@ -17,7 +16,4 @@ SHORT_DESC="Check UART communication"
 CMD="\$SCRIPT_DIR/test_uart.expect"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-failed_no
-answer=$?
-exit $answer
-# : #if reached this point, ensure exito code 0
+ : #if reached this point, ensure exito code 0

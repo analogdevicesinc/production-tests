@@ -14,11 +14,6 @@
 #define GPIO_1_FMC_CH1_SIZE	4
 #define GPIO_1_FMC_CH2_SIZE	0
 
-#define GPIO_PMOD_SIZE	6
-
-#define GPIO_CAM_CH1_SIZE  10
-#define GPIO_CAM_CH2_SIZE  22
-
 #define CHANNEL_1	0
 #define CHANNEL_2	1
 
@@ -76,23 +71,17 @@ int test_short(void* pGpio, uint8_t channel, uint8_t size) {
  */
 int test_loopback(void* pGpio, uint8_t channel, uint8_t size) {
 	uint32_t init_oe_d, oe_d, read_d, oe_d_aux, exp_d;
-	uint8_t i, sh_size;
+	uint8_t i;
 
 	oe_d = 0;
-	sh_size = size;
 
 	//building mask according to size
-	while(sh_size > 0){
-		oe_d = (oe_d << 1) | 1;
-		sh_size--;
-	}
-	//oe_d = (1 << size) - 1;
+	oe_d = (1 << size) - 1;
 
 	init_oe_d = oe_d;
 
 	//all gpio are '0' but are set as inputs so they are pulled up
 	*(volatile uint32_t*)(pGpio + GPIO_TRI_REG(channel)) = oe_d;
-	*(volatile uint32_t*)(pGpio + GPIO_DATA_REG(channel)) = 0x00000000;
 	//initial mask is applied to make sure no extra bits are used
 	oe_d = 0xFFFFFFFE & init_oe_d;
 
@@ -120,63 +109,10 @@ int test_loopback(void* pGpio, uint8_t channel, uint8_t size) {
 	return 0;
 }
 
-int test_loopback_pmod(void* pGpio, uint8_t channel, uint8_t size){
-	uint32_t init_oe_d, oe_d, read_d, oe_d_aux, exp_d;
-	uint8_t i, sh_size;
-
-	oe_d = 0;
-	sh_size = size;
-
-	//building mask according to size
-	while(sh_size > 0){
-		oe_d = (oe_d << 1) | 1;
-		sh_size--;
-	}
-
-	init_oe_d = oe_d;
-	*(volatile uint32_t*)(pGpio + GPIO_TRI_REG(channel)) = 0x0;
-	*(volatile uint32_t*)(pGpio + GPIO_DATA_REG(channel)) = 0x0;
-	usleep(100);
-
-	*(volatile uint32_t*)(pGpio + GPIO_TRI_REG(channel)) = oe_d;
-	*(volatile uint32_t*)(pGpio + GPIO_DATA_REG(channel)) = 0x00000000;
-
-	oe_d = 0xFFFFFFFE & init_oe_d;
-
-	for(i = 0; i < size/2; i++)  {
-		/* to drive signal to '0' it is set as output. to return to
-		*  pull up state it is set as an input
-		*  oe_d must be shifted left after each iteration
-		*/
-		*(volatile uint32_t*)(pGpio + GPIO_TRI_REG(channel)) = oe_d;
-		*(volatile uint32_t*)(pGpio + GPIO_DATA_REG(channel)) = oe_d ^ init_oe_d;
-		//long wait for pull-up to have time to settle
-		usleep(100000);
-		read_d = *(volatile uint32_t*)(pGpio + GPIO_DATA_REG(channel));
-		//building expected data
-		exp_d = ~(oe_d & ((oe_d << 1) | 0x1)) & init_oe_d;
-
-		//check if read data matches expected data
-		if(read_d != exp_d)  {
-			printf("loopback test fails!\r\n");
-			return -255;
-		}
-		//getting next set of output data ready.
-		oe_d_aux = oe_d << 2;
-		oe_d = (oe_d_aux | 0x3) & init_oe_d;
-
-		*(volatile uint32_t*)(pGpio + GPIO_DATA_REG(channel)) = 0x0;
-		*(volatile uint32_t*)(pGpio + GPIO_TRI_REG(channel)) = 0x0;
-		usleep(100);
-	}
-	return 0;
-}
-
 int main(int argc, char *argv[]) {
 	off_t offset;
 	uint32_t size, value, ret = 0;
 	uint8_t ch1_size,ch2_size;
-	uint8_t pmod = 0;
 	enum test_type{loopback, short_circuit};
 	enum test_type type;
 
@@ -195,16 +131,10 @@ int main(int argc, char *argv[]) {
 		ch1_size = GPIO_1_FMC_CH1_SIZE;
 		ch2_size = GPIO_1_FMC_CH2_SIZE;
 	} else if (strcmp("PMOD", argv[1]) == 0) {
-		offset = FMC_GPIO_1_BADDR;
-		ch2_size = GPIO_PMOD_SIZE;
-		pmod=1;
-		//printf("Currently not implemented\n");
-	} else if (strcmp("CAM", argv[1]) == 0) {
-		offset = CAM_GPIO_BADDR;
-		ch1_size = GPIO_CAM_CH1_SIZE;
-		ch2_size = GPIO_CAM_CH2_SIZE;
+		printf("Currently not implemented\n");
+		return -1;
 	} else {
-		printf("Usage: %s [test_dev FMC_GPIO0|FMC_GPIO1|PMOD|CAM]\n", argv[0]);
+		printf("Usage: %s [test_dev FMC_GPIO0|FMC_GPIO1|PMOD]\n", argv[0]);
 		return -1;
 	}
 	
@@ -225,19 +155,15 @@ int main(int argc, char *argv[]) {
 	int fd = open("/dev/mem", O_RDWR|O_SYNC);
 	void* mem = mmap(NULL, page_offset + GPIO_TRI_REG(CHANNEL_2), PROT_READ | PROT_WRITE,
 			    MAP_SHARED, fd, page_base);
+
 	if (mem == MAP_FAILED) {
 		perror("Can't map memory");
 		return -1;
 	}
 	
 	if (type == loopback) {
-		if(pmod) {
-			ret |= test_loopback_pmod(mem, CHANNEL_2, ch2_size);
-		}
-		else {
-			ret |= test_loopback(mem, CHANNEL_1, ch1_size);
-			ret |= test_loopback(mem, CHANNEL_2, ch2_size);
-		}
+		ret |= test_loopback(mem, CHANNEL_1, ch1_size);
+		ret |= test_loopback(mem, CHANNEL_2, ch2_size);
 	} else {
 		ret |= test_short(mem, CHANNEL_1, ch1_size);
 		ret |= test_short(mem, CHANNEL_2, ch2_size);

@@ -12,30 +12,31 @@ audio_test()
 	local ret1=0
 
 	# fix levels for output/input
-	alsactl store -f $SCRIPT_DIR/adau1761_pre.state &>/dev/null
-	alsactl restore -f $SCRIPT_DIR/state_adau1761.state &>/dev/null
+	alsactl store -c 0 -f $SCRIPT_DIR/adau1761.state &>/dev/null
 	if [[ $? -ne 0 ]]; then
 		echo "Failed saving alsa device state"
 	fi
 
-	fifo=$(mktemp --suffix=fifo.wav)
+	fifo=$(mktemp --suffix=.fifo)
+	rm -f "${fifo}" && mkfifo "${fifo}"
 	audio_tmp1=$(mktemp --suffix=tmp1.wav)
 
 	# record from the lineout jack to mic in (lower right to lower left)
-	speaker-test -D plughw:CARD=ADAU1761 -c 1 -l 1 -r 48000 -P 8 -t sine -f${FREQ} &>/dev/null &
-	arecord -D plughw:CARD=ADAU1761 -c 1 -d 3 -f S16_LE -r 48000 ${fifo} &>/dev/null
-	sox -c 1 -r 48000 ${fifo} ${audio_tmp1} trim 1.5
+	amixer set -q Headphone 70 unmute;  amixer set -q Capture 70 cap; amixer -q set Digital 255; amixer -q set 'PGA Boost' 1;
+	speaker-test -c1 -l1 -r48000 -P8 -tsine -f ${FREQ} &>/dev/null &
+	arecord -c1 -d3 -fS16_LE -r48000 "${fifo}" &>/dev/null
+	sox "${fifo}" "${audio_tmp1}" trim 1.5
 
 	# pull the frequencies from the recorded tones and compare them
-	freq1=$($SCRIPT_DIR/wav_tone_freq ${fifo})
+	freq1=$($SCRIPT_DIR/wav_tone_freq "${audio_tmp1}")
 	freq1diff=$(( FREQ - freq1 ))
 	if [[ ${freq1diff#-} -gt 2 ]]; then
 		ret1=1
 	fi
 	# clean up
-	rm -f "${fifo}" "${audio_tmp1}"
+	# rm -f "${fifo}" "${audio_tmp1}"
 	# restore levels for output/input
-	alsactl restore -f $SCRIPT_DIR/adau1761_pre.state &>/dev/null
+	alsactl restore -c 0 -f $SCRIPT_DIR/adau1761.state &>/dev/null
 
 	return $(( ret1 ))
 }

@@ -8,6 +8,6 @@ send "\r"
 expect -re "root@analog:~# "
 send "cat /proc/device-tree/model\r"
 expect {
-    "ADRV9361-Z7035" { exit 0 }
+    "Analog Devices ADRV9009-ZU11EG" { exit 0 }
 }
 exit 1

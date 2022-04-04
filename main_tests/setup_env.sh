@@ -9,7 +9,7 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/lib/utils.sh
 
-SUPPORTED_BOARDS="ADV9361_CRR-SOM FMCOMMS4 SYNCHRONA ADRV9361_BOB"
+SUPPORTED_BOARDS="ADV9361_CRR-SOM FMCOMMS4 SYNCHRONA ADRV9361_BOB ADV9009_CRR-SOM"
 
 INIT_PINS_SCRIPT="$SCRIPT_DIR"/init.sh
 
@@ -101,8 +101,28 @@ setup_libiio() {
 	popd
 }
 
+setup_adm1266() {
+	[ ! -d "src/adm1266" ] || return 0
+
+	if [ $BOARD != "ADV9009_CRR-SOM" ]; then
+		return 0
+	fi
+
+	pushd src
+	pushd adm1266
+
+	make all
+
+	popd
+	popd
+}
+
 setup_pyadi-iio() {
 	[ ! -d "work/pyadi-iio" ] || return 0
+
+	if [ $BOARD == "ADV9361_CRR-SOM" || $BOARD == "SYNCHRONA" ]; then
+		return 0
+	fi
 
 	__download_github_common pyadi-iio
 	#Set python3 as default
@@ -156,6 +176,28 @@ Hidden=false
 	if type ufw &> /dev/null ; then
 		sudo ufw enable
 		sudo ufw allow ssh
+	fi
+
+	if [ $BOARD == "ADV9009_CRR-SOM" ]; then 
+		mkdir -p "$HOME/.ssh"
+		cat "$SCRIPT_DIR/config/jig_id.pub" >> "$HOME/.ssh/authorized_keys"
+		sudo chown "$USER.$USER" "$HOME/.ssh/authorized_keys"
+		chmod 0600 "$HOME/.ssh/authorized_keys"
+
+		sudo chown "$USER.$USER" "$SCRIPT_DIR/config/jig_id"
+		chmod 0600 "$SCRIPT_DIR/config/jig_id"
+		cat > $autostart_path/call-home.desktop <<-EOF
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.9.4
+Type=Application
+Name=call-home
+Comment=call-home
+Exec=/bin/bash $SCRIPT_DIR/call_home
+StartupNotify=false
+Terminal=false
+Hidden=false
+		EOF
 	fi
 
 	cat > $autostart_path/auto-save-logs.desktop <<-EOF
@@ -384,7 +426,7 @@ pushd $SCRIPT_DIR
 
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs"
-STEPS="$STEPS write_autostart_config libiio pyadi-iio"
+STEPS="$STEPS write_autostart_config libiio pyadi-iio adm1266"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
 STEPS="$STEPS dhcp_config"
 
