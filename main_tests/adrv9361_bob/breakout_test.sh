@@ -18,6 +18,11 @@ source $SCRIPT_DIR/test_gpio.sh
 answer=$?
 proceed_if_ok $answer
 
+echo
+source $SCRIPT_DIR/test_qspi.sh
+answer=$?
+proceed_if_ok $answer
+
 failed_no
 answer=$?
 exit $answer
