@@ -317,13 +317,28 @@ production() {
         fi
 
 	if [ "$FAILED" == "0" ] ; then
+<<<<<<< HEAD
+		console_ascii_passed
+		if [ $SYNCHRONIZATION -eq 0 ]; then
+			cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
+		else
+			cat "$LOGFILE" > "$LOGDIR/no_date_passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
+		fi
+		cat /dev/null > "$LOGFILE"
+=======
 			if [ $SYNCHRONIZATION -eq 0 ]; then
 				cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
 			else
 				cat "$LOGFILE" > "$LOGDIR/no_date_passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
 			fi
 			cat /dev/null > "$LOGFILE"
+>>>>>>> 74fb9fc... prod: tests common: add support for remote logging
 	fi
-	telemetry prod-logs-upload --tdir $LOGDIR
+	telemetry prod-logs-upload --tdir $LOGDIR &> $SCRIPT_DIR/telemetry_out.txt
+	cat $SRIPT_DIR/telemetry_out.txt | grep "Authentication failed"
+	if [ $? -eq 0 ]; then
+		rm -rf $SCRIPT_DIR/password.txt
+	fi
+	rm -rf $SRIPT_DIR/telemetry_out.txt
 }
 
