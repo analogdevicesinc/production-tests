@@ -308,6 +308,7 @@ production() {
         fi
 
 	if [ "$FAILED" == "0" ] ; then
+<<<<<<< HEAD
 		console_ascii_passed
 		if [ $SYNCHRONIZATION -eq 0 ]; then
 			cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
@@ -315,6 +316,14 @@ production() {
 			cat "$LOGFILE" > "$LOGDIR/no_date_passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
 		fi
 		cat /dev/null > "$LOGFILE"
+=======
+			if [ $SYNCHRONIZATION -eq 0 ]; then
+				cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
+			else
+				cat "$LOGFILE" > "$LOGDIR/no_date_passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
+			fi
+			cat /dev/null > "$LOGFILE"
+>>>>>>> 74fb9fc... prod: tests common: add support for remote logging
 	fi
 	telemetry prod-logs-upload --tdir $LOGDIR
 }
