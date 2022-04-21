@@ -137,6 +137,11 @@ setup_pyadi-iio() {
 	popd
 }
 
+setup_telemetry() {
+	pip3 install git+https://github.com/sdgtt/telemetry.git
+	pip3 install junitparser
+}
+
 setup_write_autostart_config() {
 	local autostart_path="$HOME/.config/autostart"
 	local configs_disable="blueman light-locker polkit-gnome-authentication-agent-1"
@@ -428,7 +433,7 @@ STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs"
 STEPS="$STEPS write_autostart_config libiio pyadi-iio adm1266"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
-STEPS="$STEPS dhcp_config"
+STEPS="$STEPS dhcp_config telemetry"
 
 RAN_ONCE=0
 for step in $STEPS ; do

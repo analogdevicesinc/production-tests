@@ -41,7 +41,6 @@ dut_date_sync() {
 handle_error_state() {
 	local serial="$1"
 	FAILED=1
-	inc_fail_stats "$serial"
 	console_ascii_failed
 	if [ $SYNCHRONIZATION -eq 0 ]; then 
 		cat "$LOGFILE" > "$LOGDIR/failed_${serial}_${RUN_TIMESTAMP}.log"
@@ -54,7 +53,6 @@ handle_error_state() {
 handle_skipped_state() {
 	local serial="$1"
 	FAILED=1
-	inc_fail_stats "$serial"
 	echo_blue "CALIBRATION WAS SKIPPED. POSSIBLY DUE TO INCOMPATIBLE DEVICE OR LONG INITIALIZATION. PLEASE MAKE SURE YOU USE THE SPECIFIED FREQUENCY COUNTER HAMEG HM8123, 5.12 AND TRY AGAIN"
 	if [ $SYNCHRONIZATION -eq 0 ]; then 
 		cat "$LOGFILE" > "$LOGDIR/skipped_${serial}_${RUN_TIMESTAMP}.log"
@@ -66,23 +64,6 @@ handle_skipped_state() {
 
 need_to_read_eeprom() {
 	[ "$FAILED" == "1" ] || ! have_eeprom_vars_loaded
-}
-
-inc_fail_stats() {
-	local serial="$1"
-	let FAILED_CNT='FAILED_CNT + 1'
-	echo "PASSED_CNT=$PASSED_CNT" > $STATSFILE
-	echo "FAILED_CNT=$FAILED_CNT" >> $STATSFILE
-	[ -z "$serial" ] || echo "FAILED $serial" >> $RESULTSFILE
-}
-
-inc_pass_stats() {
-	local serial="$1"
-	let PASSED_CNT='PASSED_CNT + 1'
-	echo "PASSED_CNT=$PASSED_CNT" > $STATSFILE
-	echo "FAILED_CNT=$FAILED_CNT" >> $STATSFILE
-	echo "PASSED $serial" >> $RESULTSFILE
-	console_ascii_passed
 }
 
 console_ascii_passed() {
@@ -161,7 +142,8 @@ stop_gps_spoofing(){
 production() {
         local TARGET="$1"
         local MODE="$2"
-	local IIO_REMOTE=analog.local 
+		local BOARD="$3"
+		local IIO_REMOTE=analog.local 
 
         [ -n "$TARGET" ] || {
                 echo_red "No target specified"
@@ -182,16 +164,14 @@ production() {
         # * _errors.log - all errors that don't yet have a S/N
         # * _stats.log - number of PASSED & FAILED
 
-        local LOGDIR=$SCRIPT_DIR/log
-	# temp log to store stuff, before we know the S/N of device
-        local LOGFILE=$LOGDIR/temp.log
-	# errors that cannot be mapped to any device (because no S/N)
-        local ERRORSFILE=$LOGDIR/_errors.log
-	# stats ; how many passes/fails
-        local STATSFILE=$LOGDIR/_stats.log
-	 # format is "<BOARD S/N> = OK/FAILED"
-        local RESULTSFILE=$LOGDIR/_results.log
+		export DBSERVER="cluster0.oiqey.mongodb.net"
+		export DBUSERNAME="dev_production1"
+		export DBNAME="dev_${BOARD}_prod"
+		export BOARD_NAME="$BOARD"
 
+        local LOGDIR=$SCRIPT_DIR/log
+		# temp log to store stuff, before we know the S/N of device
+        local LOGFILE=$LOGDIR/temp.log
         # Remove temp log file start (if it exists)
         rm -f "$LOGFILE"
 
@@ -203,6 +183,17 @@ production() {
 	# TBD ready state - connection, other settings
 
 	RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
+
+	if [ -f $SCRIPT_DIR/password.txt ]; then
+		export DBPASSWORD=$(cat $SCRIPT_DIR/password.txt)
+	else
+		echo "Please input the password provided for storing log files remotely"
+		read PASSWD
+		echo $PASSWD > $SCRIPT_DIR/password.txt
+		export DBPASSWORD=$(cat $SCRIPT_DIR/password.txt)
+	fi
+
+	
 
 	timedatectl | grep "synchronized: yes"
 	SYNCHRONIZATION=$?
@@ -317,7 +308,6 @@ production() {
         fi
 
 	if [ "$FAILED" == "0" ] ; then
-			inc_pass_stats "$BOARD_SERIAL"
 			if [ $SYNCHRONIZATION -eq 0 ]; then
 				cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
 			else
@@ -325,5 +315,6 @@ production() {
 			fi
 			cat /dev/null > "$LOGFILE"
 	fi
+	telemetry prod-logs-upload --tdir $LOGDIR
 }
 

@@ -21,13 +21,13 @@ while true; do
 				wait_for_board_online
 				get_board_serial
 				echo_blue "Starting FMCOMMS4 Calibration Test"
-				production "crr" "$opt"
+				production "crr" "$opt" "FMCOMMS4"
 				break ;;
 			2)
 				wait_for_board_online
 				get_board_serial
 				echo_blue "Starting FMCOMMS4 Test"
-				production "crr" "$opt"
+				production "crr" "$opt" "FMCOMMS4"
 				break ;;
 			3)
 				enforce_root

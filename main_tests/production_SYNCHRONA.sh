@@ -21,7 +21,7 @@ while true; do
 				wait_for_board_online
 				get_board_serial
 				echo_blue "Starting Synchrona Test"
-				production "crr" "$opt"
+				production "crr" "$opt" "SYNCHRONA"
 				break ;;
 			2)
 				enforce_root

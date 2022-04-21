@@ -21,12 +21,12 @@ while true; do
 				wait_for_board_online
 				get_board_serial
 				echo_blue "Starting FMCOMMS4 Calibration Test"
-				production "crr" "$opt"
+				production "crr" "$opt" "ADRV9361_BOB"
 				break ;;
 			2)
 				wait_for_board_online
 				get_board_serial
-				echo_blue "Starting FMCOMMS4 Test"
+				echo_blue "Starting FMCOMMS4 Test" "ADRV9361_BOB"
 				production "crr" "$opt"
 				break ;;
 			3)
