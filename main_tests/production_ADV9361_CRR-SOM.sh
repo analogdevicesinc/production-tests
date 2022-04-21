@@ -29,7 +29,7 @@ while true; do
 				wait_for_board_online
 				get_board_serial
 				echo_blue "Starting ADRV Carrier Test"
-				production "crr" "$opt"
+				production "crr" "$opt" "ADRV9361_CRR-SOM"
 				break ;;
 			3)
 				enforce_root

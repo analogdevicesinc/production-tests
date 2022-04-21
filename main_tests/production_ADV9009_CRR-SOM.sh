@@ -35,13 +35,13 @@ while true; do
 				wait_for_board_online
 				get_board_serial
 				echo_blue "Starting ADRV Carrier Test"
-				production "crr" "$opt"
+				production "crr" "$opt" "ADV9009_CRR-SOM"
 				break ;;
 			4)
 				wait_for_board_online
 				get_board_serial
 				echo_blue "Starting ADRV SOM Test"
-				production "som" "$opt"
+				production "som" "$opt" "ADV9009_CRR-SOM"
 				break ;;
 			5)
 				wait_for_board_online
@@ -52,7 +52,7 @@ while true; do
 				wait_for_board_online
 				echo_blue "Starting FMCOMMS8 Test"
 				dut_date_sync
-				production "fmcomms8" "$opt"
+				production "fmcomms8" "$opt" "ADV9009_CRR-SOM"
 				break ;;
 			7)
 				enforce_root
