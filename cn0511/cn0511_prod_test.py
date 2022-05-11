@@ -61,7 +61,7 @@ m_byte_4 =   1095216660480#=00000000 11111111 00000000 00000000 00000000 0000000
 m_byte_3 =      4278190080#=00000000 00000000 11111111 00000000 00000000 00000000
 m_byte_2 =        16711680#=00000000 00000000 00000000 11111111 00000000 00000000
 m_byte_1 =           65280#=00000000 00000000 00000000 00000000 11111111 00000000
-m_byte_0 =             255#=00000000 00000000 00000000 00000000 00000000 11111111 
+m_byte_0 =             255#=00000000 00000000 00000000 00000000 00000000 11111111
 
 output_power_margin = 0
 ###############################################################################
@@ -73,7 +73,7 @@ freq_step_plot = 1000000000
 ###############################################################################
 
 
-# Function that returns the difference in dBm between the keysight's output 
+# Function that returns the difference in dBm between the keysight's output
 # and the ladybug's output at frequency freq_x.
 def keysight_minus_ladybug_output(freq_x):
     freq_x = float(freq_x)
@@ -96,7 +96,7 @@ def keysight_minus_ladybug_output(freq_x):
     #Interval 3:
     elif freq_x >= 2970e6 and freq_x <= 3100e6:
         attenuation = -0.1147 + 5.046153846153850E-10*(freq_x - 2970e6)
-    
+
     #Interval 4:
     elif freq_x >= 3100e6 and freq_x <= 3200e6:
         attenuation = -0.0491 + -4.593000000000000E-9*(freq_x - 3100e6)
@@ -163,7 +163,7 @@ def keysight_minus_ladybug_output(freq_x):
 
     #Interval 20:
     elif freq_x >= 5000e6 and freq_x <= 5090e6:
-        attenuation = -1.6105 + 4.272222222222220E-9*(freq_x - 5000e6)    
+        attenuation = -1.6105 + 4.272222222222220E-9*(freq_x - 5000e6)
 
     #Interval 21:
     elif freq_x >= 5090e6 and freq_x <= 5450e6:
@@ -187,7 +187,7 @@ def keysight_minus_ladybug_output(freq_x):
 
     elif freq_x > 5990e6:
         attenuation = -2.25 + -1.119166666666670E-8*(5990e6 - 5870e6)
-    
+
     return attenuation
 ###############################################################################
 
@@ -200,25 +200,25 @@ def read_output_ladybug():
 ###############################################################################
 
 
-# This function reads the output power with ladybug and subtracts the 
+# This function reads the output power with ladybug and subtracts the
 # approximated differennce calculated with keysight_minus_ladybug_output:
 """
 current_freq -> the freqeuency at which the output power is measured
 """
 def read_output_ladybug_optimized(current_freq):
-    output_power_lb = str(float(inst.query("MEAS?")) + 
+    output_power_lb = str(float(inst.query("MEAS?")) +
                       float(keysight_minus_ladybug_output(current_freq)))
     return output_power_lb
 ###############################################################################
 
- 
+
 # Write to register function ##################################################
-def write_reg(chip_name_str, register_addr_hex, value_addr_hex): 
+def write_reg(chip_name_str, register_addr_hex, value_addr_hex):
     #ex write_reg('ad9166', 0x115, 0xEB)
     iio_ad9166.reg_write(register_addr_hex, int(value_addr_hex, 16))
 ###############################################################################
-    
-    
+
+
 # Set NCO value function ######################################################
 def set_out_frequency(fout):
     iio_ad9166_ch.attrs["nco_frequency"].value = str(fout)
@@ -245,7 +245,7 @@ def set_out_amplitude_frequency(out_amplitude_dbm, out_frequency_hz):
 # Adjust output power offset with ladybug######################################
 # This function returns the difference that has to be added on 0x42|0x41 for
 # a specific board to all offset consants in order to calibrate the output.
-def calibrate_output_power_vs_frequency_offset_lb_adjustment(actual_offset, 
+def calibrate_output_power_vs_frequency_offset_lb_adjustment(actual_offset,
         fmin, mid_scale, step_offset_reg, output_power_margin, dbm_wanted = 0):
     #Suggested modifications: make mid_scale internal parameter of the function
     fmin = int(fmin)
@@ -254,7 +254,7 @@ def calibrate_output_power_vs_frequency_offset_lb_adjustment(actual_offset,
 
     nr_tries = 0
     verif_amplitude = 0.4
-    # Repeat the calculation of the gain constant if the verification of 
+    # Repeat the calculation of the gain constant if the verification of
     # verif_amplitude fails.
     while(float(verif_amplitude) < -0.1) or (float(verif_amplitude) > 0.1):
         nr_tries += 1
@@ -263,19 +263,19 @@ def calibrate_output_power_vs_frequency_offset_lb_adjustment(actual_offset,
 
 
         #Step 1###########################################################
-        # Set the desired output with registers 0x14E and 0x14F. The values of 
-        # 0x14E and 0x14F registers remain constant for the full calibration 
+        # Set the desired output with registers 0x14E and 0x14F. The values of
+        # 0x14E and 0x14F registers remain constant for the full calibration
         # process:
         set_out_amplitude(dbm_wanted + output_power_margin)
-        ################################################################## 
+        ##################################################################
 
 
         #Step 2###########################################################
-        # Iofs_reg = Iofs_reg_initial (Iofs_reg is the number that has to be put 
+        # Iofs_reg = Iofs_reg_initial (Iofs_reg is the number that has to be put
         # on registers 0x42|0x41, registers that modify Ioutfs value)
 
-        # -> position at the middle of the with Iofs_reg => put the value 0x80 
-        #    on register 0x42 and 0x0 on register 0x41. 
+        # -> position at the middle of the with Iofs_reg => put the value 0x80
+        #    on register 0x42 and 0x0 on register 0x41.
 
         # In this example: Iofs_reg_intial = mid_scale
         lsb_mid_scale = hex(mid_scale&3)
@@ -286,37 +286,37 @@ def calibrate_output_power_vs_frequency_offset_lb_adjustment(actual_offset,
 
 
         #Step 3###########################################################
-        # Measure Pout(fmin, Iofs_reg_initial) 
+        # Measure Pout(fmin, Iofs_reg_initial)
 
-        # -> measure the output power for fmin and Iofs_reg set at #2 
+        # -> measure the output power for fmin and Iofs_reg set at #2
 
         # In this example: Pout(fmin, Iofs_reg_initial) = out_power_ioutfs_mid
 
-        set_out_frequency(fmin) #set fmin     
-        out_power_ioutfs_mid = read_output_ladybug_optimized(fmin) #save the 
+        set_out_frequency(fmin) #set fmin
+        out_power_ioutfs_mid = read_output_ladybug_optimized(fmin) #save the
                 #measured amplitude with the Iofs_reg = Iofs_reg_initial set at #2
-        print("out_power_ioutfs_mid: ", out_power_ioutfs_mid) 
+        print("out_power_ioutfs_mid: ", out_power_ioutfs_mid)
         ##################################################################
 
 
         #Step 4###########################################################
-        # Choose Iofs_reg_increment_offset 
-        #  (for example Iofs_reg_increment_offset = 15) 
-        
+        # Choose Iofs_reg_increment_offset
+        #  (for example Iofs_reg_increment_offset = 15)
+
         # -> choose the increment step size on Iofs_reg (this value is not 1
-        #    because the measuring unit has errors). 
+        #    because the measuring unit has errors).
         # In this example: Iofs_reg_increment_offset = step_offset_reg
         # step_offset_reg is taken as a parameter by this function
         ##################################################################
 
 
         #Step 5###########################################################
-        # Measure Pout(fmin, Iofs_reg_initial + Iofs_reg_increment_offset) 
-        # -> measure the output power for fmin and Iofs_reg = Iofs_reg_initial + 
-        #                                                     + Iofs_reg_increment. 
-        # In this example:Iofs_reg_initial = mid_scale; 
-        #                 Iofs_reg_increment = step_offset_reg; 
-        #                 Pout(fmin, Iofs_reg_initial + Iofs_reg_increment_offset)= 
+        # Measure Pout(fmin, Iofs_reg_initial + Iofs_reg_increment_offset)
+        # -> measure the output power for fmin and Iofs_reg = Iofs_reg_initial +
+        #                                                     + Iofs_reg_increment.
+        # In this example:Iofs_reg_initial = mid_scale;
+        #                 Iofs_reg_increment = step_offset_reg;
+        #                 Pout(fmin, Iofs_reg_initial + Iofs_reg_increment_offset)=
         #                 = out_power_ioutfs_mid_plus_step
         incremented_number = mid_scale + step_offset_reg
         print("incremented_number: ", incremented_number)
@@ -326,25 +326,25 @@ def calibrate_output_power_vs_frequency_offset_lb_adjustment(actual_offset,
         write_reg('ad9166', 0x42, msb_incremented_number)
         write_reg('ad9166', 0x41, lsb_incremented_number)
 
-        set_out_frequency(fmin) #set fmin     
-        out_power_ioutfs_mid_plus_step = read_output_ladybug_optimized(fmin) 
+        set_out_frequency(fmin) #set fmin
+        out_power_ioutfs_mid_plus_step = read_output_ladybug_optimized(fmin)
         print("out_power_ioutfs_mid_plus_step: ", out_power_ioutfs_mid_plus_step)
         ##################################################################
 
 
         #Step 6###########################################################
-        # Calculate Pout_LSB_offset = Pout(fmin, Iofs_reg_initial + 
-        #                              + Iofst_reg_increment_offset) - 
+        # Calculate Pout_LSB_offset = Pout(fmin, Iofs_reg_initial +
+        #                              + Iofst_reg_increment_offset) -
         #                              - Pout(fmin, Iofs_reg_initial)
 
-        # -> calculate the increment in power from Iofs_reg_initial to 
+        # -> calculate the increment in power from Iofs_reg_initial to
         #    Iofs_reg_initial + Iofs_reg_increment_offset
 
-        #In this example:Pout(fmin, Iofs_reg_initial + Iofst_reg_increment_offset)= 
+        #In this example:Pout(fmin, Iofs_reg_initial + Iofst_reg_increment_offset)=
         #                = float(out_power_ioutfs_mid_plus_step)
         #                Pout(fmin, Iofs_reg_initial) = float(out_power_ioutfs_mid)
         #                Pout_LSB_offset = pout_increment_offset
-        pout_increment_offset = (float(out_power_ioutfs_mid_plus_step) - 
+        pout_increment_offset = (float(out_power_ioutfs_mid_plus_step) -
                                 float(out_power_ioutfs_mid))
 
         print("pout_increment_offset: ", pout_increment_offset)
@@ -352,11 +352,11 @@ def calibrate_output_power_vs_frequency_offset_lb_adjustment(actual_offset,
 
 
         #Step 7###########################################################
-        # Calculate N_Pout_LSB_offset = int( (Pout(fmin, Iofs_reg_initial) – 
-        #                                - desired_output_dbm) / Pout_LSB_offset)   
-        # -> calculate the number of Pout_LSB_offset needed to correct the offset 
+        # Calculate N_Pout_LSB_offset = int( (Pout(fmin, Iofs_reg_initial) –
+        #                                - desired_output_dbm) / Pout_LSB_offset)
+        # -> calculate the number of Pout_LSB_offset needed to correct the offset
         #    error
-        n_pout_increment_offset = (float(out_power_ioutfs_mid) - 
+        n_pout_increment_offset = (float(out_power_ioutfs_mid) -
                                 float(dbm_wanted))/pout_increment_offset
 
         print("n_pout_increment_offset: ", n_pout_increment_offset)
@@ -364,12 +364,12 @@ def calibrate_output_power_vs_frequency_offset_lb_adjustment(actual_offset,
 
 
         #Step 8###########################################################
-        # Calculate Iofs_reg_offset_correction = 
+        # Calculate Iofs_reg_offset_correction =
         # = Iofs_reg_initial - N_Pout_LSB_offset * Iofs_reg_increment_offset
-        #-> calculate the number that has to be put on registers 0x42|0x41 for 
-        #   correcting the offset error, more exactly, the green term in the 
-        # previously developed formula 
-        # (Iofs_reg(fx) = 0x42|0x41 = Iofs_reg_offset_correction + 
+        #-> calculate the number that has to be put on registers 0x42|0x41 for
+        #   correcting the offset error, more exactly, the green term in the
+        # previously developed formula
+        # (Iofs_reg(fx) = 0x42|0x41 = Iofs_reg_offset_correction +
         #                             + Cst_gain_correction*(fx – fmin))
         offset_number_dec =int(mid_scale - n_pout_increment_offset*step_offset_reg)
 
@@ -390,7 +390,7 @@ def calibrate_output_power_vs_frequency_offset_lb_adjustment(actual_offset,
         print("verif_amplitude: ", verif_amplitude)
         # Do iterative calculation:
         mid_scale = offset_number_dec
-        
+
         if(int(nr_tries) > 5):
                 break
 
@@ -407,17 +407,17 @@ def calibrate_output_power_vs_frequency_offset_lb_adjustment(actual_offset,
 
 
 # Return output power vs frequency for ladybug#################################
-# Parameters: out_power_dbm  -> NCO Scale = output power in dbm; 
-#             fmin -> the start freuqncy (condition fmin > fmin_interval); 
-#             fmax -> maximum frequency; 
+# Parameters: out_power_dbm  -> NCO Scale = output power in dbm;
+#             fmin -> the start freuqncy (condition fmin > fmin_interval);
+#             fmax -> maximum frequency;
 #             fstep -> step frequency;
 #             fmin_interval -> minimum frequency of the interval
-#             offset_dec -> cn0511_offset for interval [fmin_interval; fmax) 
+#             offset_dec -> cn0511_offset for interval [fmin_interval; fmax)
 #             cst_cal_gain -> cn0511_cst for interval [fmin_interval; fmax)
 
-# The function returns a list of lists where the first sublist is the x axis  
+# The function returns a list of lists where the first sublist is the x axis
 # and the second sublist is the y axis.
-def output_power_vs_freq_calibrated_lb(out_power_dbm, fmin, fmax, fstep, 
+def output_power_vs_freq_calibrated_lb(out_power_dbm, fmin, fmax, fstep,
                                        fmin_interval, offset_dec, cst_cal_gain):
     fmin = int(fmin)
     fmax = int(fmax)
@@ -444,19 +444,19 @@ def output_power_vs_freq_calibrated_lb(out_power_dbm, fmin, fmax, fstep,
 
         measured_amplitude = read_output_ladybug_optimized(current_freq)
         #measured_frequancy = measure_frequency_hz()
-        
+
         if((float(measured_amplitude) < float(out_power_dbm-5)) or (float(measured_amplitude) > float(out_power_dbm+5))):
             print("Calibration fail, the amplitude has a different value than the desired one!")
             return None
         else:
             print("Point calculated correctly!")
-        
+
         print("Measured amplitude: " + str(measured_amplitude))
         print("Measured_frequency: " + str(current_freq) + "\n")
         y_axis_dbm.append( float(measured_amplitude) )
         x_axis_hz.append( str(current_freq) )
 
-    x_y_axis.append(x_axis_hz) 
+    x_y_axis.append(x_axis_hz)
     x_y_axis.append(y_axis_dbm)
 
     # print("X axis: ", x_axis_hz)
@@ -467,14 +467,14 @@ def output_power_vs_freq_calibrated_lb(out_power_dbm, fmin, fmax, fstep,
 ###############################################################################
 
 
-# This function plots the calibrated output and saves it in a csv file for 
-# verification. It takes as input any frequency step 
+# This function plots the calibrated output and saves it in a csv file for
+# verification. It takes as input any frequency step
 def output_power_calibrated_anystep_lb(frequency_step):
     # calculate points for 0 dbm###########################################
     frequency_step = float(frequency_step)
-    y_vs_x_list_0dbm = [[],[]] #the first sublist contains the x axis and  
+    y_vs_x_list_0dbm = [[],[]] #the first sublist contains the x axis and
                                #the 2nd sublist containts y axis
-    
+
     # Run trough all frequencies with frequency_step:
     my_freq = 0
     while int(my_freq) < 6000000000:
@@ -483,23 +483,23 @@ def output_power_calibrated_anystep_lb(frequency_step):
         #Set and measure the output for the freqs below the first interval
         if(my_freq < cn0511_freq[0]):
             y_vs_x_list_aux = output_power_vs_freq_calibrated_lb(
-                                0 + output_power_margin, 
-                                my_freq, cn0511_freq[0], frequency_step, 
+                                0 + output_power_margin,
+                                my_freq, cn0511_freq[0], frequency_step,
                                 0, cn0511_offset[0], 0)
-                
+
             y_vs_x_list_0dbm[0] = y_vs_x_list_0dbm[0] + y_vs_x_list_aux[0]
             y_vs_x_list_0dbm[1] = y_vs_x_list_0dbm[1] + y_vs_x_list_aux[1]
             my_freq = float(y_vs_x_list_0dbm[0][len(y_vs_x_list_0dbm[0]) - 1])
 
 
-        #Check what interval contains my_freq and set and measure the output 
+        #Check what interval contains my_freq and set and measure the output
         # power using the corresponding calibration constants
         for freq_list_index in range(0, len(cn0511_freq) - 1):
             if(my_freq >= cn0511_freq[freq_list_index]) and (my_freq < cn0511_freq[freq_list_index + 1]):
                 y_vs_x_list_aux = output_power_vs_freq_calibrated_lb(
-                                    0 + output_power_margin, my_freq, 
-                                    cn0511_freq[freq_list_index + 1], frequency_step, 
-                                    cn0511_freq[freq_list_index], cn0511_offset[freq_list_index], 
+                                    0 + output_power_margin, my_freq,
+                                    cn0511_freq[freq_list_index + 1], frequency_step,
+                                    cn0511_freq[freq_list_index], cn0511_offset[freq_list_index],
                                     cn0511_gain[freq_list_index])
 
                 y_vs_x_list_0dbm[0] = y_vs_x_list_0dbm[0] + y_vs_x_list_aux[0]
@@ -510,15 +510,15 @@ def output_power_calibrated_anystep_lb(frequency_step):
         #Set and measure the output for the last interval
         if(my_freq >= cn0511_freq[len(cn0511_freq) - 1]) and (my_freq < 5990000000):
                 y_vs_x_list_aux = output_power_vs_freq_calibrated_lb(
-                                    0 + output_power_margin, my_freq, 
-                                    5990000000, frequency_step, 
-                                    cn0511_freq[len(cn0511_freq) - 1], cn0511_offset[len(cn0511_freq) - 1], 
+                                    0 + output_power_margin, my_freq,
+                                    5990000000, frequency_step,
+                                    cn0511_freq[len(cn0511_freq) - 1], cn0511_offset[len(cn0511_freq) - 1],
                                     cn0511_gain[len(cn0511_freq) - 1])
 
                 y_vs_x_list_0dbm[0] = y_vs_x_list_0dbm[0] + y_vs_x_list_aux[0]
                 y_vs_x_list_0dbm[1] = y_vs_x_list_0dbm[1] + y_vs_x_list_aux[1]
                 my_freq = float(y_vs_x_list_0dbm[0][len(y_vs_x_list_0dbm[0]) - 1])
-                
+
     print("x_vs_y_list1: ", y_vs_x_list_0dbm)
 
     #create raw data#######################################################
@@ -530,11 +530,11 @@ def output_power_calibrated_anystep_lb(frequency_step):
     df = pd.DataFrame(name_dict)
     wd = str(datetime.date.today()) + '/'
     os.system('mkdir -p ' + wd)
-    df.to_csv(wd + sys.argv[1] + '_cal.csv') 
-    
-    
+    df.to_csv(wd + sys.argv[1] + '_cal.csv')
+
+
     #######################################################################
- 
+
 
     print("cn0511_freq=", cn0511_freq)
     print("cn0511_offset=", cn0511_offset)
@@ -573,7 +573,7 @@ if __name__ == "__main__":
     print (rm.list_resources())
     my_resources = rm.list_resources()
     manufid_modelcode = '6669::5592'
-    # using list comprehension to check and return the resource with specified 
+    # using list comprehension to check and return the resource with specified
     # manufacturing id and model code
     my_resource = [i for i in my_resources if manufid_modelcode in i]
 
@@ -597,9 +597,9 @@ if __name__ == "__main__":
     # Output adjustment with ladybug for a specific board #####################
     offset_difference=calibrate_output_power_vs_frequency_offset_lb_adjustment(
          cn0511_offset[0], 100000000, cn0511_offset[0], 15, output_power_margin, 0)
-    
+
     for i in range(0, len(cn0511_offset)):
-        cn0511_offset[i] += offset_difference 
+        cn0511_offset[i] += offset_difference
     ###########################################################################
 
     # Plot the calibrated output from freq_step_plot to 5.9GHz with frequency
@@ -607,16 +607,16 @@ if __name__ == "__main__":
     output_power_calibrated_anystep_lb(freq_step_plot)
     ###########################################################################
 
-    
+
     #Write the obtained calibration constants to a text file ##################
-    string_to_file = ("cn0511_freq=" + str(cn0511_freq) + "\n" + "cn0511_offset=" 
+    string_to_file = ("cn0511_freq=" + str(cn0511_freq) + "\n" + "cn0511_offset="
                  + str(cn0511_offset) + "\n" + "cn0511_gain=" +str(cn0511_gain) + "\n")
 
     print("\n" + "cn0511.txt file contains: ", string_to_file)
 
     wd = str(datetime.date.today()) + '/'
     os.system('mkdir -p ' + wd)
-    my_file = open(wd + sys.argv[1] + '_cal.txt', 'w+')  
+    my_file = open(wd + sys.argv[1] + '_cal.txt', 'w+')
     my_file.write(string_to_file)
     my_file.close()
     ###########################################################################
@@ -631,20 +631,20 @@ if __name__ == "__main__":
     ######################
 
     # Compare if EEPROM content is equal with cn0511.txt content
-    f1 = open("/sys/devices/platform/soc/fe804000.i2c/i2c-1/1-0051/eeprom", "r")  
-    f2 = open(wd + sys.argv[1] + '_cal.txt', "r")  
-    
+    f1 = open("/sys/devices/platform/soc/fe804000.i2c/i2c-1/1-0051/eeprom", "r")
+    f2 = open(wd + sys.argv[1] + '_cal.txt', "r")
+
     i = 0
     identical_files = True
 
     for line1 in f1:
         i += 1
-        
+
         for line2 in f2:
-            
+
             # matching line1 from both files
-            if line1 == line2:  
-                identical_files = True  
+            if line1 == line2:
+                identical_files = True
             else:
                 identical_files = False
             break
@@ -653,7 +653,7 @@ if __name__ == "__main__":
         print("\n" + "EEPROM successfully written!")
     else:
         sys.exit("\n" + "EEPROM write fail!")
-        
+
     print("Test completed successfully!")
 
     ###########################################################################
