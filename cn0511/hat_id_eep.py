@@ -33,11 +33,14 @@
 
 import datetime
 import os
+import sys
 
 
 def hat_id_eep(sn, txt, dtbo):
 	wd = str(datetime.date.today()) + '/'
-	os.system('mkdir -p ' + wd)
+	ret = os.system('mkdir -p ' + wd)
+	if ret != 0:
+		sys.exit(ret)
 
 	in_txt = open(txt,'r').readlines()
 	out_txt = open(wd + sn + '_id.txt','w')
@@ -48,5 +51,9 @@ def hat_id_eep(sn, txt, dtbo):
 			out_txt.write(sn.encode('utf-8').hex() + '\n')
 	out_txt.close()
 
-	os.system('eepmake ' + wd + sn + '_id.txt ' + wd + sn + '_id.eep ' + dtbo)
-	os.system('eepflash.sh -w -f=' + wd + sn + '_id.eep -t=24c32 -y')
+	ret = os.system('eepmake ' + wd + sn + '_id.txt ' + wd + sn + '_id.eep ' + dtbo)
+	if ret != 0:
+		sys.exit(ret)
+	ret = os.system('eepflash.sh -w -f=' + wd + sn + '_id.eep -t=24c32 -y')
+	if ret != 0:
+		sys.exit(ret)
