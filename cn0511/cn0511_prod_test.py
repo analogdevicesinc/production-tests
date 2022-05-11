@@ -68,7 +68,6 @@ output_power_margin = 0
 
 
 #Filename and directory########################################################
-csv_filename_calibrated = "Output_adjusted.csv"
 freq_step_plot = 1000000000
 ###############################################################################
 
