@@ -444,7 +444,7 @@ def output_power_vs_freq_calibrated_lb(out_power_dbm, fmin, fmax, fstep,
         measured_amplitude = read_output_ladybug_optimized(current_freq)
         #measured_frequancy = measure_frequency_hz()
 
-        if((float(measured_amplitude) < float(out_power_dbm-5)) or (float(measured_amplitude) > float(out_power_dbm+5))):
+        if((float(measured_amplitude) < float(out_power_dbm-1)) or (float(measured_amplitude) > float(out_power_dbm+1))):
             print("Calibration fail, the amplitude has a different value than the desired one!")
             return None
         else:
