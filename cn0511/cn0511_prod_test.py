@@ -557,6 +557,7 @@ if __name__ == "__main__":
     iio_ad9166.attrs["fir85_enable"].value = "1"
     iio_ad9166_ch = iio_ad9166.find_channel("altvoltage0", True)
     iio_ad9166_ch.attrs["nco_frequency"].value = "100000000"
+    iio_ad9166_temp = iio_ad9166.find_channel("temp0", False)
 
     #connect to ladybug########################################################
     ladybug = usb.core.find(idVendor = 0x1a0d)
@@ -597,6 +598,8 @@ if __name__ == "__main__":
     offset_difference=calibrate_output_power_vs_frequency_offset_lb_adjustment(
          cn0511_offset[0], 100000000, cn0511_offset[0], 15, output_power_margin, 0)
 
+    cn0511_temp = iio_ad9166_temp.attrs["raw"].value
+
     for i in range(0, len(cn0511_offset)):
         cn0511_offset[i] += offset_difference
     ###########################################################################
@@ -606,10 +609,10 @@ if __name__ == "__main__":
     output_power_calibrated_anystep_lb(freq_step_plot)
     ###########################################################################
 
-
     #Write the obtained calibration constants to a text file ##################
     string_to_file = ("cn0511_freq=" + str(cn0511_freq) + "\n" + "cn0511_offset="
-                 + str(cn0511_offset) + "\n" + "cn0511_gain=" +str(cn0511_gain) + "\n")
+                 + str(cn0511_offset) + "\n" + "cn0511_gain=" +str(cn0511_gain) + "\n" +
+                 "cn0511_temp=" + str(cn0511_temp) + "\n")
 
     print("\n" + "cn0511.txt file contains: ", string_to_file)
 
