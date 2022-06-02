@@ -17,7 +17,7 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="03"
 SHORT_DESC="Test poweroff. Synchrona will be turned off now."
-CMD="sshpass -p analog ssh -q -t -oConnectTimeout=10 -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oCheckHostIP=no analog@analog \"sudo poweroff\" ;"
+CMD="sshpass -p analog ssh -q -t -oConnectTimeout=10 -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oCheckHostIP=no analog@192.168.2.1 \"sudo poweroff\" ;"
 CMD+="YES_no 'Device should be turned off. Check if fan is off, STAT2 is off and STAT1 has turned red'"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 

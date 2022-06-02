@@ -50,6 +50,7 @@ clk_test_cmos()
     return $(( ret1 ))
 }
 
+sudo dtoverlay -r
 sudo dtoverlay $SCRIPT_DIR/rpi-ad9545-hmc7044.dtbo
 
 lsblk | grep "/media/analog/M2k"
