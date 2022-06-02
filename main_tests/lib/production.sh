@@ -2,6 +2,8 @@
 
 source $SCRIPT_DIR/config.sh
 
+source $SCRIPT_DIR/print/print_basic.sh
+
 #----------------------------------#
 # Functions section                #
 #----------------------------------#
@@ -107,7 +109,7 @@ wait_for_firmware_files() {
 
 check_conn(){
 	while true; do
-		if ping -q -c3 -w50 analog.local &>/dev/null
+		if ping -q -c3 -w50 192.168.2.1 &>/dev/null
 		then
 			echo_blue "Connection to DUT OK"
 			break
@@ -143,7 +145,7 @@ production() {
         local TARGET="$1"
         local MODE="$2"
 		local BOARD="$3"
-		local IIO_REMOTE=analog.local 
+		local IIO_REMOTE=192.168.2.1 
 
         [ -n "$TARGET" ] || {
                 echo_red "No target specified"
@@ -244,7 +246,7 @@ production() {
                         fi
                         ;;
 				"Synchrona Production Test")
-						ssh_cmd "sudo /home/analog/synch/synch_test.sh $BOARD_SERIAL"
+						ssh_cmd "sudo /home/analog/synch/synch_test.sh ${BOARD_SERIAL}"
 						FAILED_TESTS=$?
 						if [ $FAILED_TESTS -ne 255 ]; then
 							$SCRIPT_DIR/synch/uart_test.sh 
@@ -317,6 +319,12 @@ production() {
         fi
 
 	if [ "$FAILED" == "0" ] ; then
+			console_ascii_passed
+			populate_label_fields "$BOARD_SERIAL"
+			print_label
+			echo_red "Please power up synchrona to perform cleanup"
+			ssh_cmd "rm -rf /home/analog/synch"
+			ssh_cmd "rm -rf /home/analog/.bash_history"
 			if [ $SYNCHRONIZATION -eq 0 ]; then
 				cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
 			else
