@@ -215,6 +215,12 @@ production() {
                                 handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
+				"FMCOMMS2/3 Test")
+                        $SCRIPT_DIR/fmcomms2-3/rf_test.sh
+                        if [ $? -ne 0 ]; then
+                                handle_error_state "$BOARD_SERIAL" #try to do both rf testing and calibration in one run
+                        fi
+                        ;;
 				"DCXO Calibration Test")
                         $SCRIPT_DIR/fmcomms4/dcxo_test.sh
 						res=$?
