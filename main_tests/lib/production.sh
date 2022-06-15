@@ -230,7 +230,7 @@ production() {
 							if [ $res -eq 1 ]; then
 								handle_error_state "$BOARD_SERIAL"
 							else
-								echo_red "Now please procced with the FMCOMMS4 tests (2)"
+								echo_red "Now please procced with the RF tests (2)"
 							fi
                         fi
                         ;;
