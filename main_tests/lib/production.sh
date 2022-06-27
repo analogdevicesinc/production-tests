@@ -288,13 +288,14 @@ production() {
                         ;;
 
 				"ADRV9364 Test")
-						$SCRIPT_DIR/adrv9361_bob/rf_test.sh
+						$SCRIPT_DIR/adrv9364_bob/dcxo_test.sh
+						$SCRIPT_DIR/adrv9364_bob/rf_test.sh
 						FAILED_TESTS=$?
 						
 						if [ $FAILED_TESTS -ne 0 ]; then
-							$SCRIPT_DIR/adrv9361_bob/test_uart.sh
+							$SCRIPT_DIR/adrv9364_bob/test_uart.sh
 							FAILED_UART=$?
-							$SCRIPT_DIR/adrv9361_bob/test_ethernet.sh
+							$SCRIPT_DIR/adrv9364_bob/test_ethernet.sh
 							FAILED_ETH=$?
 							if [ $FAILED_UART -ne 255 ] || [ $FAILED_ETH -ne 255 ]; then
 								ssh_cmd "sudo /home/analog/adrv9364_bob/adrv9364_test.sh"
