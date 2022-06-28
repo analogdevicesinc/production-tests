@@ -4,6 +4,8 @@ source $SCRIPT_DIR/config.sh
 
 source $SCRIPT_DIR/print/print_basic.sh
 
+source $SCRIPT_DIR/lib/utils.sh
+
 #----------------------------------#
 # Functions section                #
 #----------------------------------#
@@ -246,6 +248,7 @@ production() {
                         fi
                         ;;
 				"Synchrona Production Test")
+						scp -r $SCRIPT_DIR/synch analog@192.168.2.1:/home/analog/synch
 						ssh_cmd "sudo /home/analog/synch/synch_test.sh ${BOARD_SERIAL}"
 						FAILED_TESTS=$?
 						if [ $FAILED_TESTS -ne 255 ]; then
@@ -319,12 +322,13 @@ production() {
         fi
 
 	if [ "$FAILED" == "0" ] ; then
-			console_ascii_passed
 			populate_label_fields "$BOARD_SERIAL"
 			print_label
 			echo_red "Please power up synchrona to perform cleanup"
+			wait_for_board_online
 			ssh_cmd "rm -rf /home/analog/synch"
 			ssh_cmd "rm -rf /home/analog/.bash_history"
+			console_ascii_passed
 			if [ $SYNCHRONIZATION -eq 0 ]; then
 				cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
 			else
