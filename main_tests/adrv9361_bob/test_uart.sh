@@ -15,7 +15,6 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 TEST_ID="02"
 SHORT_DESC="Check UART communication"
 CMD="TTY_PORT=\"/dev/\$(dmesg | grep tty | grep \"cp210x converter now attached to\" | awk '{print \$10}')\";"
-CMD+="echo $TTY_PORT;"
 CMD+="\$SCRIPT_DIR/test_uart.expect \$TTY_PORT"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
