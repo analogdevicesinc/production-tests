@@ -27,7 +27,8 @@ get_board_serial() {
 	IS_OKBOARD=1
 	while [ $IS_OKBOARD -ne 0 ]; do
 		echo "Please use the scanner to scan the QR/Barcode on your carrier"
-		read BOARD_SERIAL
+		read BOARD_SERIAL_TEMP
+		BOARD_SERIAL=${BOARD_SERIAL_TEMP// /}
 		echo $BOARD_SERIAL | grep "S[0-9][0-9]" | grep "SN" &>/dev/null
 		IS_OKBOARD=$?
 	done
@@ -248,7 +249,11 @@ production() {
                         fi
                         ;;
 				"Synchrona Production Test")
-						scp -r $SCRIPT_DIR/synch analog@192.168.2.1:/home/analog/synch
+						ssh_cmd "rm -rf /home/analog/synch" # remove old folder if it exists
+						sshpass -p "analog" scp -r $SCRIPT_DIR/synch analog@192.168.2.1:/home/analog/synch # copy current one
+						sshpass -p "analog" scp $SCRIPT_DIR/synch/rpi-ad9545-hmc7044.dtbo root@192.168.2.1:/boot/overlays/rpi-ad9545-hmc7044.dtbo
+						sshpass -p "analog" scp $SCRIPT_DIR/synch/rpi-ad9545-hmc7044.dtbo root@192.168.2.1:/etc/raspap/synchrona/rpi-ad9545-hmc7044.dtbo
+						ssh_cmd "sudo raspi-config nonint do_expand_rootfs"
 						ssh_cmd "sudo /home/analog/synch/synch_test.sh ${BOARD_SERIAL}"
 						FAILED_TESTS=$?
 						if [ $FAILED_TESTS -ne 255 ]; then
@@ -325,6 +330,7 @@ production() {
 			populate_label_fields "$BOARD_SERIAL"
 			print_label
 			echo_red "Please power up synchrona to perform cleanup"
+			sleep 10
 			wait_for_board_online
 			ssh_cmd "rm -rf /home/analog/synch"
 			ssh_cmd "rm -rf /home/analog/.bash_history"
@@ -336,6 +342,11 @@ production() {
 			fi
 			cat /dev/null > "$LOGFILE"
 	fi
-	telemetry prod-logs-upload --tdir $LOGDIR
+	telemetry prod-logs-upload --tdir $LOGDIR &> $SCRIPT_DIR/telemetry_out.txt
+	cat $SCRIPT_DIR/telemetry_out.txt | grep "Authentication failed"
+	if [ $? -eq 0 ]; then
+		rm -rf $SCRIPT_DIR/password.txt
+	fi
+	rm -rf telemetry_out.txt
 }
 

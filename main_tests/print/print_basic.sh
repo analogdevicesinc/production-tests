@@ -12,7 +12,7 @@ populate_label_fields()
 
     rm -rf /tmp/csvfile.csv #remove previous data
 
-    echo $MODEL,$SERIAL,$MAC1,$MAC2,$DATE > /tmp/csvfile.csv
+    echo "$MODEL","$SERIAL","$MAC1","$DATE" > /tmp/csvfile.csv
 }
 
 
