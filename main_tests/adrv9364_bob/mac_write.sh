@@ -37,7 +37,7 @@ function write_mac() {
 
 	MAC_STRING="ethaddr=$MAC_ETH0"
 
-	sed -i "s/ethaddr=00:05:f7:80:fa:34/$MAC_STRING" /boot/qspi_boot/uEnv.txt
+	sed -i "s/ethaddr=00:05:f7:80:fa:34/$MAC_STRING/" /boot/qspi_boot/uEnv.txt
 
 	flashcp -v /boot/qspi_boot/uEnv.txt $QSPI_ENV_PART
 
