@@ -124,7 +124,7 @@ setup_pyadi-iio() {
 		return 0
 	fi
 
-	__download_github_common pyadi-iio
+	git clone https://github.com/constmonica/pyadi-iio work/pyadi-iio
 	#Set python3 as default
 	sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
 	sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
@@ -136,7 +136,7 @@ setup_pyadi-iio() {
 		git checkout som-testing-fmcomms8
 	else
 		git checkout fmcomms_scpi
-		pip3 install -r requirements_prod_test.txt
+		sudo pip3 install -r requirements_prod_test.txt
 		sudo apt-get install libatlas-base-dev
 	fi
 
@@ -145,8 +145,17 @@ setup_pyadi-iio() {
 }
 
 setup_telemetry() {
-	pip3 install git+https://github.com/sdgtt/telemetry.git
+	git clone https://github.com/sdgtt/telemetry work/telemetry
+
+	pushd work
+	pushd telemetry
+	
+	sudo python3 setup.py build
+	sudo python3 setup.py install
 	pip3 install junitparser
+
+	popd
+	popd
 }
 
 setup_write_autostart_config() {
