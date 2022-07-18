@@ -3,8 +3,6 @@
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 QSPI_ENV_PART="/dev/mtd1"
-QSPI_ENV_PART_SIZE="20000"
-MKENVIMAGE_PATH="/usr/bin/mkenvimage"
 MAC_PREFIX="00:05:f7:80:"
 
 
@@ -14,12 +12,6 @@ function check_req() {
 	if [ ! -e $QSPI_ENV_PART ]
 	then
 		echo "QSPI memory not detected"
-		exit 1
-	fi
-
-	if [ ! -e $MKENVIMAGE_PATH ]
-	then
-		echo "mkenvimage executable not found. Check u-boot-tools to be installed"
 		exit 1
 	fi
 }	
@@ -42,11 +34,8 @@ function write_mac() {
 
 	MAC_ETH0="${MAC_PREFIX}${MAC_ETH0}";
 
-	echo "ethaddr=$MAC_ETH0" > /tmp/uboot-env.txt
-
-	mkenvimage -s $QSPI_ENV_PART_SIZE -o /tmp/uboot-env.bin /tmp/uboot-env.txt
-
-	flashcp -v /tmp/uboot-env.bin $QSPI_ENV_PART
+	fw_setenv ethaddr "$MAC_ETH0"
+	fw_setenv model "ADRV9361-Z7035"
 
 	return 0
 }
