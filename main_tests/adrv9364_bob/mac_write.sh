@@ -35,11 +35,8 @@ function write_mac() {
 
 	MAC_ETH0="${MAC_PREFIX}${MAC_ETH0}";
 
-	MAC_STRING="ethaddr=$MAC_ETH0"
-
-	sed -i "s/ethaddr=00:05:f7:80:fa:34/$MAC_STRING/" /boot/qspi_boot/uEnv.txt
-
-	flashcp -v /boot/qspi_boot/uEnv.txt $QSPI_ENV_PART
+	fw_setenv ethaddr "$MAC_ETH0"
+	fw_setenv model "ADRV9364-Z7020"
 
 	return 0
 }

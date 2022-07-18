@@ -265,13 +265,6 @@ production() {
 						BIN_PATH="/lib/firmware/raspberrypi/bootloader/stable/pieeprom-2021-07-06.bin" #latest rpi stable image
 						;;
 				"ADRV9361 Test")
-						# ssh_cmd "sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Tuning' | cut -d' ' -f4 | tr -d '[:cntrl:]'"
-						# CALIB_DONE=$?
-
-						# if [ $CALIB_DONE -ne 0 ]; then
-						# 	printf "\033[1;31mPlease run calibration first\033[m\n"
-						# 	handle_error_state "$BOARD_SERIAL"
-						# fi
                         $SCRIPT_DIR/adrv9361_bob/rf_test.sh
 						FAILED_TESTS=$?
 						if [ $FAILED_TESTS -ne 255 ]; then
@@ -291,12 +284,10 @@ production() {
 						$SCRIPT_DIR/adrv9364_bob/dcxo_test.sh && $SCRIPT_DIR/adrv9364_bob/rf_test.sh
 						FAILED_TESTS=$?
 						
-						if [ $FAILED_TESTS -ne 0 ]; then
+						if [ $FAILED_TESTS -ne 255 ]; then
 							$SCRIPT_DIR/adrv9364_bob/test_uart.sh
 							FAILED_UART=$?
-							$SCRIPT_DIR/adrv9364_bob/test_ethernet.sh
-							FAILED_ETH=$?
-							if [ $FAILED_UART -ne 255 ] || [ $FAILED_ETH -ne 255 ]; then
+							if [ $FAILED_UART -ne 255 ]; then
 								ssh_cmd "sudo /home/analog/adrv9364_bob/adrv9364_test.sh"
 								FAILED_MISC=$?
 							fi
