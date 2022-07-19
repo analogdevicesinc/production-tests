@@ -3,7 +3,6 @@
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 QSPI_ENV_PART="/dev/mtd1"
-QSPI_ENV_PART_SIZE="20000"
 MAC_PREFIX="00:05:f7:80:"
 
 

@@ -281,19 +281,23 @@ production() {
                         ;;
 
 				"ADRV9364 Test")
-						$SCRIPT_DIR/adrv9364_bob/dcxo_test.sh && $SCRIPT_DIR/adrv9364_bob/rf_test.sh
-						FAILED_TESTS=$?
-						
-						if [ $FAILED_TESTS -ne 255 ]; then
-							$SCRIPT_DIR/adrv9364_bob/test_uart.sh
-							FAILED_UART=$?
-							if [ $FAILED_UART -ne 255 ]; then
-								ssh_cmd "sudo /home/analog/adrv9364_bob/adrv9364_test.sh"
-								FAILED_MISC=$?
+						$SCRIPT_DIR/adrv9364_bob/dcxo_test.sh
+						FAILED_DCXO=$?
+						if [ $FAILED_DCXO -ne 255 ]; then
+							$SCRIPT_DIR/adrv9364_bob/rf_test.sh
+							FAILED_TESTS=$?
+				
+							if [ $FAILED_TESTS -ne 255 ]; then
+								$SCRIPT_DIR/adrv9364_bob/test_uart.sh
+								FAILED_UART=$?
+								if [ $FAILED_UART -ne 255 ]; then
+									ssh_cmd "sudo /home/analog/adrv9364_bob/adrv9364_test.sh"
+									FAILED_MISC=$?
+								fi
 							fi
-						fi
-						if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_MISC -ne 0 ] || [ $FAILED_ETH -ne 0 ]; then
-							handle_error_state "$BOARD_SERIAL"
+							if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
+								handle_error_state "$BOARD_SERIAL"
+							fi
 						fi
 						;;
 				"ADRV Carrier Test")
