@@ -36,6 +36,7 @@ function write_mac() {
 
 	fw_setenv ethaddr "$MAC_ETH0"
 	fw_setenv model "ADRV9364-Z7020"
+	fw_setenv qspiboot "qspiboot=echo Booting from flash... &&  sf probe 0 0 0"
 
 	return 0
 }
