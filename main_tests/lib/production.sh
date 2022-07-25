@@ -107,7 +107,7 @@ wait_for_firmware_files() {
 
 check_conn(){
 	while true; do
-		if ping -q -c3 -w50 192.168.0.112 &>/dev/null
+		if ping -q -c3 -w50 analog &>/dev/null
 		then
 			echo_blue "Connection to DUT OK"
 			break
@@ -143,7 +143,7 @@ production() {
         local TARGET="$1"
         local MODE="$2"
 		local BOARD="$3"
-		local IIO_REMOTE=192.168.0.112 
+		local IIO_REMOTE=analog
 
         [ -n "$TARGET" ] || {
                 echo_red "No target specified"
