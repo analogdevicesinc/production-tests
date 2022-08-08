@@ -145,8 +145,19 @@ setup_pyadi-iio() {
 }
 
 setup_telemetry() {
-	pip3 install git+https://github.com/sdgtt/telemetry.git
-	pip3 install junitparser
+	[ ! -d "work/telemetry" ] || return 0
+
+	git clone https://github.com/sdgtt/telemetry work/telemetry
+
+	pushd work
+	pushd telemetry
+	
+	sudo python3 setup.py build
+	sudo python3 setup.py install
+	sudo pip3 install -r requirements.txt
+
+	popd
+	popd
 }
 
 setup_write_autostart_config() {
