@@ -20,20 +20,14 @@ while true; do
 			1)
 				wait_for_board_online
 				get_board_serial
-				echo_blue "Starting FMCDAQ3 Calibration Test"
-				production "crr" "$opt" "FMCDAQ3"
-				break ;;
-			2)
-				wait_for_board_online
-				get_board_serial
 				echo_blue "Starting FMCDAQ3 Test"
 				production "crr" "$opt" "FMCDAQ3"
 				break ;;
-			3)
+			2)
 				enforce_root
 				poweroff
 				break 2 ;;
-			4)
+			3)
 				wait_for_board_online
 				ssh_cmd "sudo poweroff &>/dev/null"
 				break ;;
