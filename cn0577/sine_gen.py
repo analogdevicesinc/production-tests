@@ -26,7 +26,9 @@ available_sample_rates= [750, 7500, 75000, 750000, 7500000, 75000000]
 max_rate = available_sample_rates[-1] # last sample rate = max rate
 min_nr_of_points=10
 max_buffer_size = 500000
-uri = "ip:192.168.3.2"
+# uri = "ip:192.168.3.2"
+uri = "usb:1.7.5"  #if m2k connected to pc
+#if m2k connected to fpga, remove uri
 
 def get_best_ratio(ratio):
     max_it=max_buffer_size/ratio
@@ -88,16 +90,16 @@ def sine_buffer_generator(channel, freq, ampl, offset, phase):
 
     return sample_rate, buffer
 
-def main():
-    ctx=libm2k.m2kOpen()
+def main(ampl, offset):
+    ctx=libm2k.m2kOpen(uri)
     ctx.calibrateADC()
     ctx.calibrateDAC()
 
     siggen=ctx.getAnalogOut()
 
     #call buffer generator, returns sample rate and buffer
-    samp0,buffer0 = sine_buffer_generator(0,20000,2.048,2.048,0)
-    samp1,buffer1 = sine_buffer_generator(1,20000,2.048,2.048,180)
+    samp0,buffer0 = sine_buffer_generator(0,20000,ampl,offset,0)
+    samp1,buffer1 = sine_buffer_generator(1,20000,ampl,offset,180)
 
     siggen.enableChannel(0, True)
     siggen.enableChannel(1, True)
@@ -115,4 +117,4 @@ def main():
     # siggen.stop()
     # libm2k.contextClose(ctx)
 
-main()
+# main()
