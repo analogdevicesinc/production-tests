@@ -14,7 +14,7 @@ source $SCRIPT_DIR/lib/utils.sh
 
 while true; do
 	echo_blue "Please enter your choice: "
-	options=("AD-FMCDAQ3 Test" "Power-Off Pi" "Power-Off Carrier")
+	options=("FMCDAQ3 Test" "Power-Off Pi" "Power-Off Carrier")
 	select opt in "${options[@]}"; do
     		case $REPLY in
 			1)
