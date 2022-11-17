@@ -21,13 +21,14 @@
 import libm2k
 import math
 import matplotlib.pyplot as plt
+import time
 
 available_sample_rates= [750, 7500, 75000, 750000, 7500000, 75000000]
 max_rate = available_sample_rates[-1] # last sample rate = max rate
 min_nr_of_points=10
 max_buffer_size = 500000
-# uri = "ip:192.168.3.2"
-uri = "usb:1.7.5"  #if m2k connected to pc
+uri = "ip:192.168.3.2"
+# uri = "usb:1.21.5"  #if m2k connected to pc
 #if m2k connected to fpga, remove uri
 
 def get_best_ratio(ratio):
@@ -91,8 +92,10 @@ def sine_buffer_generator(channel, freq, ampl, offset, phase):
     return sample_rate, buffer
 
 def main(ampl, offset):
-    ctx=libm2k.m2kOpen(uri)
+    ctx=libm2k.m2kOpen()
+    time.sleep(4)
     ctx.calibrateADC()
+    time.sleep(4)
     ctx.calibrateDAC()
 
     siggen=ctx.getAnalogOut()
@@ -111,10 +114,11 @@ def main(ampl, offset):
 
     # plt.plot(buffer0)
     # plt.plot(buffer1)
+    # plt.title("M2K Output")
     # plt.show()
 
     # input( " Press any key to stop generation ")
     # siggen.stop()
     # libm2k.contextClose(ctx)
 
-# main()
+# main(2.048,2.048)
