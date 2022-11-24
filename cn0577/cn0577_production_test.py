@@ -1,67 +1,52 @@
-# from asyncore import file_dispatcher
 import sys
-
 import adi
 import numpy as np
-# from scipy import signal
-
-# M2k libraries#
 import sine_gen
-
 import sin_params
 import matplotlib.pyplot as plt
-
-import eeprom_frudump
-import rms_noise
 import time
+import os
 
-# my_uri = "ip:169.254.92.202"
-# my_uri = "ip:analog.local"
-my_uri = sys.argv[1] if len(sys.argv) >= 2 else "ip:analog.local"
-print("Connecting with CN0577 context at " + str(my_uri))
-
-vref = 4.096
-# Program FMC ID EEPROM with serial number.
-sn = input("Enter serial number: ")
-eeprom_frudump.input_data(sn)
-
-failed_tests = []
-
-my_adc = adi.ltc2387(uri=my_uri)
-# Prompt the test operator to short the input to ground
-input("\nStarting Production Test! \nConnect ADALM2000 test jig.\nShort both input to ground, press enter to continue...")
-# Verify RMS noise less than TBD counts
-rms_result = rms_noise.count(sn, my_uri)
-if rms_result==0:
-    failed_tests.append("Fails RMS test")
+def eeprom_frudump():
+    path_EEPROM ="/sys/devices/soc0/fpga-axi@0/41620000.i2c/i2c-1/1-0050/eeprom"
+    path_masterfile = "cn0577/cn0577master.bin"
     
-# Prompt the user to connect an ADALM2000 test jig to analog inputs.
-input( "\nRemove short connection of input to ground.\nSwitch attenuation 1:1.\nSwitch ON the M2k input on test jig, press enter to continue...")
+    res1 = ''
+    res1 = os.system('fru-dump -i '+ path_masterfile + " -o " + path_EEPROM + " -s " + sn)
+    #if writing to eeprom fail, res1=1
+    if (res1):
+        sys.exit('Dumping of bin file to eeprom FAILED\n')
 
-#Play back a 90% full-scale sinewave at 20kHz using ADALM2000
-ampl= 2.048
-offset=2.048
-sine_gen.main(ampl, offset)
+def rms_noise(my_uri):
+    my_adc = adi.ltc2387(my_uri)
+    my_adc.rx_buffer_size = 8000
+    my_adc.sampling_frequency = 10000000
 
-do_plots = False
+    shorted_input = my_adc.rx()
+    time.sleep(2)
+    noise_v = shorted_input * vref * 2 / (2 ** 18)               #Convert output digital code to voltage
+    measured_noise = np.std(noise_v)
+    print("Measured Noise: ", measured_noise) 
 
-# Capture a block of 256k samples per channel.
-my_adc.rx_buffer_size = 256000
-my_adc.sampling_frequency = 10000000
+    if measured_noise < 0.002:
+        print("RMS noise test PASS")
+    else:
+        print("RMS noise test FAIL")
+        failed_tests.append("Failed rms noise test")
+        record = open("error.csv","a")
+        record.write(sn + "," + "RMS noise=" + "," + str(measured_noise) + "," + "\n")
+        record.close()
 
-for n in range(2):
-    att=1 # first run, attenuation switch 1:1
+    del my_adc
     
-    if n==1: # second run attenuation switch 100:1
-        input("\nSwitch to 100:1 attenuation, press enter to continue...")
-        att=100
-        
-        my_adc = adi.ltc2387(uri=my_uri)
-        my_adc.rx_buffer_size = 256000
-        my_adc.sampling_frequency = 10000000
+def fft_test(my_uri,att):
 
-    time.sleep(1)
+    my_adc = adi.ltc2387(uri=my_uri)
+    my_adc.rx_buffer_size = 256000
+    my_adc.sampling_frequency = 10000000
+
     data = my_adc.rx()
+    time.sleep(2)
 
     # to sign extend bit 17
     for i in range(len(data)):
@@ -72,11 +57,13 @@ for n in range(2):
     x = np.arange(0, len(data))
     voltage = data * 2.0 * vref / (2 ** 18)
     dc = np.average(voltage)  # Extract DC component
+    print("DC component= ", dc)
+
     if dc < 0.1:
-        print("DC component PASS, DC = ", dc)
+        print("DC component test PASS")
     else:
-        print("DC component FAIL, DC = ", dc)
-        failed_tests.append("Fails DC component test, attenuation setting=" + str(att))
+        print("DC component test FAIL")
+        failed_tests.append("Fails DC component test, attenuation setting = " + str(att))
         record = open("error.csv","a")
         record.write(sn + "," + str(att) + "," + "DC component=" + "," + str(dc) + "," + "\n")
         record.close()
@@ -102,16 +89,17 @@ for n in range(2):
 
     # Verify location of fundamental between bin 510 and 514 (correct bin = 512)
     fund, fund_bin = sin_params.get_max(fft_data)
+    print("Fundamental bin location =", fund_bin)
     if (510 < fund_bin < 514):
-        print("Fundamental bin location PASS, location =", fund_bin)
+        print("Fundamental bin location test PASS")
     else:
-        print("Fundamental bin location FAIL, location =", fund_bin)
-        failed_tests.append("Fails Fundamental bin location test, attenuation setting=" + str(att))
+        print("Fundamental bin location test FAIL")
+        failed_tests.append("Fails Fundamental bin location test, attenuation setting = " + str(att))
         record = open("error.csv","a")
         record.write(sn + "," + str(att) + "," + "Fundamental bin location=" + "," + str(fund_bin) + "," + "\n")
         record.close()
     
-    # Verify fundamental amplitude between lim1 and lim2 (correct fundamental amplitude = 2.048 @ 1:1, 0.0138)
+    # Verify fundamental amplitude between lim1 and lim2 (expected fundamental amplitude = 2.048 @ 1:1, 0.0138)
     if att==1:
         fund_lim1= 2
         fund_lim2= 2.8
@@ -119,23 +107,23 @@ for n in range(2):
         fund_lim1= 0.012
         fund_lim2= 0.014
 
+    print("Fundamental bin amplitude =", fund)
     if (fund_lim1 < fund < fund_lim2):
-        print("Fundamental amplitude PASS, amplitude =", fund)
+        print("Fundamental amplitude test PASS")
     else:
-        print("Fundamental amplitude FAIL, amplitude =", fund)
-        failed_tests.append("Fails Fundamental amplitude test, attenuation setting=" + str(att))
+        print("Fundamental amplitude test FAIL")
+        failed_tests.append("Fails Fundamental amplitude test, attenuation setting = " + str(att))
         record = open("error.csv","a")
         record.write(sn + "," + str(att) + "," + "Fundamental amplitude=" + "," + str(fund) + "," + "\n")
         record.close()
 
+    # For 1:1 attenuator:
+    # Total Harmonic Distortion less than 65 
+    # SNR better than 50  
 
-# For 1:1 attenuator:
-# Total Harmonic Distortion less than 65 
-# SNR better than 50  
-
-# For 100:1 attenuator, same FFT tests:
-# Total Harmonic Distortion less than 65 
-# SNR better than 35
+    # For 100:1 attenuator, same FFT tests:
+    # Total Harmonic Distortion less than 65 
+    # SNR better than 35
     parameters = sin_params.sin_params(voltage)
     snr = parameters[1]
     thd = parameters[2]
@@ -149,33 +137,66 @@ for n in range(2):
     else: #att==100
         snr_lim= 35
 
+    print("SNR =", snr)
     if snr > snr_lim:
-        print("SNR PASS, SNR =", snr)
+        print("SNR test PASS")
     else:
-        print("SNR FAILS, SNR =", snr)
-        failed_tests.append("Fails SNR test, attenuation setting=" + str(att))
+        print("SNR test FAIL")
+        failed_tests.append("Fails SNR test, attenuation setting = " + str(att))
         record = open("error.csv","a")
         record.write(sn + "," + str(att) + "," + "SNR=" + "," + str(snr) + "," + "\n")
         record.close()
 
+    print("THD =", thd)
     if thd < -65:
-        print("THD PASS, THD =", thd)
+        print("THD test PASS")
     else:
-        print("THD FAILS, THD =", thd)
-        failed_tests.append("Fails THD test, attenuation setting=" + str(att))
+        print("THD test FAIL")
+        failed_tests.append("Fails THD test, attenuation setting = " + str(att))
         record = open("error.csv","a")
         record.write(sn + "," + str(att) + "," + "THD=" + "," + str(thd) + "," + "\n")
         record.close()
-
-
+        
     record = open("cn0577_report.csv","a")
     record.write("SN, Attenuation, Sampling Frequency, Fundamental Amplitude, Fundamental bin location, DC component, SNR, THD, Floor\n")
-    record.write("B"+ sn + "_" + "," + str(att) + "_" + "," + str(my_adc.sampling_frequency) + "," + str(fund)+ "," + str(fund_bin) + "," + str(dc) + "," + str(snr)+ "," + str(thd)+ "," + str(floor)+ "\n")
-    record.close()
+    record.write(sn + "," + str(att) + "," + str(my_adc.sampling_frequency) + "," + str(fund)+ "," + str(fund_bin) + "," + str(dc) + "," + str(snr)+ "," + str(thd)+ "," + str(floor)+ "\n")
+    record.close()   
     del my_adc
 
 
+my_uri = sys.argv[1] if len(sys.argv) >= 2 else "ip:analog.local"
+print("Connecting with CN0577 context at " + str(my_uri))
 
+vref = 4.096
+# Program FMC ID EEPROM with serial number.
+sn = input("Enter serial number: ")
+eeprom_frudump()
+failed_tests = []
+
+# my_adc = adi.ltc2387(uri=my_uri)
+# Prompt the test operator to short the input to ground
+input("\nStarting Production Test! \n\nConnect ADALM2000 test jig with M2k input switched OFF. Press enter to continue...")
+input("\nShort both input to ground, press enter to continue...")
+# Verify RMS noise less than TBD counts
+rms_noise(my_uri)
+    
+# Prompt the user to connect an ADALM2000 test jig to analog inputs.
+input( "\nRemove short connection of input to ground, press enter to continue...")
+input( "\nSwitch attenuation 1:1.\nSwitch ON the M2k input on test jig, press enter to continue...")
+
+#Play back a 90% full-scale sinewave at 20kHz using ADALM2000
+ampl= 2.048
+offset=2.048
+sine_gen.main(ampl, offset)
+
+do_plots = False
+
+att=1
+fft_test(my_uri,att)
+
+att=100
+input( "\nSwitch attenuation 100:1.\nSwitch ON the M2k input on test jig, press enter to continue...")
+fft_test(my_uri,att)
 
 if len(failed_tests) == 0:
     print("\n\nBoard PASSES!!")
@@ -184,5 +205,3 @@ else:
     for failure in failed_tests:
         print(failure)
     print("\nNote failures and set aside for debug.")
-
-
