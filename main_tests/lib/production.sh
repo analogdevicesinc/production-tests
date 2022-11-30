@@ -202,6 +202,18 @@ production() {
 	fi
 
         case $MODE in
+				"FMCDAQ3 Test")
+						python3 -m pytest --color yes -vs $SCRIPT_DIR/work/pyadi-iio/test/test_daq3_prod.py --uri="ip:analog.local" --adi-hw-map --hw=daq3 --snumber "$BOARD_SERIAL"
+                        if [ $? -ne 0 ]; then
+                                handle_error_state "$BOARD_SERIAL"
+                        fi
+                        ;;
+				"FMCDAQ2 Test")
+						python3 -m pytest --color yes -vs $SCRIPT_DIR/work/pyadi-iio/test/test_daq2_prod.py --uri="ip:analog.local" --adi-hw-map --hw=daq2 --snumber "$BOARD_SERIAL"
+                        if [ $? -ne 0 ]; then
+                                handle_error_state "$BOARD_SERIAL"
+                        fi
+                        ;;
                 "FMCOMMS4 Test")
 						ssh_cmd "sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Tuning' | cut -d' ' -f4 | tr -d '[:cntrl:]'"
 						CALIB_DONE=$?
