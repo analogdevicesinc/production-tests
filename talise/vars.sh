@@ -14,5 +14,5 @@ export PATH
 # will be made and averaged
 NUM_SAMPLES=1
 
-IIO_URI_MODE="-u ip:192.168.2.1"
+IIO_URI_MODE="-u ip:analogdut.local"
 BOARD_ONLINE_TIMEOUT=20	# seconds

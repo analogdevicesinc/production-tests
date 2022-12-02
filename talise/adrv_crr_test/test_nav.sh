@@ -12,41 +12,41 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="02"
 SHORT_DESC="double press BT0 - timeout 10 seconds" 
-CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 2 \"type 1 (EV_KEY), code 105 (KEY_LEFT), value 1\" > /dev/null"
+CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 1 (EV_KEY), code 183 (KEY_F13), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="03"
 SHORT_DESC="double press BT1 - timeout 10 seconds" 
-CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 2 \"type 1 (EV_KEY), code 106 (KEY_RIGHT), value 1\" > /dev/null"
+CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 1 (EV_KEY), code 184 (KEY_F14), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="04"
 SHORT_DESC="double press BT2 - timeout 10 seconds" 
-CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 2 \"type 1 (EV_KEY), code 28 (KEY_ENTER), value 1\" > /dev/null"
+CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 1 (EV_KEY), code 185 (KEY_F15), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="05"
 SHORT_DESC="double press BT3 - timeout 10 seconds" 
-CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 2 \"type 1 (EV_KEY), code 1 (KEY_ESC), value 1\" > /dev/null"
+CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 1 (EV_KEY), code 186 (KEY_F16), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="06"
-SHORT_DESC="toggle SW0 - timeout 10 seconds" 
-CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 5 (EV_SW), code 3 (SW_RFKILL_ALL), value 0\" > /dev/null"
+SHORT_DESC="toggle twice SW0 - timeout 10 seconds"
+CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 5 (EV_SW), code 13 (SW_LINEIN_INSERT), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="07"
-SHORT_DESC="toggle SW1 - timeout 10 seconds" 
+SHORT_DESC="toggle twice SW1 - timeout 10 seconds"
 CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 5 (EV_SW), code 1 (SW_TABLET_MODE), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="08"
-SHORT_DESC="toggle SW2 - timeout 10 seconds" 
+SHORT_DESC="toggle twice SW2 - timeout 10 seconds"
 CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 5 (EV_SW), code 2 (SW_HEADPHONE_INSERT), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="09"
-SHORT_DESC="toggle SW3 - timeout 10 seconds" 
+SHORT_DESC="toggle twice SW3 - timeout 10 seconds"
 CMD="timeout 10 evtest /dev/input/by-path/platform-gpio_keys-event | grep -m 1 \"type 5 (EV_SW), code 3 (SW_RFKILL_ALL), value 0\" > /dev/null"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
@@ -62,4 +62,3 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 echo none | tee /sys/class/leds/led[0-3]\:green/trigger > /dev/null
 
 : #if reached this point, ensure exit code 0
-

@@ -20,7 +20,7 @@ while true; do
 			1)
 				echo_blue "This procedure takes around 40 seconds."
 				pushd $SCRIPT_DIR/src/adm1266/
-				./production_flash
+				sudo ./production_flash
 				popd
 				break ;;
 			2)
@@ -32,31 +32,32 @@ while true; do
 				echo_blue "Manually powercycle the board using S12 switch."
 				break ;;
 			3)
-				wait_for_board_online
 				get_board_serial
+				wait_for_board_online
 				echo_blue "Starting ADRV Carrier Test"
-				production "crr" "$opt"
+				production "crr" "$opt" "ADRV2CRR"
 				break ;;
 			4)
-				wait_for_board_online
 				get_board_serial
-				echo_blue "Starting ADRV SOM Test"
-				production "som" "$opt"
+				wait_for_board_online
+				echo_blue "Starting ADRV SOM Test" 
+				production "som" "$opt" "ADRV9009-ZU11EG-SOM"
 				break ;;
 			5)
 				wait_for_board_online
 				get_board_serial
-				python3 -m pytest --resultlog=$SCRIPT_DIR/logRF_test_log/result_${BOARD_SERIAL}.log --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg.py -v
+				#python3 -m pytest --report-log=$SCRIPT_DIR/logRF_test_log/result_${BOARD_SERIAL}.log --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg.py -v --uri="ip:analogdut.local" --hw="adrv9009-dual" --tb=short --showlocals -rN
+				production "som" "$opt" "ADRV9009-ZU11EG-SOM-RF"
 				break ;;
 			6)
+				get_board_serial
 				wait_for_board_online
 				echo_blue "Starting FMCOMMS8 Test"
 				dut_date_sync
-				production "fmcomms8" "$opt"
+				production "fmcomms8" "$opt" "FMCOMMS8"
 				break ;;
 			7)
-				enforce_root
-				poweroff
+				sudo poweroff
 				break 2 ;;
 			8)
 				wait_for_board_online

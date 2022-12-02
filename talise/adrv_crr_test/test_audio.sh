@@ -17,14 +17,17 @@ audio_test()
 		echo "Failed saving alsa device state"
 	fi
 
-	fifo=$(mktemp --suffix=.fifo)
-	rm -f "${fifo}" && mkfifo "${fifo}"
+	#set test state
+	alsactl restore -c 0 -f $SCRIPT_DIR/adau-test.state &>/dev/null
+
+	fifo=$(mktemp --suffix=.wav)
+	#rm -f "${fifo}" && mkfifo "${fifo}"
 	audio_tmp1=$(mktemp --suffix=tmp1.wav)
 
 	# record from the lineout jack to mic in (lower right to lower left)
 	amixer set -q Headphone 70 unmute;  amixer set -q Capture 70 cap; amixer -q set Digital 255; amixer -q set 'PGA Boost' 1;
 	speaker-test -c1 -l1 -r48000 -P8 -tsine -f ${FREQ} &>/dev/null &
-	arecord -c1 -d3 -fS16_LE -r48000 "${fifo}" &>/dev/null
+	arecord -c1 -d3 -fS16_LE -r48000 ${fifo} &>/dev/null
 	sox "${fifo}" "${audio_tmp1}" trim 1.5
 
 	# pull the frequencies from the recorded tones and compare them

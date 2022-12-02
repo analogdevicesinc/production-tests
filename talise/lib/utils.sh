@@ -396,7 +396,7 @@ wait_for_board_offline() {
 
 ssh_cmd() {
 	local USER=analog
-	local CLIENT=analog
+	local CLIENT=analogdut.local
 	local PASS=analog
 	local CMD="$1"
 
@@ -421,8 +421,10 @@ ssh_cmd() {
 }
 
 wait_for_board_online(){
-	while true; do
-		if timeout 30 bash -c "until ping -q -c3 analog &>/dev/null; do false; done"
+	local CLIENT=analogdut.local
+
+	for i in {1..8}; do
+		if timeout 30 bash -c "until ping -q -c3 $CLIENT &>/dev/null; do false; done"
 		then
 			echo_blue "Connection to DUT OK"
 			break

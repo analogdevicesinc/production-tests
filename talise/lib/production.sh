@@ -18,8 +18,18 @@ show_start_state() {
 	PROGRESS=1
 }
 
-get_board_serial() {
+get_board_serial_spi-nor() {
 	BOARD_SERIAL=$(ssh_cmd "dmesg | grep SPI-NOR-UniqueID | cut -d' ' -f9 | tr -d '[:cntrl:]'")
+}
+
+get_board_serial() {
+	IS_OKBOARD=1
+	while [ $IS_OKBOARD -ne 0 ]; do
+		echo "Please use the scanner to scan the QR/Barcode on your carrier"
+		read BOARD_SERIAL
+		echo $BOARD_SERIAL | grep "S[0-9][0-9]" | grep "SN" &>/dev/null
+		IS_OKBOARD=$?
+	done
 }
 
 get_fmcomms_serial() {
@@ -141,6 +151,7 @@ stop_gps_spoofing(){
 production() {
         local TARGET="$1"
         local MODE="$2"
+	local BOARD="$3"
 	local IIO_REMOTE=analog.local 
 
         [ -n "$TARGET" ] || {
@@ -161,6 +172,11 @@ production() {
         #    that flashing worked
         # * _errors.log - all errors that don't yet have a S/N
         # * _stats.log - number of PASSED & FAILED
+
+	export DBSERVER="cluster0.oiqey.mongodb.net"
+	export DBUSERNAME="dev_production1"
+	export DBNAME="dev_${BOARD}_prod"
+	export BOARD_NAME="$BOARD"
 
         local LOGDIR=$SCRIPT_DIR/log
 	# temp log to store stuff, before we know the S/N of device
@@ -184,6 +200,15 @@ production() {
 
 	RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
 
+	if [ -f $SCRIPT_DIR/password.txt ]; then
+		export DBPASSWORD=$(cat $SCRIPT_DIR/password.txt)
+	else
+		echo_blue "Please input the password provided for storing log files remotely"
+		read PASSWD
+		echo $PASSWD > $SCRIPT_DIR/password.txt
+		export DBPASSWORD=$(cat $SCRIPT_DIR/password.txt)
+	fi
+
         case $MODE in
                 "ADRV Carrier Test")
                         $SCRIPT_DIR/adrv_crr_test/test_usb_periph.sh &&
@@ -200,11 +225,15 @@ production() {
                         fi
                         ;;
                 "ADRV FMCOMMS8 RF test")
-                        ssh_cmd "sudo /home/analog/adrv_fmcomms8_test/fmcomms8_test.sh"
-			RESULT=$?
-			get_fmcomms_serial
-			python3 -m pytest --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg_fmcomms8.py -v
-                        if [ $? -ne 0 ] || [ $RESULT -ne 0 ]; then
+			python3 -m pytest --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg_fmcomms8.py -vs --uri=ip:analogdut.local --hw=adrv9009-dual-fmcomms8 &&
+			ssh_cmd "sudo fru-dump -i /usr/local/src/fru_tools/masterfiles/AD-FMCOMMS8-EBZ-FRU.bin -o /sys/devices/platform/axi/ff030000.i2c/i2c-1/i2c-8/8-0052/eeprom -s $BOARD_SERIAL -d now";
+                        if [ $? -ne 0 ]; then
+                                handle_error_state "$BOARD_SERIAL"
+                        fi
+                        ;;
+		"ADRV SOM RF test")
+			$SCRIPT_DIR/adrv_som_test/test_rf.sh
+                        if [ $? -ne 0 ]; then
                                 handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
@@ -220,5 +249,12 @@ production() {
         	cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
         	cat /dev/null > "$LOGFILE"
 	fi
+
+	telemetry prod-logs-upload --tdir $LOGDIR &> $SCRIPT_DIR/telemetry_out.txt
+	cat $SCRIPT_DIR/telemetry_out.txt | grep "Authentication failed"
+	if [ $? -eq 0 ]; then
+		rm -rf $SCRIPT_DIR/password.txt
+	fi
+	rm -rf telemetry_out.txt
 }
 

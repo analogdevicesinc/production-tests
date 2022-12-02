@@ -3,13 +3,13 @@
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/test_qspi.sh
-answer=$?
-proceed_if_ok $answer
 
 source $SCRIPT_DIR/test_hmc.sh
-proceed_if_ok $?
 
 source $SCRIPT_DIR/test_adrv.sh
-proceed_if_ok $?
 
-echo
+if [ -n "$GLOBAL_FAIL" ]; then
+	exit 1
+else
+	exit 0
+fi

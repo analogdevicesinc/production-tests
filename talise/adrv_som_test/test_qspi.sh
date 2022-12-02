@@ -13,26 +13,11 @@ CMD="test -e /dev/mtd0"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="02"
-SHORT_DESC="Mount boot partition"
-CMD="mount /dev/mmcblk0p1 /boot"
+SHORT_DESC="Write BOOT.BIN on QSPI Flash"
+CMD="flashcp -v /boot/bootbin_qspi/BOOT.BIN /dev/mtd0"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="03"
-SHORT_DESC="Write BOOT.BIN on QSPI Flash"
-CMD="flashcp -v /boot/qspi_boot/BOOT.BIN /dev/mtd0"
-run_test $TEST_ID "$SHORT_DESC" "$CMD"
-
-TEST_ID="04"
-SHORT_DESC="Write Kernel+RamFS on QSPI Flash"
-CMD="flashcp -v /boot/qspi_boot/zu11eg.itb /dev/mtd3"
-run_test $TEST_ID "$SHORT_DESC" "$CMD"
-
-TEST_ID="05"
-SHORT_DESC="Un-mount boot partition"
-CMD="umount /boot"
-run_test $TEST_ID "$SHORT_DESC" "$CMD"
-
-TEST_ID="06"
 SHORT_DESC="Write MAC addresses on ENV partition"
 CMD="write_mac"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"

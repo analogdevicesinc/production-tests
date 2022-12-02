@@ -16,4 +16,4 @@ SHORT_DESC="Check UART communication"
 CMD="\$SCRIPT_DIR/test_uart.expect"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
- : #if reached this point, ensure exito code 0
+: #if reached this point, ensure exito code 0

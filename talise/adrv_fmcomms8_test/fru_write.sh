@@ -2,7 +2,7 @@
 
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
-EEPROM_PATH="/sys/bus/i2c/devices/8-0052/eeprom"
+EEPROM_PATH="/sys/devices/platform/amba/ff030000.i2c/i2c-1/i2c-8/8-0052/eeprom"
 MASTERFILE_PATH="/usr/local/src/fru_tools/masterfiles/AD-FMCOMMS8-EBZ-FRU.bin"
 SERIAL_NUMBER_PREFIX=$(date +"%m%Y")
 
