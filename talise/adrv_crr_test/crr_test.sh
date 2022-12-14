@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
-GLOBAL_RESULT=0
+GLOBAL_FAIL=0
 
 source $SCRIPT_DIR/test_nav.sh
 
