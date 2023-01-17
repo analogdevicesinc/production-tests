@@ -215,7 +215,7 @@ production() {
                                 handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
-				"DCXO Calibration Test")
+		"DCXO Calibration Test")
                         $SCRIPT_DIR/fmcomms4/dcxo_test.sh
 						res=$?
                         if [ $res -eq 2 ]; then
@@ -228,7 +228,7 @@ production() {
 							fi
                         fi
                         ;;
-				"ADRV1 Carrier Test")
+		"ADRV1 Carrier Test")
                         $SCRIPT_DIR/adrv1_crr_test/test_usb_periph.sh
 						FAILED_USB=$?
 						if [ $FAILED_USB -ne 255 ]; then
@@ -243,50 +243,45 @@ production() {
                                 handle_error_state "$BOARD_SERIAL"
                         fi
                         ;;
-				"Synchrona Production Test")
-						ssh_cmd "sudo /home/analog/synch/synch_test.sh $BOARD_SERIAL"
-						FAILED_TESTS=$?
-						if [ $FAILED_TESTS -ne 255 ]; then
-							$SCRIPT_DIR/synch/uart_test.sh 
-							FAILED_UART=$?
-							if [ $FAILED_UART -ne 255 ]; then
-								$SCRIPT_DIR/synch/spi_test.sh
-								FAILED_SPI=$?
-								if [ $FAILED_SPI -ne 255 ]; then
-									$SCRIPT_DIR/synch/misc_test.sh
-									FAILED_MISC=$?
-								fi
-							fi
-						fi
-						if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_SPI -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
+		"Synchrona Production Test")
+			ssh_cmd "sudo /home/analog/synch/synch_test.sh $BOARD_SERIAL"
+			FAILED_TESTS=$?
+			if [ $FAILED_TESTS -ne 255 ]; then
+				$SCRIPT_DIR/synch/uart_test.sh 
+				FAILED_UART=$?
+				if [ $FAILED_UART -ne 255 ]; then
+					$SCRIPT_DIR/synch/spi_test.sh
+					FAILED_SPI=$?
+					if [ $FAILED_SPI -ne 255 ]; then
+						$SCRIPT_DIR/synch/misc_test.sh
+						FAILED_MISC=$?
+					fi
+				fi
+			fi
+			if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_SPI -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
+					handle_error_state "$BOARD_SERIAL"
+			fi
+
+			BIN_PATH="/lib/firmware/raspberrypi/bootloader/stable/pieeprom-2021-07-06.bin" #latest rpi stable image
+			;;
+		"ADRV9361 Test")
+			$SCRIPT_DIR/adrv9361_bob/init_board.sh;
+			wait_for_board_online
+			ssh_cmd "sudo /home/analog/adrv9361_bob/breakout_test.sh"
+			FAILED_MISC=$?
+			if [ $FAILED_MISC -ne 255 ]; then
+				$SCRIPT_DIR/adrv9361_bob/test_uart.sh
+				FAILED_UART=$?
+				if [ $FAILED_UART -ne 255 ]; then
+					$SCRIPT_DIR/adrv9361_bob/rf_test.sh
+					FAILED_TESTS=$?
+				fi
+			fi
+			if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
 								handle_error_state "$BOARD_SERIAL"
 						fi
-
-						BIN_PATH="/lib/firmware/raspberrypi/bootloader/stable/pieeprom-2021-07-06.bin" #latest rpi stable image
-						;;
-				"ADRV9361 Test")
-						# ssh_cmd "sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Tuning' | cut -d' ' -f4 | tr -d '[:cntrl:]'"
-						# CALIB_DONE=$?
-
-						# if [ $CALIB_DONE -ne 0 ]; then
-						# 	printf "\033[1;31mPlease run calibration first\033[m\n"
-						# 	handle_error_state "$BOARD_SERIAL"
-						# fi
-                        $SCRIPT_DIR/adrv9361_bob/rf_test.sh
-						FAILED_TESTS=$?
-						if [ $FAILED_TESTS -ne 255 ]; then
-							$SCRIPT_DIR/adrv9361_bob/test_uart.sh
-							FAILED_UART=$?
-							if [ $FAILED_UART -ne 255 ]; then
-								ssh_cmd "sudo /home/analog/adrv9361_bob/breakout_test.sh"
-								FAILED_MISC=$?
-							fi
-						fi
-                        if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
-								handle_error_state "$BOARD_SERIAL"
-						fi
-                        ;;
-				"ADRV Carrier Test")
+			;;
+		"ADRV Carrier Test")
                         $SCRIPT_DIR/adrv_crr_test/test_usb_periph.sh &&
                         $SCRIPT_DIR/adrv_crr_test/test_uart.sh &&
                         ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"

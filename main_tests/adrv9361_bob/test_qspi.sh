@@ -17,8 +17,8 @@ SHORT_DESC="Write BOOT.BIN on QSPI Flash"
 CMD="flashcp -v /boot/qspi_boot/BOOT.BIN /dev/mtd0"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
-TEST_ID="03"
-SHORT_DESC="Write MAC addresses on ENV partition"
-CMD="write_mac"
-run_test $TEST_ID "$SHORT_DESC" "$CMD"
+# TEST_ID="03"
+# SHORT_DESC="Write MAC addresses on ENV partition"
+# CMD="write_mac"
+# run_test $TEST_ID "$SHORT_DESC" "$CMD"
 :

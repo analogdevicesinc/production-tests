@@ -1,0 +1,27 @@
+#!/usr/bin/expect -f
+
+log_user 0
+
+set UPORT [lindex $argv 0]
+set MACADDR [lindex $argv 1]
+
+spawn picocom -b 115200 $UPORT
+expect "Terminal ready"
+send "\r"
+expect {
+	"Zynq> " {
+		send "env default -a\r"
+	}
+	
+};
+expect "Zynq> "
+send "setenv ethaddr $MACADDR\r"
+expect "Zynq> "
+send "setenv model \"ADRV9361-Z7035\"\r"
+expect "Zynq> "
+send "saveenv\r"
+expect "Zynq> "
+send "run sdboot\r"
+expect "Zynq> "
+send "run adi_sdboot\r"
+#exit 1
