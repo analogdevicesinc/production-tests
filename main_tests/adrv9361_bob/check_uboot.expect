@@ -1,0 +1,19 @@
+#!/usr/bin/expect -f
+
+log_user 0
+
+spawn picocom -b 115200 [lindex $argv 0]
+expect "Terminal ready"
+send "\r"
+expect {
+	"Zynq> " {
+		send "env default -a\r"
+	}
+	"root@analog:~# " { exit 0 }
+	
+};
+expect "Zynq> "
+########### for som2 ##############
+send "run sdboot\r"
+expect "Zynq> "
+send "run adi_sdboot\r"

@@ -24,11 +24,12 @@ while true; do
 				break ;;
 			2)
 				##### run expect script to erase flash and get out of uboot ######
-				$SCRIPT_DIR/adrv9361_bob/check_uboot.expect
+				PORT=$(dmesg | grep tty | grep "cp210x converter now attached to" | awk '{print $10}');
+				TTY_PORT="/dev/$PORT"
+				$SCRIPT_DIR/adrv9361_bob/check_uboot.expect $TTY_PORT
 				#### unlock the flash and erase the environment partition
-				$SCRIPT_DIR/adrv9361_bob/unlock_erase_flash.sh
-				##### re-write flash with mac address 
-				$SCRIPT_DIR/adrv9361_bob/test_qspi.sh
+				wait_for_board_online
+				ssh_cmd "sudo /home/analog/adrv9361_bob/unlock_erase_flash.sh"
 				break ;;
 			3)
 				enforce_root
