@@ -1,0 +1,16 @@
+#!/usr/bin/expect -f
+
+
+log_user 0
+
+spawn picocom -b 115200 [lindex $argv 0]
+expect "Terminal ready"
+send "\r"
+expect -re "root@analog:~# "
+send "echo analog > file.txt\r"
+expect -re "root@analog:~# "
+send "cat file.txt \r"
+expect {
+    "analog" { exit 0 }
+}
+exit 1

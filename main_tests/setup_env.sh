@@ -9,7 +9,7 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/lib/utils.sh
 
-SUPPORTED_BOARDS="ADV9361_CRR-SOM FMCOMMS4 SYNCHRONA ADRV9361_BOB ADV9009_CRR-SOM"
+SUPPORTED_BOARDS="ADV9361_CRR-SOM FMCOMMS4 SYNCHRONA ADRV9361_BOB ADV9009_CRR-SOM ADRV9364_BOB FMCDAQ3"
 
 INIT_PINS_SCRIPT="$SCRIPT_DIR"/init.sh
 
@@ -136,7 +136,7 @@ setup_pyadi-iio() {
 		git checkout som-testing-fmcomms8
 	else
 		git checkout fmcomms_scpi
-		pip3 install -r requirements_prod_test.txt
+		sudo pip3 install -r requirements_prod_test.txt
 		sudo apt-get install libatlas-base-dev
 	fi
 
@@ -145,8 +145,17 @@ setup_pyadi-iio() {
 }
 
 setup_telemetry() {
-	pip3 install git+https://github.com/sdgtt/telemetry.git
+	git clone https://github.com/sdgtt/telemetry work/telemetry
+
+	pushd work
+	pushd telemetry
+	
+	sudo python3 setup.py build
+	sudo python3 setup.py install
 	pip3 install junitparser
+
+	popd
+	popd
 }
 
 setup_write_autostart_config() {
