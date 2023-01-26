@@ -1,0 +1,33 @@
+#!/usr/bin/expect -f
+
+log_user 0
+
+set UPORT [lindex $argv 0]
+set MACADDR [lindex $argv 1]
+
+spawn picocom -b 115200 $UPORT
+expect "Terminal ready"
+send "\r"
+expect "root@analog:~# "
+send "reboot\r"
+expect {
+	"Importing environment from SD ..." {
+		send "\r"
+	}
+} 
+expect {
+	"Zynq> " {
+		send "env default -a\r"
+	}
+	"root@analog:~# " { exit 1 }
+	
+};
+expect "Zynq> "
+send "setenv ethaddr $MACADDR\r"
+expect "Zynq> "
+send "setenv model \"ADRV9364-Z7020\"\r"
+expect "Zynq> "
+send "saveenv\r"
+expect "Zynq> "
+send "reset\r"
+#exit 1
