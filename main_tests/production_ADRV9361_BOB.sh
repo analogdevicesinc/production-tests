@@ -18,6 +18,7 @@ while true; do
 	select opt in "${options[@]}"; do
     		case $REPLY in
 			1)
+				wait_for_board_online
 				get_board_serial
 				echo_blue "Starting ADRV9361 Test"
 				production "crr" "$opt" "ADRV9361_BOB"
@@ -30,6 +31,8 @@ while true; do
 				#### unlock the flash and erase the environment partition
 				wait_for_board_online
 				ssh_cmd "sudo /home/analog/adrv9361_bob/unlock_erase_flash.sh"
+				$SCRIPT_DIR/adrv9361_bob/write_mac_env.sh
+				wait_for_board_online
 				break ;;
 			3)
 				enforce_root

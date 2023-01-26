@@ -265,21 +265,21 @@ production() {
 			BIN_PATH="/lib/firmware/raspberrypi/bootloader/stable/pieeprom-2021-07-06.bin" #latest rpi stable image
 			;;
 		"ADRV9361 Test")
-			$SCRIPT_DIR/adrv9361_bob/init_board.sh;
-			wait_for_board_online
-			ssh_cmd "sudo /home/analog/adrv9361_bob/breakout_test.sh"
+			$SCRIPT_DIR/adrv9361_bob/rf_test.sh
 			FAILED_MISC=$?
 			if [ $FAILED_MISC -ne 255 ]; then
 				$SCRIPT_DIR/adrv9361_bob/test_uart.sh
 				FAILED_UART=$?
 				if [ $FAILED_UART -ne 255 ]; then
-					$SCRIPT_DIR/adrv9361_bob/rf_test.sh
+					ssh_cmd "sudo /home/analog/adrv9361_bob/breakout_test.sh"
 					FAILED_TESTS=$?
 				fi
 			fi
 			if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
-								handle_error_state "$BOARD_SERIAL"
-						fi
+				handle_error_state "$BOARD_SERIAL"
+			fi
+			$SCRIPT_DIR/adrv9361_bob/write_mac_env.sh;
+			wait_for_board_online
 			;;
 		"ADRV Carrier Test")
                         $SCRIPT_DIR/adrv_crr_test/test_usb_periph.sh &&
