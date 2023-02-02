@@ -298,9 +298,10 @@ production() {
 				fi
 				if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
 					handle_error_state "$BOARD_SERIAL"
+				else
+					$SCRIPT_DIR/adrv9364_bob/write_mac_env.sh;
+					wait_for_board_online
 				fi
-				$SCRIPT_DIR/adrv9361_bob/write_mac_env.sh;
-				wait_for_board_online
 			fi
 			;;
 		"ADRV Carrier Test")
