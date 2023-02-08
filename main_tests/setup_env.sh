@@ -9,6 +9,7 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/lib/utils.sh
 
+#TBD : Move supported board names into a file
 SUPPORTED_BOARDS="ADV9361_CRR-SOM FMCOMMS4 SYNCHRONA ADRV9361_BOB ADV9009_CRR-SOM"
 
 INIT_PINS_SCRIPT="$SCRIPT_DIR"/init.sh
@@ -84,7 +85,7 @@ setup_libiio() {
 	mkdir -p libiio/build
 	pushd libiio/build
 
-	cmake ..
+	cmake .. # TBD: enable python bindings
 	make -j3
 	sudo make install
 
@@ -103,7 +104,7 @@ setup_libiio() {
 
 setup_adm1266() {
 	[ ! -d "src/adm1266" ] || return 0
-
+	#tbd : remove all redundant if BOARD checks
 	if [ $BOARD != "ADV9009_CRR-SOM" ]; then
 		return 0
 	fi
@@ -132,11 +133,12 @@ setup_pyadi-iio() {
 	pushd work
 	pushd pyadi-iio
 
+	# TBD: This if should not be removed until all pyadi code is merged in master
 	if [ $BOARD == "ADV9009_CRR-SOM" ]; then
 		git checkout som-testing-fmcomms8
 	else
 		git checkout fmcomms_scpi
-		pip3 install -r requirements_prod_test.txt
+		sudo python3 -m pip install -r requirements_prod_test.txt
 		sudo apt-get install libatlas-base-dev
 	fi
 
@@ -154,11 +156,13 @@ setup_telemetry() {
 	
 	sudo python3 setup.py build
 	sudo python3 setup.py install
-	sudo pip3 install -r requirements.txt
+	sudo python3 -m pip install -r requirements.txt
 
 	popd
 	popd
 }
+
+# TBD : setup_nebula/dns to be researched then added
 
 setup_write_autostart_config() {
 	local autostart_path="$HOME/.config/autostart"
@@ -199,28 +203,6 @@ Hidden=false
 	if type ufw &> /dev/null ; then
 		sudo ufw enable
 		sudo ufw allow ssh
-	fi
-
-	if [ $BOARD == "ADV9009_CRR-SOM" ]; then 
-		mkdir -p "$HOME/.ssh"
-		cat "$SCRIPT_DIR/config/jig_id.pub" >> "$HOME/.ssh/authorized_keys"
-		sudo chown "$USER.$USER" "$HOME/.ssh/authorized_keys"
-		chmod 0600 "$HOME/.ssh/authorized_keys"
-
-		sudo chown "$USER.$USER" "$SCRIPT_DIR/config/jig_id"
-		chmod 0600 "$SCRIPT_DIR/config/jig_id"
-		cat > $autostart_path/call-home.desktop <<-EOF
-[Desktop Entry]
-Encoding=UTF-8
-Version=0.9.4
-Type=Application
-Name=call-home
-Comment=call-home
-Exec=/bin/bash $SCRIPT_DIR/call_home
-StartupNotify=false
-Terminal=false
-Hidden=false
-		EOF
 	fi
 
 	cat > $autostart_path/auto-save-logs.desktop <<-EOF
@@ -321,8 +303,6 @@ setup_disable_lxde_automount() {
 }
 
 setup_pi_boot_config() {
-	[ "$BOARD" == "pluto" ] || return 0
-
 	[ -f /boot/config.txt ] || return 0
 
 	local tmp=$(mktemp)
@@ -426,6 +406,10 @@ dhcp-range=192.168.0.100,192.168.0.150,24h
 	EOF
 }
 
+
+##################### Board FUnction Area ##############################################
+#TBD : ADD setup_BOARD for existing boards
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -447,11 +431,12 @@ board_is_supported "$BOARD" || {
 
 pushd $SCRIPT_DIR
 
+#TBD: move specific functions from this list into setup_board function
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs"
 STEPS="$STEPS write_autostart_config libiio pyadi-iio adm1266"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
-STEPS="$STEPS dhcp_config telemetry"
+STEPS="$STEPS dhcp_config telemetry setup_$BOARD"
 
 RAN_ONCE=0
 for step in $STEPS ; do
