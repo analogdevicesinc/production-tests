@@ -14,3 +14,4 @@ CMD+="echo \"\$TTY_PORT\";"
 CMD+="echo \"\$MAC_ADDR\";"
 CMD+="\$SCRIPT_DIR/write_mac_uboot.expect \$TTY_PORT \$MAC_ADDR"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
+

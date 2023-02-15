@@ -26,7 +26,7 @@ while true; do
 			2)
 				PORT=$(dmesg | grep tty | grep "cp210x converter now attached to" | awk '{print $10}');
 				TTY_PORT="/dev/$PORT"
-				local format_ok=false;
+				format_ok=false;
 				until [ $format_ok = true ]
 				do
 					read -p 'Please enter last four digits of ETH0 mac address (e.g. aa:bb): ' MAC_ETH0
