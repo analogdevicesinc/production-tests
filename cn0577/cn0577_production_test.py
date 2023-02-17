@@ -1,3 +1,36 @@
+# Copyright (C) 2023 Analog Devices, Inc.
+#
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without modification,
+# are permitted provided that the following conditions are met:
+#     - Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     - Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in
+#       the documentation and/or other materials provided with the
+#       distribution.
+#     - Neither the name of Analog Devices, Inc. nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#     - The use of this software may or may not infringe the patent rights
+#       of one or more patent holders.  This license does not release you
+#       from the requirement that you obtain separate licenses from these
+#       patent holders to use this software.
+#     - Use of the software either in source or binary form, must be run
+#       on or directly connected to an Analog Devices Inc. component.
+#
+# THIS SOFTWARE IS PROVIDED BY ANALOG DEVICES "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED.
+#
+# IN NO EVENT SHALL ANALOG DEVICES BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, INTELLECTUAL PROPERTY
+# RIGHTS, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+# THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 import sys
 import adi
 import numpy as np
@@ -175,14 +208,14 @@ failed_tests = []
 
 # my_adc = adi.ltc2387(uri=my_uri)
 # Prompt the test operator to short the input to ground
-input("\nStarting Production Test! \n\nConnect ADALM2000 test jig with M2k input switched OFF. Press enter to continue...")
+input("\nStarting Production Test! \n\nConnect ADALM2000 with test jig \nWARNING: CN0577 should not be removed to the ZedBoard while the power is ON\nSet ADALM2000 switch in test jig: OFF. \nPress enter to continue...")
 input("\nShort both input to ground, press enter to continue...")
 # Verify RMS noise less than TBD counts
 rms_noise(my_uri)
     
 # Prompt the user to connect an ADALM2000 test jig to analog inputs.
-input( "\nRemove short connection of input to ground, press enter to continue...")
-input( "\nSwitch attenuation 1:1.\nSwitch ON the M2k input on test jig, press enter to continue...")
+input( "\nCarefully remove short connection of input to ground, press enter to continue...")
+input( "\nSwitch attenuation 1:1.\nSwitch ON the ADALM2000 input on test jig, press enter to continue...")
 
 #Play back a 90% full-scale sinewave at 20kHz using ADALM2000
 ampl= 2.048
@@ -195,7 +228,7 @@ att=1
 fft_test(my_uri,att)
 
 att=100
-input( "\nSwitch attenuation 100:1.\nSwitch ON the M2k input on test jig, press enter to continue...")
+input( "\nSwitch attenuation 100:1.\nSwitch ON the ADALM2000 input on test jig, press enter to continue...")
 fft_test(my_uri,att)
 
 if len(failed_tests) == 0:
@@ -205,3 +238,11 @@ else:
     for failure in failed_tests:
         print(failure)
     print("\nNote failures and set aside for debug.")
+
+#Automatic shutdown after completing the test to avoid improper shutdown and hotswap of board.
+x = input("Press enter to finish test.")
+print("Shutting down... \nTurn off ZedBoard.")
+if os.name == "posix":
+    os.system("sudo shutdown -h now")
+else:
+    print("Sorry, can only shut down system when running locally on Zedboard\n")
