@@ -27,6 +27,3 @@ expect "Zynq> "
 send "setenv model \"ADRV9361-Z7035\"\r"
 expect "Zynq> "
 send "saveenv\r"
-# sleep 3
-# expect "Zynq> "
-# send "reset\r"
