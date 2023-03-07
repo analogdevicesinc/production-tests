@@ -343,6 +343,11 @@ production() {
 		fi
 		cat /dev/null > "$LOGFILE"
 	fi
-	telemetry prod-logs-upload --tdir $LOGDIR
+	telemetry prod-logs-upload --tdir $LOGDIR > $SCRIPT_DIR/telemetry_out.txt
+	cat $SRIPT_DIR/telemetry_out.txt | grep "Authentication failed"
+	if [ $? -eq 0 ]; then
+		rm -rf $SCRIPT_DIR/password.txt
+	fi
+	rm -rf $SRIPT_DIR/telemetry_out.txt
 }
 

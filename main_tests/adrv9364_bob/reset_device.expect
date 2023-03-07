@@ -1,0 +1,13 @@
+#!/usr/bin/expect -f
+
+log_user 0
+
+set UPORT [lindex $argv 0]
+set MACADDR [lindex $argv 1]
+
+spawn picocom -b 115200 $UPORT
+expect "Terminal ready"
+send "\r"
+expect "Zynq> "
+send "reset\r"
+expect "resetting ...\r"

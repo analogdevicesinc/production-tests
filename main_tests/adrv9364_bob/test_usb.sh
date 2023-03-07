@@ -28,7 +28,7 @@ TEST_ID="03"
 SHORT_DESC="USB port speed test. Should be greater than 90MB/s"
 CMD+="drive_path=\$(lsblk | grep 'sda1' | awk -F'part ' '{ print \$2 }');"
 CMD+="read_speed=\$(hdparm -T /dev/sda1 | grep \"MB/sec\" | cut -d '=' -f 2 | cut -d 'M' -f 1); echo \"Speed: \$read_speed\";"
-CMD+= "sleep 1;"
+CMD+= "sleep 2;"
 CMD+="(( \$(echo \"\$read_speed > 90\" | bc -l -q) ))"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
