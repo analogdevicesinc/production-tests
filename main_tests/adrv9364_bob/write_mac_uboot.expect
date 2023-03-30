@@ -8,7 +8,7 @@ set MACADDR [lindex $argv 1]
 spawn picocom -b 115200 $UPORT
 expect "Terminal ready"
 send "\r"
-expect "root@analog:~# "
+expect -re "root@analog:~# "
 send "reboot\r"
 expect {
 	"Importing environment from SD ..." {
@@ -28,6 +28,4 @@ expect "Zynq> "
 send "setenv model \"ADRV9364-Z7020\"\r"
 expect "Zynq> "
 send "saveenv\r"
-# sleep 3
-# expect "Zynq> "
-# send "reset\r"
+expect "Zynq> "

@@ -142,8 +142,8 @@ stop_gps_spoofing(){
 production() {
         local TARGET="$1"
         local MODE="$2"
-		local BOARD="$3"
-		local IIO_REMOTE=analog.local 
+	local BOARD="$3"
+	local IIO_REMOTE=analog.local 
 
         [ -n "$TARGET" ] || {
                 echo_red "No target specified"
@@ -164,10 +164,10 @@ production() {
         # * _errors.log - all errors that don't yet have a S/N
         # * _stats.log - number of PASSED & FAILED
 
-		export DBSERVER="cluster0.oiqey.mongodb.net"
-		export DBUSERNAME="dev_production1"
-		export DBNAME="dev_${BOARD}_prod"
-		export BOARD_NAME="$BOARD"
+	export DBSERVER="cluster0.oiqey.mongodb.net"
+	export DBUSERNAME="dev_production1"
+	export DBNAME="dev_${BOARD}_prod"
+	export BOARD_NAME="$BOARD"
 
         local LOGDIR=$SCRIPT_DIR/log
 		# temp log to store stuff, before we know the S/N of device
@@ -296,7 +296,7 @@ production() {
 						FAILED_MISC=$?
 					fi
 				fi
-				if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
+				if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_MISC -ne 0 ] || [ $FAILED_DCXO -ne 0 ]; then
 					handle_error_state "$BOARD_SERIAL"
 				else
 					$SCRIPT_DIR/adrv9364_bob/write_mac_env.sh;
@@ -344,10 +344,10 @@ production() {
 		cat /dev/null > "$LOGFILE"
 	fi
 	telemetry prod-logs-upload --tdir $LOGDIR > $SCRIPT_DIR/telemetry_out.txt
-	cat $SRIPT_DIR/telemetry_out.txt | grep "Authentication failed"
+	cat $SCRIPT_DIR/telemetry_out.txt | grep "Authentication failed"
 	if [ $? -eq 0 ]; then
 		rm -rf $SCRIPT_DIR/password.txt
 	fi
-	rm -rf $SRIPT_DIR/telemetry_out.txt
+	rm -rf $SCRIPT_DIR/telemetry_out.txt
 }
 
