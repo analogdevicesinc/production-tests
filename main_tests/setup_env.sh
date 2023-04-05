@@ -8,9 +8,7 @@ set -e
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/lib/utils.sh
-
-#TBD : Move supported board names into a file
-SUPPORTED_BOARDS="ADV9361_CRR-SOM FMCOMMS4 SYNCHRONA ADRV9361_BOB ADV9009_CRR-SOM"
+source $SCRIPT_DIR/supported_boards.sh
 
 INIT_PINS_SCRIPT="$SCRIPT_DIR"/init.sh
 
@@ -85,7 +83,7 @@ setup_libiio() {
 	mkdir -p libiio/build
 	pushd libiio/build
 
-	cmake .. # TBD: enable python bindings
+	cmake ../ -DPYTHON_BINDINGS=ON
 	make -j3
 	sudo make install
 
@@ -104,10 +102,7 @@ setup_libiio() {
 
 setup_adm1266() {
 	[ ! -d "src/adm1266" ] || return 0
-	#tbd : remove all redundant if BOARD checks
-	if [ $BOARD != "ADV9009_CRR-SOM" ]; then
-		return 0
-	fi
+	#tbd : remove all redundant if BOARD checks ==removed==
 
 	pushd src
 	pushd adm1266
@@ -121,9 +116,7 @@ setup_adm1266() {
 setup_pyadi-iio() {
 	[ ! -d "work/pyadi-iio" ] || return 0
 
-	if [ $BOARD == "ADV9361_CRR-SOM" || $BOARD == "SYNCHRONA" ]; then
-		return 0
-	fi
+#removed the if
 
 	__download_github_common pyadi-iio
 	#Set python3 as default
@@ -145,6 +138,7 @@ setup_pyadi-iio() {
 	popd
 	popd
 }
+
 
 setup_telemetry() {
 	[ ! -d "work/telemetry" ] || return 0
@@ -257,15 +251,6 @@ setup_xfce4_power_manager_settings() {
 		local val="$(echo $sett | cut -d'=' -f2)"
 		xfconf-query -c xfce4-power-manager -p $key -s $val
 	done
-}
-
-setup_disable_sudo_passwd() {
-	sudo_required
-	sudo -s <<-EOF
-		if ! grep -q $USER /etc/sudoers ; then
-			echo "$USER	ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
-		fi
-	EOF
 }
 
 setup_thunar_volman() {
@@ -407,9 +392,32 @@ dhcp-range=192.168.0.100,192.168.0.150,24h
 }
 
 
-##################### Board FUnction Area ##############################################
-#TBD : ADD setup_BOARD for existing boards
+## Board Function Area ##
 
+setup_ADV9361_CRR-SOM() {
+	
+}
+
+setup_FMCOMMS4() {
+	setup_pyadi-iio
+}
+
+setup_SYNCHRONA() [
+
+]
+
+setup_ADRV9361_BOB() {
+	setup_pyadi-iio
+}
+
+setup_ADV9009_CRR-SOM(){
+	setup_adm1266
+	setup_pyadi-iio
+}
+
+setup_FMCDAQ3(){
+	setup_pyadi-iio
+}
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
@@ -434,9 +442,9 @@ pushd $SCRIPT_DIR
 #TBD: move specific functions from this list into setup_board function
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs"
-STEPS="$STEPS write_autostart_config libiio pyadi-iio adm1266"
+STEPS="$STEPS write_autostart_config libiio"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
-STEPS="$STEPS dhcp_config telemetry setup_$BOARD"
+STEPS="$STEPS dhcp_config telemetry setup_$BOARD create_board_test_file"
 
 RAN_ONCE=0
 for step in $STEPS ; do
