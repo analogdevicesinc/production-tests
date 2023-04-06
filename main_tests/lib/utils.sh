@@ -431,3 +431,12 @@ wait_for_board_online(){
 		fi
 	done
 }
+
+setup_disable_sudo_passwd() {
+	sudo_required
+	sudo -s <<-EOF
+		if ! grep -q $USER /etc/sudoers ; then
+			echo "$USER	ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
+		fi
+	EOF
+}
