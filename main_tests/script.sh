@@ -21,11 +21,8 @@ create_board_test_file() {
     chmod +x ${board,,}/production_${board^^}.sh
 
     echo "Production test folder '$board' and 'production_${board^^}' have been created successfully"
-    SB="$SUPPORTED_BOARDS ${board^^}"
-    new_line="#!/bin/bash"
-    echo -e "$new_line\n" >supported_boards.sh
-    echo "SUPPORTED_BOARDS=\"$SB\"">>supported_boards.sh
-    echo "Added new board to the supported boards list"
+    sed -i "s/SUPPORTED_BOARDS=\"*/SUPPORTED_BOARDS=\"${board^^} /" supported_boards.sh
+    echo "Successfully added board to the supported_boards.sh file"
 
 }
 create_board_test_file 
