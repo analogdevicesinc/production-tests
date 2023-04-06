@@ -14,7 +14,7 @@ source $SCRIPT_DIR/lib/utils.sh
 
 while true; do
 	echo_blue "Please enter your choice: "
-	options=("Program PLL" "ADRV1 Carrier Test" "Power-Off Pi" "Power-Off ADRV")
+	options=("Program PLL" "ADRV1 Carrier Test" "Power-Off ADRV" "Power-Off Pi")
 	select opt in "${options[@]}"; do
     		case $REPLY in
 			1)
@@ -32,13 +32,14 @@ while true; do
 				production "crr" "$opt" "ADRV9361_CRR-SOM"
 				break ;;
 			3)
-				enforce_root
-				poweroff
-				break 2 ;;
-			4)
 				wait_for_board_online
 				ssh_cmd "sudo poweroff &>/dev/null"
 				break ;;
+				
+			4)
+				enforce_root
+				poweroff
+				break 2 ;;
         		*) echo "invalid option $REPLY";;
     		esac
 	done

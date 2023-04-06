@@ -29,10 +29,6 @@ get_board_serial() {
 	done
 }
 
-get_fmcomms_serial() {
-	BOARD_SERIAL=$(ssh_cmd "sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Serial Number' | cut -d' ' -f3 | tr -d '[:cntrl:]'")
-}
-
 dut_date_sync() {
 	CURR_DATE="@$(date +%s)"
 	ssh_cmd "sudo date -s '$CURR_DATE'"
@@ -104,7 +100,7 @@ wait_for_firmware_files() {
 	fi
 	FW_VERSION="$(cat $ver_file)"
 }
-
+#set analog.local as param
 check_conn(){
 	while true; do
 		if ping -q -c3 -w50 analog.local &>/dev/null
@@ -201,116 +197,7 @@ production() {
 		echo_red "Your time and date is not up-to-date. The times of the logs will be inaccurate. The corresponding log files will begin with \"no_date\""
 	fi
 
-        case $MODE in
-                "FMCOMMS4 Test")
-						ssh_cmd "sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Tuning' | cut -d' ' -f4 | tr -d '[:cntrl:]'"
-						CALIB_DONE=$?
-
-						if [ $CALIB_DONE -ne 0 ]; then
-							printf "\033[1;31mPlease run calibration first\033[m\n"
-							handle_error_state "$BOARD_SERIAL"
-						fi
-                        $SCRIPT_DIR/fmcomms4/rf_test.sh
-                        if [ $? -ne 0 ]; then
-                                handle_error_state "$BOARD_SERIAL"
-                        fi
-                        ;;
-				"DCXO Calibration Test")
-                        $SCRIPT_DIR/fmcomms4/dcxo_test.sh
-						res=$?
-                        if [ $res -eq 2 ]; then
-                                handle_skipped_state "$BOARD_SERIAL"
-						else
-							if [ $res -eq 1 ]; then
-								handle_error_state "$BOARD_SERIAL"
-							else
-								echo_red "Now please procced with the FMCOMMS4 tests (2)"
-							fi
-                        fi
-                        ;;
-				"ADRV1 Carrier Test")
-                        $SCRIPT_DIR/adrv1_crr_test/test_usb_periph.sh
-						FAILED_USB=$?
-						if [ $FAILED_USB -ne 255 ]; then
-                        	$SCRIPT_DIR/adrv1_crr_test/test_uart.sh
-							FAILED_UART=$?
-							if [ $FAILED_UART -ne 255 ]; then
-                        		ssh_cmd "sudo /home/analog/adrv1_crr_test/crr_test.sh"
-							fi
-						fi
-						FAILED_TESTS=$?
-                        if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_USB -ne 0 ] || [ $FAILED_UART -ne 0 ]; then
-                                handle_error_state "$BOARD_SERIAL"
-                        fi
-                        ;;
-				"Synchrona Production Test")
-						ssh_cmd "sudo /home/analog/synch/synch_test.sh $BOARD_SERIAL"
-						FAILED_TESTS=$?
-						if [ $FAILED_TESTS -ne 255 ]; then
-							$SCRIPT_DIR/synch/uart_test.sh 
-							FAILED_UART=$?
-							if [ $FAILED_UART -ne 255 ]; then
-								$SCRIPT_DIR/synch/spi_test.sh
-								FAILED_SPI=$?
-								if [ $FAILED_SPI -ne 255 ]; then
-									$SCRIPT_DIR/synch/misc_test.sh
-									FAILED_MISC=$?
-								fi
-							fi
-						fi
-						if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_SPI -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
-								handle_error_state "$BOARD_SERIAL"
-						fi
-
-						BIN_PATH="/lib/firmware/raspberrypi/bootloader/stable/pieeprom-2021-07-06.bin" #latest rpi stable image
-						;;
-				"ADRV9361 Test")
-						# ssh_cmd "sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Tuning' | cut -d' ' -f4 | tr -d '[:cntrl:]'"
-						# CALIB_DONE=$?
-
-						# if [ $CALIB_DONE -ne 0 ]; then
-						# 	printf "\033[1;31mPlease run calibration first\033[m\n"
-						# 	handle_error_state "$BOARD_SERIAL"
-						# fi
-                        $SCRIPT_DIR/adrv9361_bob/rf_test.sh
-						FAILED_TESTS=$?
-						if [ $FAILED_TESTS -ne 255 ]; then
-							$SCRIPT_DIR/adrv9361_bob/test_uart.sh
-							FAILED_UART=$?
-							if [ $FAILED_UART -ne 255 ]; then
-								ssh_cmd "sudo /home/analog/adrv9361_bob/breakout_test.sh"
-								FAILED_MISC=$?
-							fi
-						fi
-                        if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
-								handle_error_state "$BOARD_SERIAL"
-						fi
-                        ;;
-				"ADRV Carrier Test")
-                        $SCRIPT_DIR/adrv_crr_test/test_usb_periph.sh &&
-                        $SCRIPT_DIR/adrv_crr_test/test_uart.sh &&
-                        ssh_cmd "sudo /home/analog/adrv_crr_test/crr_test.sh"
-                        if [ $? -ne 0 ]; then
-                                handle_error_state "$BOARD_SERIAL"
-                        fi
-                        ;;
-                "ADRV SOM Test")
-                        ssh_cmd "sudo /home/analog/adrv_som_test/som_test.sh"
-                        if [ $? -ne 0 ]; then
-                                handle_error_state "$BOARD_SERIAL"
-                        fi
-                        ;;
-                "ADRV FMCOMMS8 RF test")
-                        ssh_cmd "sudo /home/analog/adrv_fmcomms8_test/fmcomms8_test.sh"
-						RESULT=$?
-						get_fmcomms_serial
-						python3 -m pytest --color yes $SCRIPT_DIR/work/pyadi-iio/test/test_adrv9009_zu11eg_fmcomms8.py -v
-                        if [ $? -ne 0 ] || [ $RESULT -ne 0 ]; then
-                                handle_error_state "$BOARD_SERIAL"
-                        fi
-                        ;;
-                *) echo "invalid option $MODE" ;;
-        esac
+	./${BOARD,,}/production.sh $MODE
 
         if [ -f "$STATSFILE" ] ; then
                 source $STATSFILE
