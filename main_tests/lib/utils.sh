@@ -16,6 +16,139 @@ export LC_ALL="C.UTF-8"
 # Functions section                #
 #----------------------------------#
 
+SYNCHRONIZATION=$?
+
+show_ready_state() {
+	PROGRESS=0
+	READY=1
+}
+
+show_start_state() {
+	PASSED=0
+	READY=0
+	FAILED=0
+	PROGRESS=1
+	FAILED_NO=0
+}
+
+get_board_serial() {
+	IS_OKBOARD=1
+	while [ $IS_OKBOARD -ne 0 ]; do
+		echo "Please use the scanner to scan the QR/Barcode on your carrier"
+		read BOARD_SERIAL
+		echo $BOARD_SERIAL | grep "S[0-9][0-9]" | grep "SN" &>/dev/null
+		IS_OKBOARD=$?
+	done
+}
+
+dut_date_sync() {
+	CURR_DATE="@$(date +%s)"
+	ssh_cmd "sudo date -s '$CURR_DATE'"
+}
+
+handle_error_state() {
+	local serial="$1"
+	FAILED=1
+	console_ascii_failed
+	if [ $SYNCHRONIZATION -eq 0 ]; then 
+		cat "$LOGFILE" > "$LOGDIR/failed_${serial}_${RUN_TIMESTAMP}.log"
+	else
+		cat "$LOGFILE" > "$LOGDIR/no_date_failed_${serial}_${RUN_TIMESTAMP}.log"
+	fi
+	cat /dev/null > "$LOGFILE"
+}
+
+handle_skipped_state() {
+	local serial="$1"
+	FAILED=1
+	echo_blue "CALIBRATION WAS SKIPPED. POSSIBLY DUE TO INCOMPATIBLE DEVICE OR LONG INITIALIZATION. PLEASE MAKE SURE YOU USE THE SPECIFIED FREQUENCY COUNTER HAMEG HM8123, 5.12 AND TRY AGAIN"
+	if [ $SYNCHRONIZATION -eq 0 ]; then 
+		cat "$LOGFILE" > "$LOGDIR/skipped_${serial}_${RUN_TIMESTAMP}.log"
+	else
+		cat "$LOGFILE" > "$LOGDIR/no_date_skipped_${serial}_${RUN_TIMESTAMP}.log"
+	fi
+	cat /dev/null > "$LOGFILE"
+}
+
+need_to_read_eeprom() {
+	[ "$FAILED" == "1" ] || ! have_eeprom_vars_loaded
+}
+
+console_ascii_passed() {
+	echo_green "$(cat $SCRIPT_DIR/lib/passed.ascii)"
+}
+
+console_ascii_failed() {
+	echo_red "$(cat $SCRIPT_DIR/lib/failed.ascii)"
+}
+
+wait_for_eeprom_vars() {
+	DONT_SHOW_EEPROM_MESSAGES=1
+	if need_to_read_eeprom ; then
+		echo_green "Loading settings frogetm EEPROM"
+		eeprom_cfg load || {
+			echo_red "Failed to load settings from EEPROM."
+			echo_red "Plug in a board with EEPROM vars configured to continue..."
+			echo
+		}
+		while ! eeprom_cfg load &> /dev/null ; do
+			sleep 1
+			continue
+		done
+		show_eeprom_vars
+	fi
+}
+
+wait_for_firmware_files() {
+	local target="$1"
+	local ver_file="$SCRIPT_DIR/release/$target/version"
+	FW_VERSION="$(cat $ver_file)"
+	if ! have_all_firmware_files "$target" || [ -z "$FW_VERSION" ] ; then
+		echo_red "Firmware files not found, please add them to continue..."
+		while ! have_all_firmware_files "$target" || [ ! -f "$ver_file" ]
+		do
+			sleep 1
+		done
+	fi
+	FW_VERSION="$(cat $ver_file)"
+}
+#set analog.local as param
+check_conn(){
+	while true; do
+		if ping -q -c3 -w50 analog.local &>/dev/null
+		then
+			echo_blue "Connection to DUT OK"
+			break
+		else
+			echo_red "Check ethernet connection to DUT"
+		fi
+	done
+}
+
+start_gps_spoofing(){
+	local GPSDIR=$SCRIPT_DIR/src/gps-sdr-sim/player
+	if ping -q -c2 pluto.local &>/dev/null
+	then
+		[ -d $GPSDIR ] || return 1
+		pushd $GPSDIR
+		./plutoplayer -t ../gpssim.bin -a -60 &>/dev/null &
+		popd
+	else
+		echo_red "Pluto GPS spoofer not connected to PI."
+		return 1
+	fi
+}
+
+stop_gps_spoofing(){
+	pkill plutoplayer &>/dev/null
+}
+
+
+
+#----------------------------------#
+# Functions section                #
+#----------------------------------#
+
 echo_red()   { printf "\033[1;31m$*\033[m\n"; }
 echo_green() { printf "\033[1;32m$*\033[m\n"; }
 echo_blue()  { printf "\033[1;34m$*\033[m\n"; }
