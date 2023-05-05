@@ -395,16 +395,17 @@ dhcp-range=192.168.0.100,192.168.0.150,24h
 ## Board Function Area ##
 
 setup_ADV9361_CRR-SOM() {
-	
+		
 }
 
 setup_FMCOMMS4() {
 	setup_pyadi-iio
 }
 
-setup_SYNCHRONA() [
+setup_SYNCHRONA() {
 
-]
+}
+
 
 setup_ADRV9361_BOB() {
 	setup_pyadi-iio
@@ -444,7 +445,7 @@ STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs"
 STEPS="$STEPS write_autostart_config libiio"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
-STEPS="$STEPS dhcp_config telemetry setup_$BOARD create_board_test_file"
+STEPS="$STEPS dhcp_config telemetry $BOARD create_board_test_file"
 
 RAN_ONCE=0
 for step in $STEPS ; do
