@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Wrapper script for doing a production cycle/routine for a rfsom-box.
+# Wrapper script for doing a production cycle/routine for FMCOMMS4
 # This script handles
 #
-# Can be called with:  ./production_rfsom-box.sh
+# Can be called with:  ./production_FMCOMMS4.sh
 #
 
 SCRIPT_DIR="$(readlink -f $(dirname $0))"
