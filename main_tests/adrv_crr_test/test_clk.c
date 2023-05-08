@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 	else if (strcmp("CLK4", argv[1]) == 0)
 		reg_addr = CLK4_REG_ADDR;
 	else {
-		printf("Usage: %s [test_clk CLK0|CLK1|CLK2|CLK3]\n", argv[0]);
+		printf("Usage: %s [test_clk CLK0|CLK1|CLK2|CLK3|CLK4]\n", argv[0]);
 		return -1;
 	}
 

@@ -13,7 +13,7 @@ run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_ID="02"
 SHORT_DESC="Check lock state of HMC7044"
-CMD="cat /sys/kernel/debug/iio/iio\:device2/status | grep -q \"PLL1 & PLL2 Locked\""
+CMD="cat /sys/kernel/debug/iio/iio\:device3/status | grep -q \"PLL1 & PLL2 Locked\""
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
  : #if reached this point, ensure exito code 0

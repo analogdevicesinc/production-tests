@@ -86,13 +86,13 @@ then
 			then
 				exit 1
 			else
+				GLOBAL_FAIL=1
 				break
 			fi
 		fi
 		eval "$3"
 		answer=$?
 	done
-
 fi
 
 proceed_if_ok $answer "${RED}FAIL${NC}" "${GREEN}OK${NC}"

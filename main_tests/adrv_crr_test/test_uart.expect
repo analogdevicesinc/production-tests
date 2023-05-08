@@ -5,7 +5,16 @@ log_user 0
 spawn picocom -b 115200 /dev/ttyUSB0
 expect "Terminal ready"
 send "\r"
-expect -re "root@analog:~# "
+expect {
+	"analogdut login: " {
+		send "analog\r"
+		expect "Password:"
+		send "analog\r"
+		exp_continue
+	}
+	"analog@analogdut:~$ " {	
+	}
+}
 send "cat /proc/device-tree/model\r"
 expect {
     "Analog Devices ADRV9009-ZU11EG" { exit 0 }
