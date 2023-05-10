@@ -40,7 +40,7 @@ def temperature_check(dut):
             dut.led = 1
             check = True
 	
-            adt75_temp = dut.adt75
+            adt75_temp = dut.adt75()
             print('\nADT75 Temperature Reading    : ' + str(adt75_temp) + '\n')
             return 'SUCCESS'
 
