@@ -163,7 +163,7 @@ def main():
     
         elif start_test.lower() == 'y' or start_test.lower() == 'yes':
             print('\nRunning 10SPE connection test...', end = '')
-            dut = adi.CN0575(uri = None)
+            dut = adi.cn0575(uri = None)
             dut.led = 1
             sleep(1)
 
