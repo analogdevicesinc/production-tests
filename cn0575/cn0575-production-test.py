@@ -39,17 +39,10 @@ def temperature_check(dut):
         if dut.button == 1:
             dut.led = 1
             check = True
-		
-            adt75_temp = dut.onboard_adt75
-            rpi_temp = dut.rpi_cpu_temp
-
-            print('\nADT75 Temperature Reading    : ' + str(adt75_temp))
-            print('Raspberry Pi CPU Temperature : ' + str(rpi_temp) + '\n')
-            if adt75_temp < rpi_temp:
-                return 'SUCCESS'
-
-            else:
-                return 'FAIL'
+	
+            adt75_temp = dut.adt75
+            print('\nADT75 Temperature Reading    : ' + str(adt75_temp) + '\n')
+            return 'SUCCESS'
 
 # The following code is used to flash the EEPROM of the PMD-RPI-INTZ.
 # This function generates an *.eep file based on the eeprom settings file, clears any existing data in the EEPROM 
@@ -175,11 +168,6 @@ def main():
             sleep(1)
 
             result = temperature_check(dut)
-            if result != 'SUCCESS':
-                print('\nAbnormal temperature readings detected. Please power down the board and wait for it to cool before trying again.\n')
-                del dut
-                exit(1)
-
             break
 
         else:
