@@ -41,7 +41,7 @@ def temperature_check(dut):
             check = True
 	
             adt75_temp = dut.adt75()
-            print('\nADT75 Temperature Reading    : ' + str(adt75_temp) + '\n')
+            print('\nADT75 Temperature Reading    : ' + str(adt75_temp) + ' deg. C\n')
             return 'SUCCESS'
 
 # The following code is used to flash the EEPROM of the PMD-RPI-INTZ.
