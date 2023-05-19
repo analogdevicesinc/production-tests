@@ -36,9 +36,9 @@ production() {
 		export DBNAME="dev_${BOARD}_prod"
 		export BOARD_NAME="$BOARD"
 
-        local LOGDIR=$SCRIPT_DIR/log
+        export LOGDIR=$SCRIPT_DIR/log
 		# temp log to store stuff, before we know the S/N of device
-        local LOGFILE=$LOGDIR/temp.log
+        export LOGFILE=$LOGDIR/temp.log
         # Remove temp log file start (if it exists)
         rm -f "$LOGFILE"
 
@@ -68,7 +68,8 @@ production() {
 		echo_red "Your time and date is not up-to-date. The times of the logs will be inaccurate. The corresponding log files will begin with \"no_date\""
 	fi
 
-	/home/analog/production-tests/main_tests/${BOARD,,}/production.sh $MODE
+	$SCRIPT_DIR/${BOARD,,}/production.sh "$MODE"
+	FAILED=$?
 
         if [ -f "$STATSFILE" ] ; then
                 source $STATSFILE
@@ -84,10 +85,10 @@ production() {
 		cat /dev/null > "$LOGFILE"
 	fi
 	telemetry prod-logs-upload --tdir $LOGDIR &> $SCRIPT_DIR/telemetry_out.txt
-	cat $SRIPT_DIR/telemetry_out.txt | grep "Authentication failed"
+	cat $SCRIPT_DIR/telemetry_out.txt | grep "Authentication failed"
 	if [ $? -eq 0 ]; then
 		rm -rf $SCRIPT_DIR/password.txt
 	fi
-	rm -rf $SRIPT_DIR/telemetry_out.txt
+	rm -rf $SCRIPT_DIR/telemetry_out.txt
 }
 
