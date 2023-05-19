@@ -4,6 +4,7 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/../lib/utils.sh
 
+MODE="$1"
 case $MODE in
                 "FMCOMMS4 Test")
 						ssh_cmd "sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Tuning' | cut -d' ' -f4 | tr -d '[:cntrl:]'"
