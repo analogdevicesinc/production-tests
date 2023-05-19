@@ -8,9 +8,11 @@ source $SCRIPT_DIR/setup_env.sh
 # function to create a directory and test file"
 create_board_test_file() {
     read -p "Enter a board name: " board
+    touch &SCRIPT_DIR/production_${board^^}.sh
+    chmod +x production_${board^^}.sh
     mkdir ${board,,}
-    touch ${board,,}/production_${board^^}.sh
-    chmod +x ${board,,}/production_${board^^}.sh
+    touch ${board,,}/production.sh
+    chmod +x ${board,,}/production.sh
 
     echo "Production test folder '$board' and 'production_${board^^}' have been created successfully"
     sed -i "s/SUPPORTED_BOARDS=\"*/SUPPORTED_BOARDS=\"${board^^} /" supported_boards.sh
