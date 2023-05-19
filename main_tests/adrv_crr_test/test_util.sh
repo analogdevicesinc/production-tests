@@ -86,6 +86,7 @@ then
 			then
 				exit 1
 			else
+				GLOBAL_FAIL=1
 				break
 			fi
 		fi

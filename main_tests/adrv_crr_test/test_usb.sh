@@ -15,7 +15,7 @@ TEST_NAME="TEST_USB_DRIVE_MOUNTED"
 
 TEST_ID="02"
 SHORT_DESC="Test if sda1 partition is mounted"
-CMD="[ ! -f /dev/sda1 ]"
+CMD="sleep 2 && [ ! -f /dev/sda1 ]"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
 TEST_NAME="TEST_USB_HOST_MODE_SPEED"
