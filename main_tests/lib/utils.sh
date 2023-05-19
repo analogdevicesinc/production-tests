@@ -47,7 +47,7 @@ dut_date_sync() {
 }
 
 handle_error_state() {
-	local serial="$1"
+	serial="$1"
 	FAILED=1
 	console_ascii_failed
 	if [ $SYNCHRONIZATION -eq 0 ]; then 
@@ -79,7 +79,7 @@ console_ascii_passed() {
 }
 
 console_ascii_failed() {
-	echo_red "$(cat $SCRIPT_DIR/lib/failed.ascii)"
+	echo_red "$(cat $SCRIPT_DIR/../lib/failed.ascii)"
 }
 
 wait_for_eeprom_vars() {
