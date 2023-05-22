@@ -23,7 +23,8 @@ get_board_serial() {
 	IS_OKBOARD=1
 	while [ $IS_OKBOARD -ne 0 ]; do
 		echo "Please use the scanner to scan the QR/Barcode on your carrier"
-		read BOARD_SERIAL
+		read BOARD_SERIAL_TEMP
+		BOARD_SERIAL=${BOARD_SERIAL_TEMP// /}
 		echo $BOARD_SERIAL | grep "S[0-9][0-9]" | grep "SN" &>/dev/null
 		IS_OKBOARD=$?
 	done
@@ -107,7 +108,7 @@ wait_for_firmware_files() {
 
 check_conn(){
 	while true; do
-		if ping -q -c3 -w50 analog.local &>/dev/null
+		if ping -q -c3 -w50 analogdut.local &>/dev/null
 		then
 			echo_blue "Connection to DUT OK"
 			break
@@ -202,6 +203,12 @@ production() {
 	fi
 
         case $MODE in
+		"FMCOMMS5 Test")
+                        $SCRIPT_DIR/fmcomms5/rf_test.sh $BOARD_SERIAL
+                        if [ $? -ne 0 ]; then
+                                handle_error_state "$BOARD_SERIAL"
+                        fi
+                        ;;
                 "FMCOMMS4 Test")
 			ssh_cmd "sudo fru-dump -i /sys/devices/soc0/fpga-axi@0/41600000.i2c/i2c-0/i2c-7/7-0050/eeprom -b | grep 'Tuning' | cut -d' ' -f4 | tr -d '[:cntrl:]'"
 			CALIB_DONE=$?
