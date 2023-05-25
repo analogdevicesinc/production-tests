@@ -127,7 +127,7 @@ setup_pyadi-iio() {
 	__download_github_common pyadi-iio
 	#Set python3 as default
 	sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
-	sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
+	sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 2
 
 	pushd work
 	pushd pyadi-iio
