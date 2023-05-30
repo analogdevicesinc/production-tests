@@ -3,7 +3,7 @@
 echo SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/supported_boards.sh
-source $SCRIPT_DIR/setup_env.sh
+#source $SCRIPT_DIR/setup_env.sh
 
 # function to create a directory and test file"
 create_board_test_file() {
@@ -36,7 +36,7 @@ change_rpi_hostname(){
     sudo sed -i 's/analog/pi/g' hosts
     echo "Raspberry Pi hostname has been changed. Prepare for reboot."
     sleep 1
-    #sudo reboot
+    sudo reboot
 }
 
 change_rpi_hostname

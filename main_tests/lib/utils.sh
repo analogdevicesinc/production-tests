@@ -529,7 +529,7 @@ wait_for_board_offline() {
 
 ssh_cmd() {
 	local USER=analog
-	local CLIENT=analog
+	local CLIENT=analogdut.local
 	local PASS=analog
 	local CMD="$1"
 
