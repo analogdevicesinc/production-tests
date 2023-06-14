@@ -398,6 +398,11 @@ setup_ADV9361_CRR-SOM() {
 		:
 }
 
+setup_FMCOMMS2-3() {
+	setup_pyadi-iio
+}
+
+
 setup_FMCOMMS4() {
 	setup_pyadi-iio
 }
