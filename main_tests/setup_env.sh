@@ -9,7 +9,7 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/lib/utils.sh
 
-SUPPORTED_BOARDS="ADV9361_CRR-SOM FMCOMMS4 SYNCHRONA ADRV9361_BOB ADV9009_CRR-SOM ADRV9364_BOB FMCDAQ3 FMCOMMS5"
+SUPPORTED_BOARDS="ADV9361_CRR-SOM FMCOMMS4 SYNCHRONA ADRV9361_BOB ADV9009_CRR-SOM ADRV9364_BOB FMCDAQ3 FMCOMMS5 JUPITER"
 
 INIT_PINS_SCRIPT="$SCRIPT_DIR"/init.sh
 
@@ -135,7 +135,7 @@ setup_pyadi-iio() {
 	if [ $BOARD == "ADV9009_CRR-SOM" ]; then
 		git checkout som-testing-fmcomms8
 	else
-		git checkout fmcomms_scpi
+		git checkout jupiter_prod
 		sudo pip3 install -r requirements_prod_test.txt
 		sudo apt-get install libatlas-base-dev
 	fi

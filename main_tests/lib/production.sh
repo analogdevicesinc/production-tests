@@ -203,6 +203,27 @@ production() {
 	fi
 
         case $MODE in
+		"Test Jupiter Main Board")
+			ssh_cmd " sudo /home/analog/jupiter/test_poe.sh";
+			ssh_cmd "sudo reboot";
+			sleep 10;
+			ssh_cmd " sudo /home/analog/jupiter/test_power_usb1.sh";
+			ssh_cmd "sudo reboot";
+			sleep 10;
+                        ssh_cmd "sudo /home/analog/jupiter/main_board_test.sh $BOARD_SERIAL";
+			
+			$SCRIPT_DIR/test_uart.sh;
+			$SCRIPT_DIR/test_usb_periph.sh;
+                        if [ $? -ne 0 ]; then
+                                handle_error_state "$BOARD_SERIAL"
+                        fi
+                        ;;
+		"Test Jupiter Add-On Board")
+                        $SCRIPT_DIR/jupiter/addon_rf_test.sh $BOARD_SERIAL
+                        if [ $? -ne 0 ]; then
+                                handle_error_state "$BOARD_SERIAL"
+                        fi
+                        ;;
 		"FMCOMMS5 Test")
                         $SCRIPT_DIR/fmcomms5/rf_test.sh $BOARD_SERIAL
                         if [ $? -ne 0 ]; then
