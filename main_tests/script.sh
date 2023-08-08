@@ -8,7 +8,7 @@ source $SCRIPT_DIR/supported_boards.sh
 # function to create a directory and test file"
 create_board_test_file() {
     read -p "Enter a board name: " board
-    touch &SCRIPT_DIR/production_${board^^}.sh
+    touch $SCRIPT_DIR/production_${board^^}.sh
     chmod +x production_${board^^}.sh
     mkdir ${board,,}
     touch ${board,,}/production.sh
