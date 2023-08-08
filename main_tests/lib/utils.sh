@@ -34,11 +34,12 @@ show_start_state() {
 get_board_serial() {
 	IS_OKBOARD=1
 	while [ $IS_OKBOARD -ne 0 ]; do
-		echo "Please use the scanner to scan the QR/Barcode on your carrier"
+		echo "Please use the scanner to scan the QR/Barcode on your carrier" 1>&2
 		read BOARD_SERIAL
 		echo $BOARD_SERIAL | grep "S[0-9][0-9]" | grep "SN" &>/dev/null
 		IS_OKBOARD=$?
 	done
+	echo $BOARD_SERIAL
 }
 
 dut_date_sync() {
