@@ -180,6 +180,7 @@ Hidden=true
 	fi
 
 	# FIXME: see about generalizing this to other desktops [Gnome, MATE, LXDE, etc]
+	# for writing fw we must use sudo -E ./production_$BOARD
 	cat > $autostart_path/test-jig-tool.desktop <<-EOF
 [Desktop Entry]
 Encoding=UTF-8
@@ -393,6 +394,10 @@ dhcp-range=192.168.0.100,192.168.0.150,24h
 
 
 ## Board Function Area ##
+
+setup_60GHZ-CONN(){
+	setup_pyadi-iio
+}
 
 setup_ADV9361_CRR-SOM() {
 		:
