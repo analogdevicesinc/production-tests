@@ -301,7 +301,7 @@ hdmi_cvt=800 480 60 6 0 0 0
 hdmi_drive=1
 max_usb_current=1
 
-dtoverlay=pi3-disable-wifi
+#dtoverlay=pi3-disable-wifi
 dtoverlay=pi3-disable-bt
 # --- end setup_env.sh
 	EOF
