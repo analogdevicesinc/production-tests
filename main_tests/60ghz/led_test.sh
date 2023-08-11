@@ -40,7 +40,7 @@ check_leds() {
 
     check_eth_led() {
         echo_blue "[3] Testing the Raspberry Ethernet LED status"
-        read -n 1 -p "Is the Raspberry Ethernet LED on? (y/n): " answer
+        read -n 1 -p "Is the DUT Ethernet LED on? (y/n): " answer
         echo ""
 
         if [[ "$answer" =~ [yY] ]]; then
@@ -60,7 +60,6 @@ check_leds() {
 }
 
 check_leds
-echo $RESULT
     if [ $RESULT -ne 0 ]; then
         exit 1;
     fi

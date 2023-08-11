@@ -40,17 +40,19 @@ case $MODE in
         sudo -S $SCRIPT_DIR/check_fw.sh &&
         sudo $SCRIPT_DIR/nets.sh up
         threshold=200
+        RESULT=$?
         last_line=$(sudo ip netns exec net1 iperf -c 192.168.1.1 -i1 -t10 | tail -n 1)
         speed=$(echo "$last_line" | awk '{print $(NF-1)}')
-        echo $last_line
         echo $speed
         if (( $(echo "$speed >= $threshold" | bc -l) )); then
             echo "Above 200 Mbits/sec"
+            RESULT=0;
         else
             echo "Below 200 Mbits/sec"
+            RESULT=1;
         fi
-        TEST_RESULT=$?
-        if [ $TEST_RESULT -ne 0 ]; then
+        sudo $SCRIPT_DIR/nets.sh down
+        if [ $RESULT -ne 0 ]; then
             handle_error_state "$BOARD_SERIAL"
             exit 1;
         fi
