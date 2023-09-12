@@ -392,6 +392,16 @@ dhcp-range=192.168.0.100,192.168.0.150,24h
 	EOF
 }
 
+setup_sync_datetime() {
+	sudo_required
+
+	# Try to use NTP. May fail if there is no timesync service (e.g. systemd-timesyncd)
+	sudo timedatectl set-ntp true && return
+
+	# Alternatively, use a much less precise source, but still good enough for certificates to be valid
+	sudo date +"%d %b %Y %T %Z" -s "$(curl -s --head http://google.com | grep '^Date:' | cut -d' ' -f 3-)"
+}
+
 
 ## Board Function Area ##
 
@@ -448,7 +458,7 @@ pushd $SCRIPT_DIR
 
 #TBD: move specific functions from this list into setup_board function
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
-STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs"
+STEPS="$STEPS thunar_volman disable_lxde_automount sync_datetime apt_install_prereqs"
 STEPS="$STEPS write_autostart_config libiio"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
 STEPS="$STEPS dhcp_config telemetry $BOARD"
