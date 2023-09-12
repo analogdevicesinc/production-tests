@@ -31,7 +31,8 @@ setup_apt_install_prereqs() {
 	sudo_required
 	sudo -s <<-EOF
 	apt-get -y update
-	apt-get -y install bc sshpass libfftw3-dev librsvg2-dev libgtk-3-dev \
+	apt-get -y -o DPkg::Lock::Timeout=60 install \
+		bc sshpass libfftw3-dev librsvg2-dev libgtk-3-dev \
 		cmake build-essential git libxml2 libxml2-dev bison flex \
 		expect usbutils dfu-util screen libaio-dev libglib2.0-dev picocom \
 		wget unzip curl cups cups-bsd intltool itstool libxml2-utils \
