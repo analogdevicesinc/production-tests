@@ -7,16 +7,22 @@
 # 	printf "\033[1;31mPlease run calibration first\033[m\n"
 # 	handle_error_state "$BOARD_SERIAL"
 # fi
-$SCRIPT_DIR/adrv9361_bob/rf_test.sh
-FAILED_TESTS=$?
-if [ $FAILED_TESTS -ne 255 ]; then
-	$SCRIPT_DIR/adrv9361_bob/test_uart.sh
-	FAILED_UART=$?
-	if [ $FAILED_UART -ne 255 ]; then
-		ssh_cmd "sudo /home/analog/adrv9361_bob/breakout_test.sh"
-		FAILED_MISC=$?
-	fi
-fi
-if [ $FAILED_TESTS -ne 0 ] || [ $FAILED_UART -ne 0 ] || [ $FAILED_MISC -ne 0 ]; then
+
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
+
+source $SCRIPT_DIR/../lib/utils.sh
+
+$SCRIPT_DIR/rf_test.sh || {
 	handle_error_state "$BOARD_SERIAL"
-fi
+	exit
+}
+
+$SCRIPT_DIR/test_uart.sh || {
+	handle_error_state "$BOARD_SERIAL"
+	exit
+}
+
+ssh_cmd "sudo /home/analog/adrv9361_bob/breakout_test.sh" || {
+	handle_error_state "$BOARD_SERIAL"
+	exit
+}
