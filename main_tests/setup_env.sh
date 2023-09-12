@@ -38,7 +38,8 @@ setup_apt_install_prereqs() {
 		wget unzip curl cups cups-bsd intltool itstool libxml2-utils \
 		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal libiec16022-dev \
 		openssh-server gpg dnsmasq libcurl4-gnutls-dev libqrencode-dev pv \
-		python3-pytest python3-libiio python3-scapy python3-scipy
+		python3-pytest python3-libiio python3-scapy python3-scipy libzstd-dev \
+		python3.7 python3-pip
 	/etc/init.d/htpdate restart
 	EOF
 }
