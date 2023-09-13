@@ -14,15 +14,15 @@ source $SCRIPT_DIR/../lib/utils.sh
 
 $SCRIPT_DIR/rf_test.sh || {
 	handle_error_state "$BOARD_SERIAL"
-	exit
+	exit 1
 }
 
 $SCRIPT_DIR/test_uart.sh || {
 	handle_error_state "$BOARD_SERIAL"
-	exit
+	exit 1
 }
 
 ssh_cmd "sudo /home/analog/adrv9361_bob/breakout_test.sh" || {
 	handle_error_state "$BOARD_SERIAL"
-	exit
+	exit 1
 }
