@@ -135,6 +135,23 @@ setup_libiio() {
 	popd
 }
 
+setup_genalyzer() {
+	[ ! -d "work/genalyzer" ] || return 0
+
+	__download_github_common genalyzer
+
+	pushd work
+	mkdir -p genalyzer/build
+	pushd genalyzer/build
+
+	cmake ../ -DPYTHON_BINDINGS=ON
+	make -j3
+	sudo make install
+
+	popd
+	popd
+}
+
 setup_adm1266() {
 	[ ! -d "src/adm1266" ] || return 0
 	#tbd : remove all redundant if BOARD checks ==removed==
@@ -492,7 +509,7 @@ pushd $SCRIPT_DIR
 #TBD: move specific functions from this list into setup_board function
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
 STEPS="$STEPS thunar_volman disable_lxde_automount sync_datetime apt_install_prereqs pip_install_prereqs"
-STEPS="$STEPS write_autostart_config libiio"
+STEPS="$STEPS write_autostart_config libiio genalyzer"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
 STEPS="$STEPS dhcp_config telemetry $BOARD"
 

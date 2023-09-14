@@ -4,7 +4,7 @@
 # Global definitions section       #
 #----------------------------------#
 
-LD_LIBRARY_PATH="$SCRIPT_DIR/work/libiio/build"
+LD_LIBRARY_PATH="$SCRIPT_DIR/work/libiio/build:$LD_LIBRARY_PATH"
 PATH="$SCRIPT_DIR/work/libiio/build/tests:$PATH"
 
 export LD_LIBRARY_PATH
