@@ -144,7 +144,7 @@ production() {
         local TARGET="$1"
         local MODE="$2"
 	local BOARD="$3"
-	local IIO_REMOTE=analog.local 
+	local IIO_REMOTE=analogdut.local 
 
         [ -n "$TARGET" ] || {
                 echo_red "No target specified"
@@ -204,26 +204,29 @@ production() {
 
         case $MODE in
 		"Test Jupiter Main Board")
-			ssh_cmd " sudo /home/analog/jupiter/test_poe.sh";
-			ssh_cmd "sudo reboot";
-			sleep 10;
+			$SCRIPT_DIR/jupiter/test_uart.sh;
+			ssh_cmd "/home/analog/jupiter/test_flashpd.sh";
+			ssh_cmd "sudo poweroff";
+			echo_blue "The board is now powered off. Please insert the power cable in USB1 for the next boot mode."
+			sleep 50;
 			ssh_cmd " sudo /home/analog/jupiter/test_power_usb1.sh";
-			ssh_cmd "sudo reboot";
-			sleep 10;
-                        ssh_cmd "sudo /home/analog/jupiter/main_board_test.sh $BOARD_SERIAL";
+			ssh_cmd "sudo poweroff";
+			echo_blue "The board is now powered off. Please insert the power cable in USB2 for the next boot mode."
+			sleep 50;
+			echo_blue "The test will now carry on with the rest of the test sequence"
+			ssh_cmd "sudo /home/analog/jupiter/main_board_test.sh $BOARD_SERIAL";
 			
-			$SCRIPT_DIR/test_uart.sh;
 			$SCRIPT_DIR/test_usb_periph.sh;
-                        if [ $? -ne 0 ]; then
-                                handle_error_state "$BOARD_SERIAL"
-                        fi
-                        ;;
+			if [ $? -ne 0 ]; then
+					handle_error_state "$BOARD_SERIAL"
+			fi
+			;;
 		"Test Jupiter Add-On Board")
-                        $SCRIPT_DIR/jupiter/addon_rf_test.sh $BOARD_SERIAL
-                        if [ $? -ne 0 ]; then
-                                handle_error_state "$BOARD_SERIAL"
-                        fi
-                        ;;
+			$SCRIPT_DIR/jupiter/addon_rf_test.sh $BOARD_SERIAL
+			if [ $? -ne 0 ]; then
+					handle_error_state "$BOARD_SERIAL"
+			fi
+			;;
 		"FMCOMMS5 Test")
                         $SCRIPT_DIR/fmcomms5/rf_test.sh $BOARD_SERIAL
                         if [ $? -ne 0 ]; then

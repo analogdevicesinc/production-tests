@@ -32,7 +32,8 @@ echo
 source $SCRIPT_DIR/test_flash.sh
 answer=$?
 proceed_if_ok $answer
+
 ###### maybe directly python command
-# source $SCRIPT_DIR/test_rf.sh
-# answer=$?
-# proceed_if_ok $answer
+source $SCRIPT_DIR/test_rf.sh
+answer=$?
+proceed_if_ok $answer

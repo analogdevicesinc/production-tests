@@ -2,12 +2,14 @@
 
 log_user 0
 
+set prompt "root@analog:~# "
+set command "cat /sys/bus/i2c/devices/0-006a/hwmon/hwmon0/in1_input"
+
 spawn picocom -b 115200 /dev/ttyUSB0
 expect "Terminal ready"
 send "\r"
-expect -re "root@analog:~# "
-send "cat /proc/device-tree/model\r"
-expect {
-    "Analog Devices, Inc. Pluto NG" { exit 0 }
-}
-exit 1
+expect $prompt
+send $command\r
+expect $command\r\n
+expect -re (.*)\r\n { puts "$expect_out(1,string)" }
+exit 0

@@ -10,6 +10,7 @@ TEST_ID="01"
 SHORT_DESC="Test X."
 CMD="RVAL=\$(cat /sys/bus/iio/devices/iio:device0/in_voltage0_pspll_raw);"
 CMD+="SCALE=\$(cat /sys/bus/iio/devices/iio:device0/in_voltage0_pspll_scale);"
+CMD+="VAL=\$(\$RVAL / \$SCALE);"
 CMD+="[[ \$VAL -ge 5500 ]] && [[ \$VAL -le 6100 ]]"
 run_test $TEST_ID "$SHORT_DESC" "$CMD"
 
