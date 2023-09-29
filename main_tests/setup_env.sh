@@ -395,7 +395,7 @@ dhcp-range=192.168.0.100,192.168.0.150,24h
 
 ## Board Function Area ##
 
-setuo_SWIOT() {
+setup_SWIOT() {
 	setup_pyadi-iio
 }
 
