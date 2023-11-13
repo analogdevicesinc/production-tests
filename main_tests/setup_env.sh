@@ -395,6 +395,10 @@ dhcp-range=192.168.0.100,192.168.0.150,24h
 
 ## Board Function Area ##
 
+setup_MAX-ARDUINO() {
+	:
+}
+
 setup_SWIOT() {
 	setup_pyadi-iio
 }
