@@ -396,7 +396,13 @@ dhcp-range=192.168.0.100,192.168.0.150,24h
 ## Board Function Area ##
 
 setup_MAX-ARDUINO() {
-	:
+	pip install esptool==4.1
+	mkdir max-arduino
+	cd max-arduino
+	wget https://github.com/amiclaus/linux_noos_guides/releases/download/release/ESP32-WROOM-32-AT-NINA-W102.zip
+	unzip ESP32-WROOM-32-AT-NINA-W102.zip -d  "$(basename -s .zip ESP32-WROOM-32-AT-NINA-W102.zip)"
+	rm -rf ESP32-WROOM-32-AT-NINA-W102.zip
+
 }
 
 setup_SWIOT() {
@@ -452,7 +458,7 @@ fi
 
 board_is_supported "$BOARD" || {
 	echo_red "Board '$BOARD' is not supported by this script"
-	echo_red "   Supported boards are '$SUPPORTED_BOARDS'"
+	echo_red "Supported boards are '$SUPPORTED_BOARDS'"
 	exit 1
 }
 
