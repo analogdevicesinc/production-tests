@@ -1,24 +1,30 @@
 #!/bin/bash
 
-# RELEASE_FW=https://swdownloads.analog.com
-# FW_DOWNLOAD_PATH=/home/analog/production-tests/main_tests/max-arduino/apard32690_production.hex
+RELEASE_FW=https://swdownloads.analog.com/cse/prod_test_rel/max_arduino_fw/apard32690_production.zip
+FW_DOWNLOAD_PATH=/home/analog/production-tests/main_tests/max-arduino
+
+
+rm $FW_DOWNLOAD_PATH/apard32690.hex
+rm $FW_DOWNLOAD_PATH/apard32690_production.zip
+
 
 # cp the hex file to daplink
-mountpoint=$(mount | awk '/DAPLINK/ { for (i=1; i<=NF; i++) if ($i ~ "/DAPLINK") print $i }')
+mountpoint=$(mount | awk '/DAPLINK2/ { for (i=1; i<=NF; i++) if ($i ~ "/DAPLINK2") print $i }')
 echo $mountpoint
 
 # Start monitoring the mountpoint
 inotifywait -m -e unmount "$mountpoint" | (
 
-    wget -T 5 $RELEASE_FW -O $FW_DOWNLOAD_PATH/apard32690_production.hex
+    wget -T 5 $RELEASE_FW -O $FW_DOWNLOAD_PATH/apard32690_production.zip
+    unzip $FW_DOWNLOAD_PATH/apard32690_production.zip -d $FW_DOWNLOAD_PATH
     ret=$?
  
     if [ $ret == 0 ];then
 	echo "wget success"
-        rsync -ah -v --progress $FW_DOWNLOAD_PATH/apard32690_production.hex $mountpoint
+        rsync -ah -v --progress $FW_DOWNLOAD_PATH/apard32690.hex $mountpoint
     else
 	echo "wget error"
-	rsync -ah -v --progress /home/analog/production-tests/main_tests/max-arduino/firmware/apard32690_production.hex $mountpoint
+	rsync -ah -v --progress /home/analog/production-tests/main_tests/max-arduino/apard32690.hex $mountpoint
     fi
 
     sync

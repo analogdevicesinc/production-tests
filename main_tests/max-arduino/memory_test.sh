@@ -10,7 +10,7 @@ tty=/dev/ttyACM0
 #exec 4<$tty 5>$tty
 test_names=("[1] UART test" " [2] MAXQ1065 ping" " [3] RAM chip 1" " [4] RAM chip 2" " [5] Flash chip")
 
-while [ "$first_word" != "Running" ]; do
+while [ "$first_word" != "IP" ]; do
     read -e output < $tty &> /dev/null
     first_word=$(echo "$output" | cut -f1 -d" ")
     test_name=$(echo "$output" | cut -f1 -d":")

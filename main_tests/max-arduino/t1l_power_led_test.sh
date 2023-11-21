@@ -9,8 +9,8 @@ RESULT=$?
 
 check_leds() {
     check_powergood_leds() {
-        echo_blue "[1] Testing the power good LEDs status"
-        read -n 1 -p "Are the DS12 and DS9 LEDs on? (y/n): " answer
+        echo_blue "[1] Testing the power LED status"
+        read -n 1 -p "Is the blue DS1 LED on? (y/n): " answer
         echo ""
 
         if [[ "$answer" =~ [yY] ]]; then
