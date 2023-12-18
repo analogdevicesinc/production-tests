@@ -44,6 +44,12 @@ setup_apt_install_prereqs() {
 	EOF
 }
 
+setup_pip_install_prereqs() {
+	sudo_required
+	sudo -s <<-EOF
+	pip install --upgrade pip setuptools
+	EOF
+}
 
 download_to() {
         local url="$1"
@@ -486,7 +492,7 @@ pushd $SCRIPT_DIR
 
 #TBD: move specific functions from this list into setup_board function
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
-STEPS="$STEPS thunar_volman disable_lxde_automount sync_datetime apt_install_prereqs"
+STEPS="$STEPS thunar_volman disable_lxde_automount sync_datetime apt_install_prereqs pip_install_prereqs"
 STEPS="$STEPS write_autostart_config libiio"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
 STEPS="$STEPS dhcp_config telemetry $BOARD"
