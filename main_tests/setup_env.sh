@@ -44,15 +44,42 @@ setup_apt_install_prereqs() {
 	EOF
 }
 
-__common_build_tool() {
-	local c_files
-	mkdir -p work
 
-	for c_file in $tool_c ; do
-		cp -f "src/$c_file" "work/$c_file"
-		c_files="$c_files work/$c_file"
-	done
-	gcc $c_files -o "work/$tool" $cflags $ldflags
+download_to() {
+        local url="$1"
+        local file="$2"
+
+        wget "$url" -O "$file" || {
+                echo_red "Download has failed..."
+                rm -f "$file"
+                return 1
+        }
+
+        return 0
+}
+
+download_and_unzip_to() {
+        local url="$1"
+        local dir="$2"
+
+        local tmp_file="$(mktemp)"
+
+        download_to "$url" "$tmp_file" || return 1
+
+        unzip "$tmp_file" -d "$dir" || {
+                echo_red "Unzip has failed..."
+                rm -f "$tmp_file"
+                return 1
+        }
+        rm -f "$tmp_file"
+
+        return 0
+}
+
+get_latest_release() {
+	curl --silent "https://api.github.com/repos/$1/releases/latest" |
+	grep '"tag_name":' |
+	sed -E 's/.*"([^"]+)".*/\1/'
 }
 
 __download_github_common() {
