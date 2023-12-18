@@ -335,7 +335,6 @@ hdmi_cvt=800 480 60 6 0 0 0
 hdmi_drive=1
 max_usb_current=1
 
-dtoverlay=pi3-disable-wifi
 dtoverlay=pi3-disable-bt
 # --- end setup_env.sh
 	EOF
@@ -510,6 +509,8 @@ if [ "$RAN_ONCE" == "0" ] ; then
 	for step in $STEPS ; do
 		echo_red "    $step"
 	done
+else
+	echo_red "To properly finish the setup, reboot!"
 fi
 
 popd
