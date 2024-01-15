@@ -452,6 +452,13 @@ setup_sync_datetime() {
 	sudo date +"%d %b %Y %T %Z" -s "$(curl -s --head http://google.com | grep '^Date:' | cut -d' ' -f 3-)"
 }
 
+setup_check_internet() {
+	ping -c1 -q 8.8.8.8 || {
+		echo_red "No internet connection. Required for future setup steps"
+		exit 1
+	}
+}
+
 
 ## Board Function Area ##
 
@@ -508,7 +515,7 @@ pushd $SCRIPT_DIR
 
 #TBD: move specific functions from this list into setup_board function
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
-STEPS="$STEPS thunar_volman disable_lxde_automount sync_datetime apt_install_prereqs pip_install_prereqs"
+STEPS="$STEPS thunar_volman disable_lxde_automount check_internet sync_datetime apt_install_prereqs pip_install_prereqs"
 STEPS="$STEPS write_autostart_config libiio genalyzer"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
 STEPS="$STEPS dhcp_config telemetry $BOARD"
