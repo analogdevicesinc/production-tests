@@ -1,12 +1,27 @@
 #!/bin/bash
 
+RELEASE_FW=https://swdownloads.analog.com/update/wethlink/latest/revb-wethlink.hex
+
+FW_DOWNLOAD_PATH=/home/analog/production-tests/main_tests/60ghz/wethlink-v0.1.9
+
 # cp the hex file to daplink
 mountpoint=$(mount | awk '/DAPLINK/ { for (i=1; i<=NF; i++) if ($i ~ "/DAPLINK") print $i }')
 echo $mountpoint
 
 # Start monitoring the mountpoint
 inotifywait -m -e unmount "$mountpoint" | (
-    rsync -ah --progress ~/production-tests/main_tests/60ghz/wethlink-v0.1.9/wethlink-v0.1.9.hex $mountpoint
+
+    wget -T 5 $RELEASE_FW -O $FW_DOWNLOAD_PATH/revb-wethlink.hex
+    ret=$?
+ 
+    if [ $ret == 0 ];then
+	echo "wget success"
+        rsync -ah -v --progress $FW_DOWNLOAD_PATH/revb-wethlink.hex $mountpoint
+    else
+	echo "wget error"
+	rsync -ah -v --progress /home/analog/production-tests/main_tests/60ghz/wethlink-v0.1.9/revb-wethlink.hex $mountpoint
+    fi
+
     sync
     while read -r directory event filename; do
         echo "$mountpoint has been unmounted. Waiting for it to be mounted again..."
