@@ -31,7 +31,7 @@ class Parser:
     def _parse_cpp(self, file):
         cmd_list = []
         for row in file.read().splitlines():
-            if row.startswith('0x'):
+            if len(row) != 0 and row[0].startswith('0x'):
                 cmd = [None] * 5
                 row = row.split(",")[:-1]
                 if row[0] == '0x00':
@@ -62,7 +62,7 @@ class Parser:
         cmd_list = []
         csvreader = csv.reader(file)
         for row in csvreader:
-           if row[0].startswith('0x'):
+           if len(row) != 0 and row[0].startswith('0x'):
                 cmd = [None] * 5
                 if row[0] == 'delay':
                     cmd[0] = row[0]
