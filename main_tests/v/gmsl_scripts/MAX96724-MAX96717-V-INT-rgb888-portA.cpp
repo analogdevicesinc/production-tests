@@ -48,8 +48,8 @@
 
 0x04,0x4E,0x04,0x0B,0x00, // BACKTOP : BACKTOP12 | CSI_OUT_EN (CSI_OUT_EN): CSI output disabled
 // Link Initialization for Deserializer
-0x04,0x4E,0x00,0x06,0xF1, // DEV : REG6 | (Default) LINK_EN_A (LINK_EN_A): Enabled | LINK_EN_B (LINK_EN_B): Disabled | LINK_EN_C (LINK_EN_C): Disabled | LINK_EN_D (LINK_EN_D): Disabled
-0x04,0x4E,0x00,0x03,0xFE, // DEV : REG3 | (Default) DIS_REM_CC_A (GMSL Link A I2C Port 0): Enabled | DIS_REM_CC_B (GMSL Link B I2C Port 0): Disabled | DIS_REM_CC_C (GMSL Link C I2C Port 0): Disabled | DIS_REM_CC_D (GMSL Link D I2C Port 0): Disabled
+0x04,0x4E,0x00,0x06,0xFF, // DEV : REG6 | (Default) LINK_EN_A (LINK_EN_A): Enabled | LINK_EN_B (LINK_EN_B): Enabled | LINK_EN_C (LINK_EN_C): Enabled | LINK_EN_D (LINK_EN_D): Enabled
+0x04,0x4E,0x00,0x03,0xFF, // DEV : REG3 | DIS_REM_CC_A (GMSL Link A I2C Port 0): Disabled | DIS_REM_CC_B (GMSL Link B I2C Port 0): Disabled | DIS_REM_CC_C (GMSL Link C I2C Port 0): Disabled | DIS_REM_CC_D (GMSL Link D I2C Port 0): Disabled
 0x00,0x01, // Warning: The actual recommended delay is 5 usec.
 // Video Transmit Configuration for Serializer(s)
 0x04,0x84,0x00,0x02,0x03, // DEV : REG2 | VID_TX_EN_Z (VID_TX_EN_Z): Disabled
