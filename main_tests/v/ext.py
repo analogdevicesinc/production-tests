@@ -7,7 +7,7 @@ from smbus2 import SMBus
 I2C_BUS_NR = 2
 IN_FILES = [
     'gmsl_scripts/MAX96724-MAX96717-V-QSH-rgb888-portAB.cpp',
-    'gmsl_scripts/MAX96717_TPG_80.csv',
+    'gmsl_scripts/MAX96724_TPG.csv',
 ]
 
 bus = SMBus(I2C_BUS_NR)
