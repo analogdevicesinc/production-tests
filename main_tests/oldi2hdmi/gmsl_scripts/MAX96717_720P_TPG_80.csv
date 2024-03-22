@@ -1,0 +1,106 @@
+# Name: btogorea
+# Date: 3/21/2024
+# Version: 6.6.5
+#
+# I2C Address(0x), Register Address(0x), Register Value(0x), Read Modify Write(0x)
+#
+# THIS DATA FILE, AND ALL INFORMATION CONTAINED THEREIN,
+# IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+# THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+# PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL ANALOG DEVICES, INC. BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE DATA FILE,
+# THE INFORMATION CONTAINED THEREIN, OR ITS USE FOR ANY PURPOSE.
+# BEFORE USING THIS DATA FILE IN ANY APPLICATION FOR PRODUCTION OR DEPLOYMENT,
+# THE CUSTOMER IS SOLELY RESPONSIBLE FOR TESTING AND VERIFYING
+# THE CONTENT OF THIS DATA FILE IN CONNECTION WITH THEIR PRODUCTS AND SYSTEM(S).
+# ---------------------------------------------------------------------------------
+#
+#            _____ _____  
+#      /\   |  __ \_   _| 
+#     /  \  | |  | || |   
+#    / /\ \ | |  | || |   
+#   / ____ \| |__| || |_  
+#  /_/    \_\_____/_____| 
+#
+# ---------------------------------------------------------------------------------
+# This script is validated on: 
+# MAX96717(2)
+# Please refer to the Errata sheet for each device.
+# ---------------------------------------------------------------------------------
+#de_invert => Value: 0
+0x81,0x24E,0x00,0x04
+#hs_invert => Value: 0
+0x81,0x24E,0x00,0x08
+#vs_invert => Value: 0
+0x81,0x24E,0x00,0x10
+#vs_delay_h => Value: 0
+0x80,0x250,0x00
+#vs_delay_m => Value: 0
+0x80,0x251,0x00
+#vs_delay_l => Value: 0
+0x80,0x252,0x00
+#vs_high_h => Value: 8250
+0x80,0x253,0x00
+#vs_high_m => Value: 8250
+0x80,0x254,0x20
+#vs_high_l => Value: 8250
+0x80,0x255,0x3A
+#vs_low_h => Value: 1229250
+0x80,0x256,0x12
+#vs_low_m => Value: 1229250
+0x80,0x257,0xC1
+#vs_low_l => Value: 1229250
+0x80,0x258,0xC2
+#v2h_h => Value: 0
+0x80,0x259,0x00
+#v2h_m => Value: 0
+0x80,0x25A,0x00
+#v2h_l => Value: 0
+0x80,0x25B,0x00
+#v_hs_high_h => Value: 40
+0x80,0x25C,0x00
+#v_hs_high_l => Value: 40
+0x80,0x25D,0x28
+#v_hs_low_h => Value: 1610
+0x80,0x25E,0x06
+#v_hs_low_l => Value: 1610
+0x80,0x25F,0x4A
+#v_hs_cnt_h => Value: 750
+0x80,0x260,0x02
+#v_hs_cnt_l => Value: 750
+0x80,0x261,0xEE
+#v2d_h => Value: 41510
+0x80,0x262,0x00
+#v2d_m => Value: 41510
+0x80,0x263,0xA2
+#v2d_l => Value: 41510
+0x80,0x264,0x26
+#v_de_high_h => Value: 1280
+0x80,0x265,0x05
+#v_de_high_l => Value: 1280
+0x80,0x266,0x00
+#v_de_low_h => Value: 370
+0x80,0x267,0x01
+#v_de_low_l => Value: 370
+0x80,0x268,0x72
+#v_de_cnt_h => Value: 720
+0x80,0x269,0x02
+#v_de_cnt_l => Value: 720
+0x80,0x26A,0xD0
+#patgen_mode => Value: 2
+0x81,0x26B,0x02,0x03
+#grad_inc => Value: 4
+0x80,0x26C,0x04
+#par_vid_en => Value: 0
+0x81,0x07,0x00,0x01
+#patgen_clk_src => Value: 5
+0x81,0x24F,0x0A,0x0E
+#auto_bpp => Value: 0
+0x81,0x110,0x00,0x08
+#tun_mode => Value: 0
+0x81,0x383,0x00,0x80
+#vpg_enable => Value: 227
+0x81,0x24E,0xE3,0xE3
