@@ -31,7 +31,7 @@ class Parser:
     def _parse_cpp(self, file):
         cmd_list = []
         for row in file.read().splitlines():
-            if len(row) != 0 and row[0].startswith('0x'):
+            if len(row) != 0 and row.startswith('0x'):
                 cmd = [None] * 5
                 row = row.split(",")[:-1]
                 if row[0] == '0x00':
