@@ -23,24 +23,6 @@ sudo_required() {
 	}
 }
 
-setup_apt_install_prereqs() {
-	type apt-get &> /dev/null || {
-		echo "No 'apt-get' found; cannot install dependencies"
-		return 0
-	}
-	sudo_required
-	sudo -s <<-EOF
-	apt-get -y update
-	apt-get -y install bc sshpass libfftw3-dev librsvg2-dev libgtk-3-dev \
-		cmake build-essential git libxml2 libxml2-dev bison flex \
-		expect usbutils dfu-util screen libaio-dev libglib2.0-dev picocom \
-		wget unzip curl cups cups-bsd intltool itstool libxml2-utils \
-		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal libiec16022-dev \
-		openssh-server gpg dnsmasq libcurl4-gnutls-dev libqrencode-dev pv \
-		python3-pytest python3-libiio python3-scapy python3-scipy
-	/etc/init.d/htpdate restart
-	EOF
-}
 
 __common_build_tool() {
 	local c_files
@@ -139,22 +121,6 @@ setup_pyadi-iio() {
 	popd
 }
 
-
-setup_telemetry() {
-	[ ! -d "work/telemetry" ] || return 0
-
-	git clone https://github.com/sdgtt/telemetry work/telemetry
-
-	pushd work
-	pushd telemetry
-	
-	sudo python3 setup.py build
-	sudo python3 setup.py install
-	sudo python3 -m pip install -r requirements.txt
-
-	popd
-	popd
-}
 
 # TBD : setup_nebula/dns to be researched then added
 
@@ -471,10 +437,10 @@ pushd $SCRIPT_DIR
 
 #TBD: move specific functions from this list into setup_board function
 STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4_power_manager_settings"
-STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs"
+STEPS="$STEPS thunar_volman disable_lxde_automount"
 STEPS="$STEPS write_autostart_config libiio"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
-STEPS="$STEPS dhcp_config telemetry $BOARD"
+STEPS="$STEPS dhcp_config $BOARD"
 
 RAN_ONCE=0
 for step in $STEPS ; do
