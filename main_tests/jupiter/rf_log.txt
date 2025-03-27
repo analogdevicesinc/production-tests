@@ -1,0 +1,1074 @@
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.9.2, pytest-7.4.2, pluggy-0.13.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+metadata: {'Python': '3.9.2', 'Platform': 'Linux-5.10.63-v7l+-armv7l-with-glibc2.31', 'Packages': {'pytest': '7.4.2', 'pluggy': '0.13.0'}, 'Plugins': {'metadata': '3.0.0', 'html': '4.0.2', 'cov': '4.1.0', 'libiio': '0.0.13'}}
+rootdir: /home/analog/production-tests/main_tests/work/pyadi-iio
+configfile: pyproject.toml
+plugins: metadata-3.0.0, html-4.0.2, cov-4.1.0, libiio-0.0.13
+[1mcollecting ... [0mcollected 6 items
+
+../work/pyadi-iio/test/test_jupiter_isolation.py::test_adrv9002_sfdr[0-param_set0--16.3-False-1999952-0.125916-65-adi.adrv9002] 
+Configuration channel: 0
+LO:  2400000000
+Frequency  1999952 and scale  0.125916
+
+Fundamental tone on rx1 is  -68.95164412001338 1999921.875
+Fundamental tone on rx2 is  -79.04315230393598 -1999921.875
+Isolation value rx1 is  64.05164412001339
+Isolation value rx2 is  74.14315230393599
+[31mFAILED[0m
+../work/pyadi-iio/test/test_jupiter_isolation.py::test_adrv9002_sfdr[0-param_set1--17.5-False-1999952-0.125916-65-adi.adrv9002] 
+Configuration channel: 0
+LO:  4500000000
+Frequency  1999952 and scale  0.125916
+
+Fundamental tone on rx1 is  -61.10464739621726 1999921.875
+Fundamental tone on rx2 is  -71.58182459823844 -1999921.875
+Isolation value rx1 is  55.00464739621726
+Isolation value rx2 is  65.48182459823845
+[31mFAILED[0m
+../work/pyadi-iio/test/test_jupiter_isolation.py::test_adrv9002_sfdr[0-param_set2--17.8-False-1999952-0.125916-65-adi.adrv9002] 
+Configuration channel: 0
+LO:  5500000000
+Frequency  1999952 and scale  0.125916
+
+Fundamental tone on rx1 is  -68.24282411301837 1999921.875
+Fundamental tone on rx2 is  -65.39009353678739 -1999921.875
+Isolation value rx1 is  61.842824113018374
+Isolation value rx2 is  58.99009353678739
+[31mFAILED[0m
+../work/pyadi-iio/test/test_jupiter_isolation.py::test_adrv9002_sfdr[1-param_set3--16.3-True-1999952-0.125916-65-adi.adrv9002] 
+Configuration channel: 1
+LO:  2400000000
+Frequency  1999952 and scale  0.125916
+
+Fundamental tone on rx1 is  -78.86647321185166 1999921.875
+Fundamental tone on rx2 is  -75.53830234003334 1999921.875
+Isolation value rx1 is  73.96647321185166
+Isolation value rx2 is  70.63830234003335
+[32mPASSED[0m
+../work/pyadi-iio/test/test_jupiter_isolation.py::test_adrv9002_sfdr[1-param_set4--17.5-True-1999952-0.125916-65-adi.adrv9002] 
+Configuration channel: 1
+LO:  4500000000
+Frequency  1999952 and scale  0.125916
+
+Fundamental tone on rx1 is  -76.0572335867193 1999921.875
+Fundamental tone on rx2 is  -71.85330186892517 1999921.875
+Isolation value rx1 is  69.95723358671931
+Isolation value rx2 is  65.75330186892518
+[32mPASSED[0m
+../work/pyadi-iio/test/test_jupiter_isolation.py::test_adrv9002_sfdr[1-param_set5--17.8-True-1999952-0.125916-65-adi.adrv9002] 
+Configuration channel: 1
+LO:  5500000000
+Frequency  1999952 and scale  0.125916
+
+Fundamental tone on rx1 is  -75.28193122916778 1999921.875
+Fundamental tone on rx2 is  -59.98911093034689 1999921.875
+Isolation value rx1 is  68.88193122916779
+Isolation value rx2 is  53.589110930346884
+[31mFAILED[0m
+
+=================================== FAILURES ===================================
+[31m[1m_ test_adrv9002_sfdr[0-param_set0--16.3-False-1999952-0.125916-65-adi.adrv9002] _[0m
+
+context_desc = [{'devices': 'ltc2945,tps6598x_source_psy_0_0038,tps6598x_source_psy_0_003f,xilinx-system-monitor,adrv9002-phy,axi-adr...ystem-monitor0-convst,xilinx-system-monitor0-samplerate', 'hw': 'adrv9002', 'type': 'ip', 'uri': 'ip:analogdut.local'}]
+test_isolation = <function isolation at 0xaeff5d60>, classname = 'adi.adrv9002'
+iio_uri = 'ip:analogdut.local', channel = 0
+param_set = {'gain_control_mode_chan0': 'spi', 'gain_control_mode_chan1': 'spi', 'rx0_lo': 2400000000, 'rx1_lo': 2400000000, ...}
+frequency = 1999952, scale = 0.125916, isolation_min = 65, tx_level = -16.3
+rxtx2 = False
+
+    [37m@pytest[39;49;00m.mark.iio_hardware(hardware)
+    [37m@pytest[39;49;00m.mark.parametrize([33m"[39;49;00m[33mclassname[39;49;00m[33m"[39;49;00m, [(classname)])
+    [37m@pytest[39;49;00m.mark.parametrize([33m"[39;49;00m[33mfrequency, scale, isolation_min[39;49;00m[33m"[39;49;00m, [([94m1999952[39;49;00m, [94m0.125916[39;49;00m, [94m65[39;49;00m)])
+    [37m@pytest[39;49;00m.mark.parametrize(
+        [33m"[39;49;00m[33mchannel, param_set, tx_level, rxtx2[39;49;00m[33m"[39;49;00m,
+        [
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m2400000000[39;49;00m,
+                    rx0_lo=[94m2400000000[39;49;00m,
+                    tx1_lo=[94m2400000000[39;49;00m,
+                    rx1_lo=[94m2400000000[39;49;00m,
+                    gain_control_mode_chan0=[33m"[39;49;00m[33mspi[39;49;00m[33m"[39;49;00m,
+                    gain_control_mode_chan1=[33m"[39;49;00m[33mspi[39;49;00m[33m"[39;49;00m,
+                    rx_hardwaregain_chan0=[94m34[39;49;00m,
+                    rx_hardwaregain_chan1=[94m34[39;49;00m,
+                ),
+                -[94m16.3[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m4500000000[39;49;00m,
+                    rx0_lo=[94m4500000000[39;49;00m,
+                    tx1_lo=[94m4500000000[39;49;00m,
+                    rx1_lo=[94m4500000000[39;49;00m,
+                ),
+                -[94m17.5[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m5500000000[39;49;00m,
+                    rx0_lo=[94m5500000000[39;49;00m,
+                    tx1_lo=[94m5500000000[39;49;00m,
+                    rx1_lo=[94m5500000000[39;49;00m,
+                ),
+                -[94m17.8[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m2400000000[39;49;00m,
+                    rx0_lo=[94m2400000000[39;49;00m,
+                    tx1_lo=[94m2400000000[39;49;00m,
+                    rx1_lo=[94m2400000000[39;49;00m,
+                ),
+                -[94m16.3[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m4500000000[39;49;00m,
+                    rx0_lo=[94m4500000000[39;49;00m,
+                    tx1_lo=[94m4500000000[39;49;00m,
+                    rx1_lo=[94m4500000000[39;49;00m,
+                ),
+                -[94m17.5[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m5500000000[39;49;00m,
+                    rx0_lo=[94m5500000000[39;49;00m,
+                    tx1_lo=[94m5500000000[39;49;00m,
+                    rx1_lo=[94m5500000000[39;49;00m,
+                ),
+                -[94m17.8[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+    
+        ],
+    )
+    [94mdef[39;49;00m [92mtest_adrv9002_sfdr[39;49;00m(
+        context_desc, test_isolation, classname, iio_uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2,
+    ):
+        [96mprint[39;49;00m([33m"[39;49;00m[33m"[39;49;00m)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mConfiguration channel:[39;49;00m[33m"[39;49;00m, channel)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mLO: [39;49;00m[33m"[39;49;00m, param_set[[33m"[39;49;00m[33mtx0_lo[39;49;00m[33m"[39;49;00m])
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFrequency [39;49;00m[33m"[39;49;00m, frequency, [33m"[39;49;00m[33mand scale [39;49;00m[33m"[39;49;00m, scale)
+        [96mprint[39;49;00m([33m"[39;49;00m[33m"[39;49;00m)
+>       test_isolation(classname, iio_uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2, plot=[94mTrue[39;49;00m)
+
+[1m[31m../work/pyadi-iio/test/test_jupiter_isolation.py[0m:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+classname = 'adi.adrv9002', uri = 'ip:analogdut.local', channel = 0
+param_set = {'gain_control_mode_chan0': 'spi', 'gain_control_mode_chan1': 'spi', 'rx0_lo': 2400000000, 'rx1_lo': 2400000000, ...}
+frequency = 1999952, scale = 0.125916, isolation_min = 65, tx_level = -16.3
+rxtx2 = False, plot = True
+
+    [94mdef[39;49;00m [92misolation[39;49;00m(classname, uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2=[94mFalse[39;49;00m, plot=[94mFalse[39;49;00m):
+        [33m"""t_isolation: Test rf isolation with connected loopback cables and plug termination.[39;49;00m
+    [33m    This test requires a devices with TX and RX onboard where the transmit[39;49;00m
+    [33m    signal can be recovered. Sinuoidal data is passed to DMAs which is then[39;49;00m
+    [33m    estimated on the RX side.[39;49;00m
+    [33m    parameters:[39;49;00m
+    [33m        uri: type=string[39;49;00m
+    [33m            URI of IIO context of target board/system[39;49;00m
+    [33m        classname: type=string[39;49;00m
+    [33m            Name of pyadi interface class which contain attribute[39;49;00m
+    [33m        channel: type=list[39;49;00m
+    [33m            List of integers or list of list of integers of channels to[39;49;00m
+    [33m            enable through tx_enabled_channels[39;49;00m
+    [33m        param_set: type=dict[39;49;00m
+    [33m            Dictionary of attribute and values to be set before tone is[39;49;00m
+    [33m            generated and received[39;49;00m
+    [33m        frequency: type=int[39;49;00m
+    [33m            Value of dds frequency[39;49;00m
+    [33m        scale: type=float[39;49;00m
+    [33m            Value of dds scale[39;49;00m
+    [33m        isolation_min: type=int[39;49;00m
+    [33m            Min value of isolation for test to pass[39;49;00m
+    [33m        tx_level: type=float[39;49;00m
+    [33m            Value of tx_level to calculate isolation[39;49;00m
+    [33m    """[39;49;00m
+        sdr = [96meval[39;49;00m(classname + [33m"[39;49;00m[33m(uri=[39;49;00m[33m'[39;49;00m[33m"[39;49;00m + uri + [33m"[39;49;00m[33m'[39;49;00m[33m)[39;49;00m[33m"[39;49;00m)
+        [94mfor[39;49;00m p [95min[39;49;00m param_set.keys():
+            [96msetattr[39;49;00m(sdr, p, param_set[p])
+        time.sleep([94m1[39;49;00m)
+    
+        sdr.dds_single_tone(frequency, scale, channel)
+        time.sleep([94m2[39;49;00m)
+    
+        N = [94m2[39;49;00m ** [94m16[39;49;00m
+        [94mif[39;49;00m(rxtx2):
+            sdr._tx2.tx_cyclic_buffer = [94mTrue[39;49;00m
+            sdr._tx2.tx_enabled_channels = [[94m0[39;49;00m]
+            sdr._tx2.tx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.tx_enabled_channels)
+        [94melse[39;49;00m:
+            sdr.tx_cyclic_buffer = [94mTrue[39;49;00m
+            sdr.tx_enabled_channels = [[94m0[39;49;00m]
+            sdr.tx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.tx_enabled_channels)
+    
+        [90m# if rxtx2:[39;49;00m
+        [90m#     sdr._rx2.rx_enabled_channels = [0][39;49;00m
+        [90m#     sdr._rx2.rx_buffer_size = N * 2 * len(sdr.rx_enabled_channels)[39;49;00m
+        [90m# else:[39;49;00m
+        sdr._rx2.rx_enabled_channels = [[94m0[39;49;00m]
+        sdr._rx2.rx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.rx_enabled_channels)
+        sdr.rx_enabled_channels = [[94m0[39;49;00m]
+        sdr.rx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.rx_enabled_channels)
+    
+        ref = [94m2[39;49;00m ** [94m15[39;49;00m
+    
+        [94mif[39;49;00m [96mhasattr[39;49;00m(sdr, [33m"[39;49;00m[33msample_rate[39;49;00m[33m"[39;49;00m):
+            RXFS = [96mint[39;49;00m(sdr.sample_rate)
+        [94melse[39;49;00m:
+            RXFS = [96mint[39;49;00m(sdr.rx0_sample_rate)
+    
+        [94mtry[39;49;00m:
+            amp = [94m0[39;49;00m
+            freq = [94m0[39;49;00m
+            amp2 = [94m0[39;49;00m
+            freq2 = [94m0[39;49;00m
+            [94mfor[39;49;00m i [95min[39;49;00m [96mrange[39;49;00m([94m8[39;49;00m):
+                data = sdr.rx()
+                time.sleep([94m1[39;49;00m)
+                amps, freq = spec.spec_est(
+                    data, fs=RXFS, ref=ref, num_ffts=[94m1[39;49;00m, enable_windowing=[94mTrue[39;49;00m, plot=[94mFalse[39;49;00m
+                )
+                amp += amps
+    
+            [94mfor[39;49;00m i [95min[39;49;00m [96mrange[39;49;00m([94m8[39;49;00m):
+                data2 = sdr.rx2()
+                time.sleep([94m1[39;49;00m)
+                amps2, freq2 = spec.spec_est(
+                    data2, fs=RXFS, ref=ref, num_ffts=[94m1[39;49;00m, enable_windowing=[94mTrue[39;49;00m, plot=[94mFalse[39;49;00m
+                )
+                amp2 += amps2
+    
+            amp /= [94m8[39;49;00m
+            amp2 /= [94m8[39;49;00m
+        [94mexcept[39;49;00m [96mException[39;49;00m [94mas[39;49;00m e:
+            [94mdel[39;49;00m sdr
+            [94mraise[39;49;00m [96mException[39;49;00m(e)
+        [94mdel[39;49;00m sdr
+    
+        sfdr, peaks, indxs, sfdr2 = spec.sfdr_signal(data, amp, freq, plot=[94mFalse[39;49;00m)
+        sfdr, peaks2, indxs2, sfdr2 = spec.sfdr_signal(data2, amp2, freq2, plot=[94mFalse[39;49;00m)
+    
+        ml = indxs[[94m0[39;49;00m]
+        ml2 = indxs2[[94m0[39;49;00m]
+        [94mif[39;49;00m plot:
+            [94mimport[39;49;00m [04m[96mmatplotlib[39;49;00m[04m[96m.[39;49;00m[04m[96mpyplot[39;49;00m [94mas[39;49;00m [04m[96mplt[39;49;00m
+    
+            plt.subplot([94m2[39;49;00m, [94m1[39;49;00m, [94m1[39;49;00m)
+            plt.plot(data, [33m"[39;49;00m[33m.-[39;49;00m[33m"[39;49;00m)
+            plt.plot([94m1[39;49;00m, [94m1[39;49;00m, [33m"[39;49;00m[33mr.[39;49;00m[33m"[39;49;00m)
+            plt.margins([94m0.1[39;49;00m, [94m0.1[39;49;00m)
+            plt.xlabel([33m"[39;49;00m[33mTime [s][39;49;00m[33m"[39;49;00m)
+    
+            plt.subplot([94m2[39;49;00m, [94m1[39;49;00m, [94m2[39;49;00m)
+            plt.plot(fftshift(freq), fftshift(amp))
+            plt.plot(freq[ml], amp[ml], [33m"[39;49;00m[33my.[39;49;00m[33m"[39;49;00m)
+    
+            plt.margins([94m0.1[39;49;00m, [94m0.1[39;49;00m)
+            plt.annotate([33m"[39;49;00m[33mFundamental[39;49;00m[33m"[39;49;00m, (freq[ml], amp[ml]))
+            plt.xlabel([33m"[39;49;00m[33mFrequency [Hz][39;49;00m[33m"[39;49;00m)
+            plt.tight_layout()
+            [90m# plt.show()[39;49;00m
+            plt.savefig([33m"[39;49;00m[33m./results_log/graph_ch_isolation[39;49;00m[33m"[39;49;00m + [96mstr[39;49;00m(channel) + [96mstr[39;49;00m(param_set[[33m"[39;49;00m[33mrx0_lo[39;49;00m[33m"[39;49;00m] / [94m1000000000[39;49;00m) + [33m"[39;49;00m[33mGHz.png[39;49;00m[33m"[39;49;00m)
+            plt.close()
+    
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFundamental tone on rx1 is [39;49;00m[33m"[39;49;00m, peaks[[94m0[39;49;00m], freq[indxs[[94m0[39;49;00m]])
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFundamental tone on rx2 is [39;49;00m[33m"[39;49;00m, peaks2[[94m0[39;49;00m], freq2[indxs2[[94m0[39;49;00m]])
+    
+        rx_fs = -[94m11.4[39;49;00m
+        isolation = tx_level - amp[ml] - rx_fs
+        isolation2 = tx_level - amp2[ml2] - rx_fs
+        [96mprint[39;49;00m([33m"[39;49;00m[33mIsolation value rx1 is [39;49;00m[33m"[39;49;00m, isolation)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mIsolation value rx2 is [39;49;00m[33m"[39;49;00m, isolation2)
+    
+>       [94massert[39;49;00m isolation > isolation_min
+[1m[31mE       assert 64.05164412001339 > 65[0m
+
+[1m[31m../work/pyadi-iio/test/dma_tests.py[0m:887: AssertionError
+[31m[1m_ test_adrv9002_sfdr[0-param_set1--17.5-False-1999952-0.125916-65-adi.adrv9002] _[0m
+
+context_desc = [{'devices': 'ltc2945,tps6598x_source_psy_0_0038,tps6598x_source_psy_0_003f,xilinx-system-monitor,adrv9002-phy,axi-adr...ystem-monitor0-convst,xilinx-system-monitor0-samplerate', 'hw': 'adrv9002', 'type': 'ip', 'uri': 'ip:analogdut.local'}]
+test_isolation = <function isolation at 0xaeff5d60>, classname = 'adi.adrv9002'
+iio_uri = 'ip:analogdut.local', channel = 0
+param_set = {'rx0_lo': 4500000000, 'rx1_lo': 4500000000, 'tx0_lo': 4500000000, 'tx1_lo': 4500000000, ...}
+frequency = 1999952, scale = 0.125916, isolation_min = 65, tx_level = -17.5
+rxtx2 = False
+
+    [37m@pytest[39;49;00m.mark.iio_hardware(hardware)
+    [37m@pytest[39;49;00m.mark.parametrize([33m"[39;49;00m[33mclassname[39;49;00m[33m"[39;49;00m, [(classname)])
+    [37m@pytest[39;49;00m.mark.parametrize([33m"[39;49;00m[33mfrequency, scale, isolation_min[39;49;00m[33m"[39;49;00m, [([94m1999952[39;49;00m, [94m0.125916[39;49;00m, [94m65[39;49;00m)])
+    [37m@pytest[39;49;00m.mark.parametrize(
+        [33m"[39;49;00m[33mchannel, param_set, tx_level, rxtx2[39;49;00m[33m"[39;49;00m,
+        [
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m2400000000[39;49;00m,
+                    rx0_lo=[94m2400000000[39;49;00m,
+                    tx1_lo=[94m2400000000[39;49;00m,
+                    rx1_lo=[94m2400000000[39;49;00m,
+                    gain_control_mode_chan0=[33m"[39;49;00m[33mspi[39;49;00m[33m"[39;49;00m,
+                    gain_control_mode_chan1=[33m"[39;49;00m[33mspi[39;49;00m[33m"[39;49;00m,
+                    rx_hardwaregain_chan0=[94m34[39;49;00m,
+                    rx_hardwaregain_chan1=[94m34[39;49;00m,
+                ),
+                -[94m16.3[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m4500000000[39;49;00m,
+                    rx0_lo=[94m4500000000[39;49;00m,
+                    tx1_lo=[94m4500000000[39;49;00m,
+                    rx1_lo=[94m4500000000[39;49;00m,
+                ),
+                -[94m17.5[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m5500000000[39;49;00m,
+                    rx0_lo=[94m5500000000[39;49;00m,
+                    tx1_lo=[94m5500000000[39;49;00m,
+                    rx1_lo=[94m5500000000[39;49;00m,
+                ),
+                -[94m17.8[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m2400000000[39;49;00m,
+                    rx0_lo=[94m2400000000[39;49;00m,
+                    tx1_lo=[94m2400000000[39;49;00m,
+                    rx1_lo=[94m2400000000[39;49;00m,
+                ),
+                -[94m16.3[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m4500000000[39;49;00m,
+                    rx0_lo=[94m4500000000[39;49;00m,
+                    tx1_lo=[94m4500000000[39;49;00m,
+                    rx1_lo=[94m4500000000[39;49;00m,
+                ),
+                -[94m17.5[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m5500000000[39;49;00m,
+                    rx0_lo=[94m5500000000[39;49;00m,
+                    tx1_lo=[94m5500000000[39;49;00m,
+                    rx1_lo=[94m5500000000[39;49;00m,
+                ),
+                -[94m17.8[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+    
+        ],
+    )
+    [94mdef[39;49;00m [92mtest_adrv9002_sfdr[39;49;00m(
+        context_desc, test_isolation, classname, iio_uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2,
+    ):
+        [96mprint[39;49;00m([33m"[39;49;00m[33m"[39;49;00m)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mConfiguration channel:[39;49;00m[33m"[39;49;00m, channel)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mLO: [39;49;00m[33m"[39;49;00m, param_set[[33m"[39;49;00m[33mtx0_lo[39;49;00m[33m"[39;49;00m])
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFrequency [39;49;00m[33m"[39;49;00m, frequency, [33m"[39;49;00m[33mand scale [39;49;00m[33m"[39;49;00m, scale)
+        [96mprint[39;49;00m([33m"[39;49;00m[33m"[39;49;00m)
+>       test_isolation(classname, iio_uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2, plot=[94mTrue[39;49;00m)
+
+[1m[31m../work/pyadi-iio/test/test_jupiter_isolation.py[0m:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+classname = 'adi.adrv9002', uri = 'ip:analogdut.local', channel = 0
+param_set = {'rx0_lo': 4500000000, 'rx1_lo': 4500000000, 'tx0_lo': 4500000000, 'tx1_lo': 4500000000, ...}
+frequency = 1999952, scale = 0.125916, isolation_min = 65, tx_level = -17.5
+rxtx2 = False, plot = True
+
+    [94mdef[39;49;00m [92misolation[39;49;00m(classname, uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2=[94mFalse[39;49;00m, plot=[94mFalse[39;49;00m):
+        [33m"""t_isolation: Test rf isolation with connected loopback cables and plug termination.[39;49;00m
+    [33m    This test requires a devices with TX and RX onboard where the transmit[39;49;00m
+    [33m    signal can be recovered. Sinuoidal data is passed to DMAs which is then[39;49;00m
+    [33m    estimated on the RX side.[39;49;00m
+    [33m    parameters:[39;49;00m
+    [33m        uri: type=string[39;49;00m
+    [33m            URI of IIO context of target board/system[39;49;00m
+    [33m        classname: type=string[39;49;00m
+    [33m            Name of pyadi interface class which contain attribute[39;49;00m
+    [33m        channel: type=list[39;49;00m
+    [33m            List of integers or list of list of integers of channels to[39;49;00m
+    [33m            enable through tx_enabled_channels[39;49;00m
+    [33m        param_set: type=dict[39;49;00m
+    [33m            Dictionary of attribute and values to be set before tone is[39;49;00m
+    [33m            generated and received[39;49;00m
+    [33m        frequency: type=int[39;49;00m
+    [33m            Value of dds frequency[39;49;00m
+    [33m        scale: type=float[39;49;00m
+    [33m            Value of dds scale[39;49;00m
+    [33m        isolation_min: type=int[39;49;00m
+    [33m            Min value of isolation for test to pass[39;49;00m
+    [33m        tx_level: type=float[39;49;00m
+    [33m            Value of tx_level to calculate isolation[39;49;00m
+    [33m    """[39;49;00m
+        sdr = [96meval[39;49;00m(classname + [33m"[39;49;00m[33m(uri=[39;49;00m[33m'[39;49;00m[33m"[39;49;00m + uri + [33m"[39;49;00m[33m'[39;49;00m[33m)[39;49;00m[33m"[39;49;00m)
+        [94mfor[39;49;00m p [95min[39;49;00m param_set.keys():
+            [96msetattr[39;49;00m(sdr, p, param_set[p])
+        time.sleep([94m1[39;49;00m)
+    
+        sdr.dds_single_tone(frequency, scale, channel)
+        time.sleep([94m2[39;49;00m)
+    
+        N = [94m2[39;49;00m ** [94m16[39;49;00m
+        [94mif[39;49;00m(rxtx2):
+            sdr._tx2.tx_cyclic_buffer = [94mTrue[39;49;00m
+            sdr._tx2.tx_enabled_channels = [[94m0[39;49;00m]
+            sdr._tx2.tx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.tx_enabled_channels)
+        [94melse[39;49;00m:
+            sdr.tx_cyclic_buffer = [94mTrue[39;49;00m
+            sdr.tx_enabled_channels = [[94m0[39;49;00m]
+            sdr.tx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.tx_enabled_channels)
+    
+        [90m# if rxtx2:[39;49;00m
+        [90m#     sdr._rx2.rx_enabled_channels = [0][39;49;00m
+        [90m#     sdr._rx2.rx_buffer_size = N * 2 * len(sdr.rx_enabled_channels)[39;49;00m
+        [90m# else:[39;49;00m
+        sdr._rx2.rx_enabled_channels = [[94m0[39;49;00m]
+        sdr._rx2.rx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.rx_enabled_channels)
+        sdr.rx_enabled_channels = [[94m0[39;49;00m]
+        sdr.rx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.rx_enabled_channels)
+    
+        ref = [94m2[39;49;00m ** [94m15[39;49;00m
+    
+        [94mif[39;49;00m [96mhasattr[39;49;00m(sdr, [33m"[39;49;00m[33msample_rate[39;49;00m[33m"[39;49;00m):
+            RXFS = [96mint[39;49;00m(sdr.sample_rate)
+        [94melse[39;49;00m:
+            RXFS = [96mint[39;49;00m(sdr.rx0_sample_rate)
+    
+        [94mtry[39;49;00m:
+            amp = [94m0[39;49;00m
+            freq = [94m0[39;49;00m
+            amp2 = [94m0[39;49;00m
+            freq2 = [94m0[39;49;00m
+            [94mfor[39;49;00m i [95min[39;49;00m [96mrange[39;49;00m([94m8[39;49;00m):
+                data = sdr.rx()
+                time.sleep([94m1[39;49;00m)
+                amps, freq = spec.spec_est(
+                    data, fs=RXFS, ref=ref, num_ffts=[94m1[39;49;00m, enable_windowing=[94mTrue[39;49;00m, plot=[94mFalse[39;49;00m
+                )
+                amp += amps
+    
+            [94mfor[39;49;00m i [95min[39;49;00m [96mrange[39;49;00m([94m8[39;49;00m):
+                data2 = sdr.rx2()
+                time.sleep([94m1[39;49;00m)
+                amps2, freq2 = spec.spec_est(
+                    data2, fs=RXFS, ref=ref, num_ffts=[94m1[39;49;00m, enable_windowing=[94mTrue[39;49;00m, plot=[94mFalse[39;49;00m
+                )
+                amp2 += amps2
+    
+            amp /= [94m8[39;49;00m
+            amp2 /= [94m8[39;49;00m
+        [94mexcept[39;49;00m [96mException[39;49;00m [94mas[39;49;00m e:
+            [94mdel[39;49;00m sdr
+            [94mraise[39;49;00m [96mException[39;49;00m(e)
+        [94mdel[39;49;00m sdr
+    
+        sfdr, peaks, indxs, sfdr2 = spec.sfdr_signal(data, amp, freq, plot=[94mFalse[39;49;00m)
+        sfdr, peaks2, indxs2, sfdr2 = spec.sfdr_signal(data2, amp2, freq2, plot=[94mFalse[39;49;00m)
+    
+        ml = indxs[[94m0[39;49;00m]
+        ml2 = indxs2[[94m0[39;49;00m]
+        [94mif[39;49;00m plot:
+            [94mimport[39;49;00m [04m[96mmatplotlib[39;49;00m[04m[96m.[39;49;00m[04m[96mpyplot[39;49;00m [94mas[39;49;00m [04m[96mplt[39;49;00m
+    
+            plt.subplot([94m2[39;49;00m, [94m1[39;49;00m, [94m1[39;49;00m)
+            plt.plot(data, [33m"[39;49;00m[33m.-[39;49;00m[33m"[39;49;00m)
+            plt.plot([94m1[39;49;00m, [94m1[39;49;00m, [33m"[39;49;00m[33mr.[39;49;00m[33m"[39;49;00m)
+            plt.margins([94m0.1[39;49;00m, [94m0.1[39;49;00m)
+            plt.xlabel([33m"[39;49;00m[33mTime [s][39;49;00m[33m"[39;49;00m)
+    
+            plt.subplot([94m2[39;49;00m, [94m1[39;49;00m, [94m2[39;49;00m)
+            plt.plot(fftshift(freq), fftshift(amp))
+            plt.plot(freq[ml], amp[ml], [33m"[39;49;00m[33my.[39;49;00m[33m"[39;49;00m)
+    
+            plt.margins([94m0.1[39;49;00m, [94m0.1[39;49;00m)
+            plt.annotate([33m"[39;49;00m[33mFundamental[39;49;00m[33m"[39;49;00m, (freq[ml], amp[ml]))
+            plt.xlabel([33m"[39;49;00m[33mFrequency [Hz][39;49;00m[33m"[39;49;00m)
+            plt.tight_layout()
+            [90m# plt.show()[39;49;00m
+            plt.savefig([33m"[39;49;00m[33m./results_log/graph_ch_isolation[39;49;00m[33m"[39;49;00m + [96mstr[39;49;00m(channel) + [96mstr[39;49;00m(param_set[[33m"[39;49;00m[33mrx0_lo[39;49;00m[33m"[39;49;00m] / [94m1000000000[39;49;00m) + [33m"[39;49;00m[33mGHz.png[39;49;00m[33m"[39;49;00m)
+            plt.close()
+    
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFundamental tone on rx1 is [39;49;00m[33m"[39;49;00m, peaks[[94m0[39;49;00m], freq[indxs[[94m0[39;49;00m]])
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFundamental tone on rx2 is [39;49;00m[33m"[39;49;00m, peaks2[[94m0[39;49;00m], freq2[indxs2[[94m0[39;49;00m]])
+    
+        rx_fs = -[94m11.4[39;49;00m
+        isolation = tx_level - amp[ml] - rx_fs
+        isolation2 = tx_level - amp2[ml2] - rx_fs
+        [96mprint[39;49;00m([33m"[39;49;00m[33mIsolation value rx1 is [39;49;00m[33m"[39;49;00m, isolation)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mIsolation value rx2 is [39;49;00m[33m"[39;49;00m, isolation2)
+    
+>       [94massert[39;49;00m isolation > isolation_min
+[1m[31mE       assert 55.00464739621726 > 65[0m
+
+[1m[31m../work/pyadi-iio/test/dma_tests.py[0m:887: AssertionError
+[31m[1m_ test_adrv9002_sfdr[0-param_set2--17.8-False-1999952-0.125916-65-adi.adrv9002] _[0m
+
+context_desc = [{'devices': 'ltc2945,tps6598x_source_psy_0_0038,tps6598x_source_psy_0_003f,xilinx-system-monitor,adrv9002-phy,axi-adr...ystem-monitor0-convst,xilinx-system-monitor0-samplerate', 'hw': 'adrv9002', 'type': 'ip', 'uri': 'ip:analogdut.local'}]
+test_isolation = <function isolation at 0xaeff5d60>, classname = 'adi.adrv9002'
+iio_uri = 'ip:analogdut.local', channel = 0
+param_set = {'rx0_lo': 5500000000, 'rx1_lo': 5500000000, 'tx0_lo': 5500000000, 'tx1_lo': 5500000000, ...}
+frequency = 1999952, scale = 0.125916, isolation_min = 65, tx_level = -17.8
+rxtx2 = False
+
+    [37m@pytest[39;49;00m.mark.iio_hardware(hardware)
+    [37m@pytest[39;49;00m.mark.parametrize([33m"[39;49;00m[33mclassname[39;49;00m[33m"[39;49;00m, [(classname)])
+    [37m@pytest[39;49;00m.mark.parametrize([33m"[39;49;00m[33mfrequency, scale, isolation_min[39;49;00m[33m"[39;49;00m, [([94m1999952[39;49;00m, [94m0.125916[39;49;00m, [94m65[39;49;00m)])
+    [37m@pytest[39;49;00m.mark.parametrize(
+        [33m"[39;49;00m[33mchannel, param_set, tx_level, rxtx2[39;49;00m[33m"[39;49;00m,
+        [
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m2400000000[39;49;00m,
+                    rx0_lo=[94m2400000000[39;49;00m,
+                    tx1_lo=[94m2400000000[39;49;00m,
+                    rx1_lo=[94m2400000000[39;49;00m,
+                    gain_control_mode_chan0=[33m"[39;49;00m[33mspi[39;49;00m[33m"[39;49;00m,
+                    gain_control_mode_chan1=[33m"[39;49;00m[33mspi[39;49;00m[33m"[39;49;00m,
+                    rx_hardwaregain_chan0=[94m34[39;49;00m,
+                    rx_hardwaregain_chan1=[94m34[39;49;00m,
+                ),
+                -[94m16.3[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m4500000000[39;49;00m,
+                    rx0_lo=[94m4500000000[39;49;00m,
+                    tx1_lo=[94m4500000000[39;49;00m,
+                    rx1_lo=[94m4500000000[39;49;00m,
+                ),
+                -[94m17.5[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m5500000000[39;49;00m,
+                    rx0_lo=[94m5500000000[39;49;00m,
+                    tx1_lo=[94m5500000000[39;49;00m,
+                    rx1_lo=[94m5500000000[39;49;00m,
+                ),
+                -[94m17.8[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m2400000000[39;49;00m,
+                    rx0_lo=[94m2400000000[39;49;00m,
+                    tx1_lo=[94m2400000000[39;49;00m,
+                    rx1_lo=[94m2400000000[39;49;00m,
+                ),
+                -[94m16.3[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m4500000000[39;49;00m,
+                    rx0_lo=[94m4500000000[39;49;00m,
+                    tx1_lo=[94m4500000000[39;49;00m,
+                    rx1_lo=[94m4500000000[39;49;00m,
+                ),
+                -[94m17.5[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m5500000000[39;49;00m,
+                    rx0_lo=[94m5500000000[39;49;00m,
+                    tx1_lo=[94m5500000000[39;49;00m,
+                    rx1_lo=[94m5500000000[39;49;00m,
+                ),
+                -[94m17.8[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+    
+        ],
+    )
+    [94mdef[39;49;00m [92mtest_adrv9002_sfdr[39;49;00m(
+        context_desc, test_isolation, classname, iio_uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2,
+    ):
+        [96mprint[39;49;00m([33m"[39;49;00m[33m"[39;49;00m)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mConfiguration channel:[39;49;00m[33m"[39;49;00m, channel)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mLO: [39;49;00m[33m"[39;49;00m, param_set[[33m"[39;49;00m[33mtx0_lo[39;49;00m[33m"[39;49;00m])
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFrequency [39;49;00m[33m"[39;49;00m, frequency, [33m"[39;49;00m[33mand scale [39;49;00m[33m"[39;49;00m, scale)
+        [96mprint[39;49;00m([33m"[39;49;00m[33m"[39;49;00m)
+>       test_isolation(classname, iio_uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2, plot=[94mTrue[39;49;00m)
+
+[1m[31m../work/pyadi-iio/test/test_jupiter_isolation.py[0m:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+classname = 'adi.adrv9002', uri = 'ip:analogdut.local', channel = 0
+param_set = {'rx0_lo': 5500000000, 'rx1_lo': 5500000000, 'tx0_lo': 5500000000, 'tx1_lo': 5500000000, ...}
+frequency = 1999952, scale = 0.125916, isolation_min = 65, tx_level = -17.8
+rxtx2 = False, plot = True
+
+    [94mdef[39;49;00m [92misolation[39;49;00m(classname, uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2=[94mFalse[39;49;00m, plot=[94mFalse[39;49;00m):
+        [33m"""t_isolation: Test rf isolation with connected loopback cables and plug termination.[39;49;00m
+    [33m    This test requires a devices with TX and RX onboard where the transmit[39;49;00m
+    [33m    signal can be recovered. Sinuoidal data is passed to DMAs which is then[39;49;00m
+    [33m    estimated on the RX side.[39;49;00m
+    [33m    parameters:[39;49;00m
+    [33m        uri: type=string[39;49;00m
+    [33m            URI of IIO context of target board/system[39;49;00m
+    [33m        classname: type=string[39;49;00m
+    [33m            Name of pyadi interface class which contain attribute[39;49;00m
+    [33m        channel: type=list[39;49;00m
+    [33m            List of integers or list of list of integers of channels to[39;49;00m
+    [33m            enable through tx_enabled_channels[39;49;00m
+    [33m        param_set: type=dict[39;49;00m
+    [33m            Dictionary of attribute and values to be set before tone is[39;49;00m
+    [33m            generated and received[39;49;00m
+    [33m        frequency: type=int[39;49;00m
+    [33m            Value of dds frequency[39;49;00m
+    [33m        scale: type=float[39;49;00m
+    [33m            Value of dds scale[39;49;00m
+    [33m        isolation_min: type=int[39;49;00m
+    [33m            Min value of isolation for test to pass[39;49;00m
+    [33m        tx_level: type=float[39;49;00m
+    [33m            Value of tx_level to calculate isolation[39;49;00m
+    [33m    """[39;49;00m
+        sdr = [96meval[39;49;00m(classname + [33m"[39;49;00m[33m(uri=[39;49;00m[33m'[39;49;00m[33m"[39;49;00m + uri + [33m"[39;49;00m[33m'[39;49;00m[33m)[39;49;00m[33m"[39;49;00m)
+        [94mfor[39;49;00m p [95min[39;49;00m param_set.keys():
+            [96msetattr[39;49;00m(sdr, p, param_set[p])
+        time.sleep([94m1[39;49;00m)
+    
+        sdr.dds_single_tone(frequency, scale, channel)
+        time.sleep([94m2[39;49;00m)
+    
+        N = [94m2[39;49;00m ** [94m16[39;49;00m
+        [94mif[39;49;00m(rxtx2):
+            sdr._tx2.tx_cyclic_buffer = [94mTrue[39;49;00m
+            sdr._tx2.tx_enabled_channels = [[94m0[39;49;00m]
+            sdr._tx2.tx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.tx_enabled_channels)
+        [94melse[39;49;00m:
+            sdr.tx_cyclic_buffer = [94mTrue[39;49;00m
+            sdr.tx_enabled_channels = [[94m0[39;49;00m]
+            sdr.tx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.tx_enabled_channels)
+    
+        [90m# if rxtx2:[39;49;00m
+        [90m#     sdr._rx2.rx_enabled_channels = [0][39;49;00m
+        [90m#     sdr._rx2.rx_buffer_size = N * 2 * len(sdr.rx_enabled_channels)[39;49;00m
+        [90m# else:[39;49;00m
+        sdr._rx2.rx_enabled_channels = [[94m0[39;49;00m]
+        sdr._rx2.rx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.rx_enabled_channels)
+        sdr.rx_enabled_channels = [[94m0[39;49;00m]
+        sdr.rx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.rx_enabled_channels)
+    
+        ref = [94m2[39;49;00m ** [94m15[39;49;00m
+    
+        [94mif[39;49;00m [96mhasattr[39;49;00m(sdr, [33m"[39;49;00m[33msample_rate[39;49;00m[33m"[39;49;00m):
+            RXFS = [96mint[39;49;00m(sdr.sample_rate)
+        [94melse[39;49;00m:
+            RXFS = [96mint[39;49;00m(sdr.rx0_sample_rate)
+    
+        [94mtry[39;49;00m:
+            amp = [94m0[39;49;00m
+            freq = [94m0[39;49;00m
+            amp2 = [94m0[39;49;00m
+            freq2 = [94m0[39;49;00m
+            [94mfor[39;49;00m i [95min[39;49;00m [96mrange[39;49;00m([94m8[39;49;00m):
+                data = sdr.rx()
+                time.sleep([94m1[39;49;00m)
+                amps, freq = spec.spec_est(
+                    data, fs=RXFS, ref=ref, num_ffts=[94m1[39;49;00m, enable_windowing=[94mTrue[39;49;00m, plot=[94mFalse[39;49;00m
+                )
+                amp += amps
+    
+            [94mfor[39;49;00m i [95min[39;49;00m [96mrange[39;49;00m([94m8[39;49;00m):
+                data2 = sdr.rx2()
+                time.sleep([94m1[39;49;00m)
+                amps2, freq2 = spec.spec_est(
+                    data2, fs=RXFS, ref=ref, num_ffts=[94m1[39;49;00m, enable_windowing=[94mTrue[39;49;00m, plot=[94mFalse[39;49;00m
+                )
+                amp2 += amps2
+    
+            amp /= [94m8[39;49;00m
+            amp2 /= [94m8[39;49;00m
+        [94mexcept[39;49;00m [96mException[39;49;00m [94mas[39;49;00m e:
+            [94mdel[39;49;00m sdr
+            [94mraise[39;49;00m [96mException[39;49;00m(e)
+        [94mdel[39;49;00m sdr
+    
+        sfdr, peaks, indxs, sfdr2 = spec.sfdr_signal(data, amp, freq, plot=[94mFalse[39;49;00m)
+        sfdr, peaks2, indxs2, sfdr2 = spec.sfdr_signal(data2, amp2, freq2, plot=[94mFalse[39;49;00m)
+    
+        ml = indxs[[94m0[39;49;00m]
+        ml2 = indxs2[[94m0[39;49;00m]
+        [94mif[39;49;00m plot:
+            [94mimport[39;49;00m [04m[96mmatplotlib[39;49;00m[04m[96m.[39;49;00m[04m[96mpyplot[39;49;00m [94mas[39;49;00m [04m[96mplt[39;49;00m
+    
+            plt.subplot([94m2[39;49;00m, [94m1[39;49;00m, [94m1[39;49;00m)
+            plt.plot(data, [33m"[39;49;00m[33m.-[39;49;00m[33m"[39;49;00m)
+            plt.plot([94m1[39;49;00m, [94m1[39;49;00m, [33m"[39;49;00m[33mr.[39;49;00m[33m"[39;49;00m)
+            plt.margins([94m0.1[39;49;00m, [94m0.1[39;49;00m)
+            plt.xlabel([33m"[39;49;00m[33mTime [s][39;49;00m[33m"[39;49;00m)
+    
+            plt.subplot([94m2[39;49;00m, [94m1[39;49;00m, [94m2[39;49;00m)
+            plt.plot(fftshift(freq), fftshift(amp))
+            plt.plot(freq[ml], amp[ml], [33m"[39;49;00m[33my.[39;49;00m[33m"[39;49;00m)
+    
+            plt.margins([94m0.1[39;49;00m, [94m0.1[39;49;00m)
+            plt.annotate([33m"[39;49;00m[33mFundamental[39;49;00m[33m"[39;49;00m, (freq[ml], amp[ml]))
+            plt.xlabel([33m"[39;49;00m[33mFrequency [Hz][39;49;00m[33m"[39;49;00m)
+            plt.tight_layout()
+            [90m# plt.show()[39;49;00m
+            plt.savefig([33m"[39;49;00m[33m./results_log/graph_ch_isolation[39;49;00m[33m"[39;49;00m + [96mstr[39;49;00m(channel) + [96mstr[39;49;00m(param_set[[33m"[39;49;00m[33mrx0_lo[39;49;00m[33m"[39;49;00m] / [94m1000000000[39;49;00m) + [33m"[39;49;00m[33mGHz.png[39;49;00m[33m"[39;49;00m)
+            plt.close()
+    
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFundamental tone on rx1 is [39;49;00m[33m"[39;49;00m, peaks[[94m0[39;49;00m], freq[indxs[[94m0[39;49;00m]])
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFundamental tone on rx2 is [39;49;00m[33m"[39;49;00m, peaks2[[94m0[39;49;00m], freq2[indxs2[[94m0[39;49;00m]])
+    
+        rx_fs = -[94m11.4[39;49;00m
+        isolation = tx_level - amp[ml] - rx_fs
+        isolation2 = tx_level - amp2[ml2] - rx_fs
+        [96mprint[39;49;00m([33m"[39;49;00m[33mIsolation value rx1 is [39;49;00m[33m"[39;49;00m, isolation)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mIsolation value rx2 is [39;49;00m[33m"[39;49;00m, isolation2)
+    
+>       [94massert[39;49;00m isolation > isolation_min
+[1m[31mE       assert 61.842824113018374 > 65[0m
+
+[1m[31m../work/pyadi-iio/test/dma_tests.py[0m:887: AssertionError
+[31m[1m_ test_adrv9002_sfdr[1-param_set5--17.8-True-1999952-0.125916-65-adi.adrv9002] _[0m
+
+context_desc = [{'devices': 'ltc2945,tps6598x_source_psy_0_0038,tps6598x_source_psy_0_003f,xilinx-system-monitor,adrv9002-phy,axi-adr...ystem-monitor0-convst,xilinx-system-monitor0-samplerate', 'hw': 'adrv9002', 'type': 'ip', 'uri': 'ip:analogdut.local'}]
+test_isolation = <function isolation at 0xaeff5d60>, classname = 'adi.adrv9002'
+iio_uri = 'ip:analogdut.local', channel = 1
+param_set = {'rx0_lo': 5500000000, 'rx1_lo': 5500000000, 'tx0_lo': 5500000000, 'tx1_lo': 5500000000, ...}
+frequency = 1999952, scale = 0.125916, isolation_min = 65, tx_level = -17.8
+rxtx2 = True
+
+    [37m@pytest[39;49;00m.mark.iio_hardware(hardware)
+    [37m@pytest[39;49;00m.mark.parametrize([33m"[39;49;00m[33mclassname[39;49;00m[33m"[39;49;00m, [(classname)])
+    [37m@pytest[39;49;00m.mark.parametrize([33m"[39;49;00m[33mfrequency, scale, isolation_min[39;49;00m[33m"[39;49;00m, [([94m1999952[39;49;00m, [94m0.125916[39;49;00m, [94m65[39;49;00m)])
+    [37m@pytest[39;49;00m.mark.parametrize(
+        [33m"[39;49;00m[33mchannel, param_set, tx_level, rxtx2[39;49;00m[33m"[39;49;00m,
+        [
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m2400000000[39;49;00m,
+                    rx0_lo=[94m2400000000[39;49;00m,
+                    tx1_lo=[94m2400000000[39;49;00m,
+                    rx1_lo=[94m2400000000[39;49;00m,
+                    gain_control_mode_chan0=[33m"[39;49;00m[33mspi[39;49;00m[33m"[39;49;00m,
+                    gain_control_mode_chan1=[33m"[39;49;00m[33mspi[39;49;00m[33m"[39;49;00m,
+                    rx_hardwaregain_chan0=[94m34[39;49;00m,
+                    rx_hardwaregain_chan1=[94m34[39;49;00m,
+                ),
+                -[94m16.3[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m4500000000[39;49;00m,
+                    rx0_lo=[94m4500000000[39;49;00m,
+                    tx1_lo=[94m4500000000[39;49;00m,
+                    rx1_lo=[94m4500000000[39;49;00m,
+                ),
+                -[94m17.5[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m0[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m5500000000[39;49;00m,
+                    rx0_lo=[94m5500000000[39;49;00m,
+                    tx1_lo=[94m5500000000[39;49;00m,
+                    rx1_lo=[94m5500000000[39;49;00m,
+                ),
+                -[94m17.8[39;49;00m,
+                [94mFalse[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m2400000000[39;49;00m,
+                    rx0_lo=[94m2400000000[39;49;00m,
+                    tx1_lo=[94m2400000000[39;49;00m,
+                    rx1_lo=[94m2400000000[39;49;00m,
+                ),
+                -[94m16.3[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m4500000000[39;49;00m,
+                    rx0_lo=[94m4500000000[39;49;00m,
+                    tx1_lo=[94m4500000000[39;49;00m,
+                    rx1_lo=[94m4500000000[39;49;00m,
+                ),
+                -[94m17.5[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+            (
+    	    [94m1[39;49;00m,
+                [96mdict[39;49;00m(
+                    tx_hardwaregain_chan0=[94m0[39;49;00m,
+                    tx_hardwaregain_chan1=[94m0[39;49;00m,
+                    tx0_lo=[94m5500000000[39;49;00m,
+                    rx0_lo=[94m5500000000[39;49;00m,
+                    tx1_lo=[94m5500000000[39;49;00m,
+                    rx1_lo=[94m5500000000[39;49;00m,
+                ),
+                -[94m17.8[39;49;00m,
+                [94mTrue[39;49;00m,
+            ),
+    
+        ],
+    )
+    [94mdef[39;49;00m [92mtest_adrv9002_sfdr[39;49;00m(
+        context_desc, test_isolation, classname, iio_uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2,
+    ):
+        [96mprint[39;49;00m([33m"[39;49;00m[33m"[39;49;00m)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mConfiguration channel:[39;49;00m[33m"[39;49;00m, channel)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mLO: [39;49;00m[33m"[39;49;00m, param_set[[33m"[39;49;00m[33mtx0_lo[39;49;00m[33m"[39;49;00m])
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFrequency [39;49;00m[33m"[39;49;00m, frequency, [33m"[39;49;00m[33mand scale [39;49;00m[33m"[39;49;00m, scale)
+        [96mprint[39;49;00m([33m"[39;49;00m[33m"[39;49;00m)
+>       test_isolation(classname, iio_uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2, plot=[94mTrue[39;49;00m)
+
+[1m[31m../work/pyadi-iio/test/test_jupiter_isolation.py[0m:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+classname = 'adi.adrv9002', uri = 'ip:analogdut.local', channel = 1
+param_set = {'rx0_lo': 5500000000, 'rx1_lo': 5500000000, 'tx0_lo': 5500000000, 'tx1_lo': 5500000000, ...}
+frequency = 1999952, scale = 0.125916, isolation_min = 65, tx_level = -17.8
+rxtx2 = True, plot = True
+
+    [94mdef[39;49;00m [92misolation[39;49;00m(classname, uri, channel, param_set, frequency, scale, isolation_min, tx_level, rxtx2=[94mFalse[39;49;00m, plot=[94mFalse[39;49;00m):
+        [33m"""t_isolation: Test rf isolation with connected loopback cables and plug termination.[39;49;00m
+    [33m    This test requires a devices with TX and RX onboard where the transmit[39;49;00m
+    [33m    signal can be recovered. Sinuoidal data is passed to DMAs which is then[39;49;00m
+    [33m    estimated on the RX side.[39;49;00m
+    [33m    parameters:[39;49;00m
+    [33m        uri: type=string[39;49;00m
+    [33m            URI of IIO context of target board/system[39;49;00m
+    [33m        classname: type=string[39;49;00m
+    [33m            Name of pyadi interface class which contain attribute[39;49;00m
+    [33m        channel: type=list[39;49;00m
+    [33m            List of integers or list of list of integers of channels to[39;49;00m
+    [33m            enable through tx_enabled_channels[39;49;00m
+    [33m        param_set: type=dict[39;49;00m
+    [33m            Dictionary of attribute and values to be set before tone is[39;49;00m
+    [33m            generated and received[39;49;00m
+    [33m        frequency: type=int[39;49;00m
+    [33m            Value of dds frequency[39;49;00m
+    [33m        scale: type=float[39;49;00m
+    [33m            Value of dds scale[39;49;00m
+    [33m        isolation_min: type=int[39;49;00m
+    [33m            Min value of isolation for test to pass[39;49;00m
+    [33m        tx_level: type=float[39;49;00m
+    [33m            Value of tx_level to calculate isolation[39;49;00m
+    [33m    """[39;49;00m
+        sdr = [96meval[39;49;00m(classname + [33m"[39;49;00m[33m(uri=[39;49;00m[33m'[39;49;00m[33m"[39;49;00m + uri + [33m"[39;49;00m[33m'[39;49;00m[33m)[39;49;00m[33m"[39;49;00m)
+        [94mfor[39;49;00m p [95min[39;49;00m param_set.keys():
+            [96msetattr[39;49;00m(sdr, p, param_set[p])
+        time.sleep([94m1[39;49;00m)
+    
+        sdr.dds_single_tone(frequency, scale, channel)
+        time.sleep([94m2[39;49;00m)
+    
+        N = [94m2[39;49;00m ** [94m16[39;49;00m
+        [94mif[39;49;00m(rxtx2):
+            sdr._tx2.tx_cyclic_buffer = [94mTrue[39;49;00m
+            sdr._tx2.tx_enabled_channels = [[94m0[39;49;00m]
+            sdr._tx2.tx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.tx_enabled_channels)
+        [94melse[39;49;00m:
+            sdr.tx_cyclic_buffer = [94mTrue[39;49;00m
+            sdr.tx_enabled_channels = [[94m0[39;49;00m]
+            sdr.tx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.tx_enabled_channels)
+    
+        [90m# if rxtx2:[39;49;00m
+        [90m#     sdr._rx2.rx_enabled_channels = [0][39;49;00m
+        [90m#     sdr._rx2.rx_buffer_size = N * 2 * len(sdr.rx_enabled_channels)[39;49;00m
+        [90m# else:[39;49;00m
+        sdr._rx2.rx_enabled_channels = [[94m0[39;49;00m]
+        sdr._rx2.rx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.rx_enabled_channels)
+        sdr.rx_enabled_channels = [[94m0[39;49;00m]
+        sdr.rx_buffer_size = N * [94m2[39;49;00m * [96mlen[39;49;00m(sdr.rx_enabled_channels)
+    
+        ref = [94m2[39;49;00m ** [94m15[39;49;00m
+    
+        [94mif[39;49;00m [96mhasattr[39;49;00m(sdr, [33m"[39;49;00m[33msample_rate[39;49;00m[33m"[39;49;00m):
+            RXFS = [96mint[39;49;00m(sdr.sample_rate)
+        [94melse[39;49;00m:
+            RXFS = [96mint[39;49;00m(sdr.rx0_sample_rate)
+    
+        [94mtry[39;49;00m:
+            amp = [94m0[39;49;00m
+            freq = [94m0[39;49;00m
+            amp2 = [94m0[39;49;00m
+            freq2 = [94m0[39;49;00m
+            [94mfor[39;49;00m i [95min[39;49;00m [96mrange[39;49;00m([94m8[39;49;00m):
+                data = sdr.rx()
+                time.sleep([94m1[39;49;00m)
+                amps, freq = spec.spec_est(
+                    data, fs=RXFS, ref=ref, num_ffts=[94m1[39;49;00m, enable_windowing=[94mTrue[39;49;00m, plot=[94mFalse[39;49;00m
+                )
+                amp += amps
+    
+            [94mfor[39;49;00m i [95min[39;49;00m [96mrange[39;49;00m([94m8[39;49;00m):
+                data2 = sdr.rx2()
+                time.sleep([94m1[39;49;00m)
+                amps2, freq2 = spec.spec_est(
+                    data2, fs=RXFS, ref=ref, num_ffts=[94m1[39;49;00m, enable_windowing=[94mTrue[39;49;00m, plot=[94mFalse[39;49;00m
+                )
+                amp2 += amps2
+    
+            amp /= [94m8[39;49;00m
+            amp2 /= [94m8[39;49;00m
+        [94mexcept[39;49;00m [96mException[39;49;00m [94mas[39;49;00m e:
+            [94mdel[39;49;00m sdr
+            [94mraise[39;49;00m [96mException[39;49;00m(e)
+        [94mdel[39;49;00m sdr
+    
+        sfdr, peaks, indxs, sfdr2 = spec.sfdr_signal(data, amp, freq, plot=[94mFalse[39;49;00m)
+        sfdr, peaks2, indxs2, sfdr2 = spec.sfdr_signal(data2, amp2, freq2, plot=[94mFalse[39;49;00m)
+    
+        ml = indxs[[94m0[39;49;00m]
+        ml2 = indxs2[[94m0[39;49;00m]
+        [94mif[39;49;00m plot:
+            [94mimport[39;49;00m [04m[96mmatplotlib[39;49;00m[04m[96m.[39;49;00m[04m[96mpyplot[39;49;00m [94mas[39;49;00m [04m[96mplt[39;49;00m
+    
+            plt.subplot([94m2[39;49;00m, [94m1[39;49;00m, [94m1[39;49;00m)
+            plt.plot(data, [33m"[39;49;00m[33m.-[39;49;00m[33m"[39;49;00m)
+            plt.plot([94m1[39;49;00m, [94m1[39;49;00m, [33m"[39;49;00m[33mr.[39;49;00m[33m"[39;49;00m)
+            plt.margins([94m0.1[39;49;00m, [94m0.1[39;49;00m)
+            plt.xlabel([33m"[39;49;00m[33mTime [s][39;49;00m[33m"[39;49;00m)
+    
+            plt.subplot([94m2[39;49;00m, [94m1[39;49;00m, [94m2[39;49;00m)
+            plt.plot(fftshift(freq), fftshift(amp))
+            plt.plot(freq[ml], amp[ml], [33m"[39;49;00m[33my.[39;49;00m[33m"[39;49;00m)
+    
+            plt.margins([94m0.1[39;49;00m, [94m0.1[39;49;00m)
+            plt.annotate([33m"[39;49;00m[33mFundamental[39;49;00m[33m"[39;49;00m, (freq[ml], amp[ml]))
+            plt.xlabel([33m"[39;49;00m[33mFrequency [Hz][39;49;00m[33m"[39;49;00m)
+            plt.tight_layout()
+            [90m# plt.show()[39;49;00m
+            plt.savefig([33m"[39;49;00m[33m./results_log/graph_ch_isolation[39;49;00m[33m"[39;49;00m + [96mstr[39;49;00m(channel) + [96mstr[39;49;00m(param_set[[33m"[39;49;00m[33mrx0_lo[39;49;00m[33m"[39;49;00m] / [94m1000000000[39;49;00m) + [33m"[39;49;00m[33mGHz.png[39;49;00m[33m"[39;49;00m)
+            plt.close()
+    
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFundamental tone on rx1 is [39;49;00m[33m"[39;49;00m, peaks[[94m0[39;49;00m], freq[indxs[[94m0[39;49;00m]])
+        [96mprint[39;49;00m([33m"[39;49;00m[33mFundamental tone on rx2 is [39;49;00m[33m"[39;49;00m, peaks2[[94m0[39;49;00m], freq2[indxs2[[94m0[39;49;00m]])
+    
+        rx_fs = -[94m11.4[39;49;00m
+        isolation = tx_level - amp[ml] - rx_fs
+        isolation2 = tx_level - amp2[ml2] - rx_fs
+        [96mprint[39;49;00m([33m"[39;49;00m[33mIsolation value rx1 is [39;49;00m[33m"[39;49;00m, isolation)
+        [96mprint[39;49;00m([33m"[39;49;00m[33mIsolation value rx2 is [39;49;00m[33m"[39;49;00m, isolation2)
+    
+        [94massert[39;49;00m isolation > isolation_min
+>       [94massert[39;49;00m isolation2 > isolation_min
+[1m[31mE       assert 53.589110930346884 > 65[0m
+
+[1m[31m../work/pyadi-iio/test/dma_tests.py[0m:888: AssertionError
+[33m=============================== warnings summary ===============================[0m
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[0-param_set0--16.3-False-1999952-0.125916-65-adi.adrv9002]
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[0-param_set1--17.5-False-1999952-0.125916-65-adi.adrv9002]
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[0-param_set2--17.8-False-1999952-0.125916-65-adi.adrv9002]
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[1-param_set3--16.3-True-1999952-0.125916-65-adi.adrv9002]
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[1-param_set4--17.5-True-1999952-0.125916-65-adi.adrv9002]
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[1-param_set5--17.8-True-1999952-0.125916-65-adi.adrv9002]
+  /usr/local/lib/python3.9/dist-packages/matplotlib/cbook.py:1699: ComplexWarning: Casting complex values to real discards the imaginary part
+    return math.isfinite(val)
+
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[0-param_set0--16.3-False-1999952-0.125916-65-adi.adrv9002]
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[0-param_set1--17.5-False-1999952-0.125916-65-adi.adrv9002]
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[0-param_set2--17.8-False-1999952-0.125916-65-adi.adrv9002]
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[1-param_set3--16.3-True-1999952-0.125916-65-adi.adrv9002]
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[1-param_set4--17.5-True-1999952-0.125916-65-adi.adrv9002]
+test/test_jupiter_isolation.py::test_adrv9002_sfdr[1-param_set5--17.8-True-1999952-0.125916-65-adi.adrv9002]
+  /usr/local/lib/python3.9/dist-packages/matplotlib/cbook.py:1345: ComplexWarning: Casting complex values to real discards the imaginary part
+    return np.asarray(x, float)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[36m[1m=========================== short test summary info ============================[0m
+[31mFAILED[0m ../work/pyadi-iio/test/test_jupiter_isolation.py::[1mtest_adrv9002_sfdr[0-param_set0--16.3-False-1999952-0.125916-65-adi.adrv9002][0m - assert 64.05164412001339 > 65
+[31mFAILED[0m ../work/pyadi-iio/test/test_jupiter_isolation.py::[1mtest_adrv9002_sfdr[0-param_set1--17.5-False-1999952-0.125916-65-adi.adrv9002][0m - assert 55.00464739621726 > 65
+[31mFAILED[0m ../work/pyadi-iio/test/test_jupiter_isolation.py::[1mtest_adrv9002_sfdr[0-param_set2--17.8-False-1999952-0.125916-65-adi.adrv9002][0m - assert 61.842824113018374 > 65
+[31mFAILED[0m ../work/pyadi-iio/test/test_jupiter_isolation.py::[1mtest_adrv9002_sfdr[1-param_set5--17.8-True-1999952-0.125916-65-adi.adrv9002][0m - assert 53.589110930346884 > 65
+[31m============= [31m[1m4 failed[0m, [32m2 passed[0m, [33m12 warnings[0m[31m in 213.41s (0:03:33)[0m[31m =============[0m

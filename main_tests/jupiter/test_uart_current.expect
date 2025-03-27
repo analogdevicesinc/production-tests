@@ -1,0 +1,15 @@
+#!/usr/bin/expect -f
+
+log_user 0
+
+set prompt "root@analogdut:~# "
+set command "cat /sys/bus/i2c/devices/0-006a/hwmon/hwmon0/curr1_input"
+
+spawn picocom -b 115200 /dev/ttyUSB0
+expect "Terminal ready"
+send "\r"
+expect $prompt
+send $command\r
+expect $command\r\n
+expect -re (.*)\r\n { puts "$expect_out(1,string)" }
+exit 0

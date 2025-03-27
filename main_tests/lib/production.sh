@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source $SCRIPT_DIR/config.sh
+source $SCRIPT_DIR/print/print_basic.sh
 
 #----------------------------------#
 # Functions section                #
@@ -17,17 +18,42 @@ show_start_state() {
 	FAILED=0
 	PROGRESS=1
 	FAILED_NO=0
+	SYNCHRONIZATION=0
+	TNAME=""
 }
 
 get_board_serial() {
 	IS_OKBOARD=1
 	while [ $IS_OKBOARD -ne 0 ]; do
-		echo "Please use the scanner to scan the QR/Barcode on your carrier"
-		read BOARD_SERIAL_TEMP
-		BOARD_SERIAL=${BOARD_SERIAL_TEMP// /}
-		echo $BOARD_SERIAL | grep "S[0-9][0-9]" | grep "SN" &>/dev/null
+		echo "Please use the scanner to scan the QR/Barcode on DUT"
+		read BOARD_SERIAL
+		echo $BOARD_SERIAL
+		if [ ${#BOARD_SERIAL} -ne 13 ];then
+			continue
+		fi
+		date -d "${BOARD_SERIAL:0:8}" +'%Y-%m-%d'
+		if [ $? -ne 0 ];then
+			continue
+		fi
 		IS_OKBOARD=$?
 	done
+	export BOARD_S="$BOARD_SERIAL"
+}
+
+get_board_serial_eeprom() {
+	# IS_OKBOARD=1
+	BOARD_SERIAL=$(ssh_cmd "sudo fru-dump -i /sys/bus/i2c/devices/0-0050/eeprom -b | grep 'Serial Number' | cut -d' ' -f3 | tr -d '[:cntrl:]'")
+	echo $BOARD_SERIAL
+	if [ ${#BOARD_SERIAL} -ne 13 ];then
+		echo " The serial numer in eeprom is not according to standard!!";
+		return 1;
+	fi
+	date -d "${BOARD_SERIAL:0:8}" +'%Y-%m-%d'
+	if [ $? -ne 0 ];then
+		echo " The serial numer in eeprom is not according to standard!!";
+		return 1;
+	fi
+	export BOARD_S="$BOARD_SERIAL"
 }
 
 get_fmcomms_serial() {
@@ -42,11 +68,12 @@ dut_date_sync() {
 handle_error_state() {
 	local serial="$1"
 	FAILED=1
-	console_ascii_failed
+	console_ascii_failed;
+
 	if [ $SYNCHRONIZATION -eq 0 ]; then 
-		cat "$LOGFILE" > "$LOGDIR/failed_${serial}_${RUN_TIMESTAMP}.log"
+		cat "$LOGFILE" > "$LOGDIR/failed_${serial}_${RUN_TIMESTAMP}_${TNAME}.log"
 	else
-		cat "$LOGFILE" > "$LOGDIR/no_date_failed_${serial}_${RUN_TIMESTAMP}.log"
+		cat "$LOGFILE" > "$LOGDIR/no_date_failed_${serial}_${RUN_TIMESTAMP}_${TNAME}.log"
 	fi
 	cat /dev/null > "$LOGFILE"
 }
@@ -118,6 +145,13 @@ check_conn(){
 	done
 }
 
+check_sw_version() {
+	echo_red "RPI SW VERSION IS $RPI_SW_V";
+	J_SW_V=$(ssh_cmd "cat /home/analog/jupiter/software_version.txt;")
+	echo_red "JUPITER SW VERSION IS $J_SW_V";
+	YES_no "Is the software version correct? Do you wish to continue?";
+}
+
 start_gps_spoofing(){
 	local GPSDIR=$SCRIPT_DIR/src/gps-sdr-sim/player
 	if ping -q -c2 pluto.local &>/dev/null
@@ -143,8 +177,8 @@ stop_gps_spoofing(){
 production() {
         local TARGET="$1"
         local MODE="$2"
-	local BOARD="$3"
-	local IIO_REMOTE=analog.local 
+		local BOARD="$3"
+		local IIO_REMOTE=analogdut.local 
 
         [ -n "$TARGET" ] || {
                 echo_red "No target specified"
@@ -165,10 +199,9 @@ production() {
         # * _errors.log - all errors that don't yet have a S/N
         # * _stats.log - number of PASSED & FAILED
 
-	export DBSERVER="cluster0.oiqey.mongodb.net"
-	export DBUSERNAME="dev_production1"
-	export DBNAME="dev_${BOARD}_prod"
-	export BOARD_NAME="$BOARD"
+		export DBSERVER="cluster0.oiqey.mongodb.net"
+		export DBUSERNAME="dev_production1"
+		export DBNAME="dev_${BOARD}_prod"
 
         local LOGDIR=$SCRIPT_DIR/log
 		# temp log to store stuff, before we know the S/N of device
@@ -194,15 +227,200 @@ production() {
 		export DBPASSWORD=$(cat $SCRIPT_DIR/password.txt)
 	fi
 
-	
-
-	timedatectl | grep "synchronized: yes"
+	htpdate google.com | grep -q "No time correction needed"
 	SYNCHRONIZATION=$?
 	if [ $SYNCHRONIZATION -ne 0 ]; then
+		OFFS=$(htpdate google.com)
+		echo $OFFS
 		echo_red "Your time and date is not up-to-date. The times of the logs will be inaccurate. The corresponding log files will begin with \"no_date\""
 	fi
 
-        case $MODE in
+	gpioset 0 18=1;
+
+	# timedatectl | grep "synchronized: yes"
+	case $MODE in
+		"Test Jupiter Main Board")
+			TNAME="main_board"
+			check_sw_version;
+			if [ $? -ne 0 ]; then
+				echo_red "WRONG SW VERSION";
+				handle_error_state "wrong_sw_version";
+			else
+				get_board_serial;
+				ssh_cmd "sudo /home/analog/jupiter/test_poe.sh;"
+				TEST_POE=$?;
+				if [ $TEST_POE -ne 255 ]; then
+					ssh_cmd "sudo /home/analog/jupiter/test_flashpd.sh";
+					if [ $? -ne 0 ]; then
+						handle_error_state "$BOARD_SERIAL";
+						exit 1
+					fi
+					ssh_cmd "sudo /home/analog/jupiter/test_measure_pr.sh";
+					TEST_FLASHPD=$?;
+					if [ $TEST_FLASHPD -eq 0 ]; then
+						echo_yellow "Test USB_DATA boot.\r\n";
+						echo_yellow "Make sure you: \r\n";
+						echo_yellow "  1.->press shortly on the power button and wait for the LED to turn RED";
+						echo_yellow "  2.->unplug the ETH cable";
+						echo_yellow "  3.->plug the DUT_POWER cable in USB_DATA";
+						echo_yellow "  4.->press the button again to power up the board";
+						echo_yellow "  5.->wait for the board to boot (LED should turn blue)\r\n";
+						wait_enter && sleep 38;
+						$SCRIPT_DIR/jupiter/test_uart.sh
+						TEST_USB1=$?;
+						if [ $TEST_USB1 -ne 255 ]; then
+							echo_yellow "Testing USB_POWER boot mode.Make sure you: \r\n"
+							echo_yellow "  1.->plug in the ETH cable"
+							echo_yellow "  2.->plug the DUT_POWER cable in USB_POWER\r\n"
+							wait_enter && sleep 3;
+							wait_for_board_online;
+							echo_blue "The test will now carry on with the rest of the test sequence\r\n"
+							ssh_cmd "sudo /home/analog/jupiter/main_board_test.sh $BOARD_SERIAL"
+							TEST_MAIN=$?;
+							if [ $TEST_MAIN -ne 255 ]; then
+								$SCRIPT_DIR/jupiter/test_usb_periph.sh
+								TEST_PERIPH=$?;
+								if [ $TEST_PERIPH -ne 255 ]; then
+									$SCRIPT_DIR/jupiter/test_rf.sh 
+									TEST_RF=$?;
+									$SCRIPT_DIR/jupiter/test_rf_lna.sh
+									TEST_LNA=$?;
+									if [ $TEST_RF -ne 255 ] && [ $TEST_LNA -ne 255 ]; then
+										$SCRIPT_DIR/jupiter/test_ext_lo.sh
+										TEST_LO=$?;
+										if [ $TEST_LO -ne 255 ]; then
+											$SCRIPT_DIR/jupiter/test_mcs.sh
+											TEST_MCS=$?;
+											if [ $TEST_MCS -eq 255 ]; then
+												handle_error_state "$BOARD_SERIAL"
+											else
+												TEST_TOTAL=$(($TEST_UART + $TEST_USB1 + $TEST_MAIN + $TEST_LO + $TEST_PERIPH + $TEST_RF + $TEST_MCS))
+												if [ $TEST_TOTAL -ne 0 ]; then
+													handle_error_state "$BOARD_SERIAL"
+												else
+													echo_green "Writing EEPROM vals";
+													ssh_cmd "sudo /home/analog/jupiter/test_flash.sh $BOARD_SERIAL";
+													if [ $? -ne 0 ]; then
+														handle_error_state "$BOARD_SERIAL";
+													fi
+												fi
+											fi
+										else
+											handle_error_state "$BOARD_SERIAL"
+										fi
+										
+									else
+										handle_error_state "$BOARD_SERIAL"
+									fi
+									
+								else
+									handle_error_state "$BOARD_SERIAL"
+								fi
+								
+							else
+								handle_error_state "$BOARD_SERIAL"
+							fi
+						
+						else
+							handle_error_state "$BOARD_SERIAL"
+						fi
+					else
+						handle_error_state "$BOARD_SERIAL"
+					fi
+					
+				else
+					handle_error_state "$BOARD_SERIAL"
+				fi
+				ssh_cmd "sudo sh -c 'cp /home/analog/jupiter/system.dtb /boot/system.dtb'";
+				echo_yellow "Board is now powering off!\r\n";
+				ssh_cmd "sudo sh -c 'poweroff'";
+				sleep 2;
+			fi
+			;;
+		"Test Jupiter Add-On Board")
+			TNAME="add_on"
+			check_sw_version;
+			if [ $? -ne 0 ]; then
+				echo_red "WRONG SW VERSION";
+				handle_error_state "wrong_sw_version";
+			else
+				get_board_serial
+				ssh_cmd "sudo /home/analog/jupiter/test_power_addon.sh";
+				RES=$?
+				if [ $RES -ne 0 ]; then
+						handle_error_state "$BOARD_SERIAL"
+				else
+					$SCRIPT_DIR/jupiter/test_rf_addon.sh
+					RES=$?
+					if [ $RES -ne 0 ]; then
+							handle_error_state "$BOARD_SERIAL"
+					else
+						$SCRIPT_DIR/jupiter/test_rf_addon_lna.sh
+						RES=$?
+						if [ $RES -ne 0 ]; then
+								handle_error_state "$BOARD_SERIAL"
+						fi
+					fi
+				fi
+				echo_yellow "Board is now powering off!\r\n";
+				ssh_cmd "sudo sh -c 'poweroff'";
+				sleep 2;
+			fi
+			;;
+		"Test Entire System")
+			TNAME="system"
+			check_sw_version;
+			if [ $? -ne 0 ]; then
+				echo_red "WRONG SW VERSION";
+				handle_error_state "wrong_sw_version";
+			else
+				gpioset 0 18=0;
+				get_board_serial_eeprom;
+				if [ $? -ne 0 ]; then
+					handle_error_state "$BOARD_SERIAL"
+					exit 1
+				fi
+				ssh_cmd "sudo /home/analog/jupiter/test_check_eeprom.sh";
+				if [ $? -ne 0 ]; then
+					handle_error_state "$BOARD_SERIAL"
+				else
+					ssh_cmd "sudo /home/analog/jupiter/test_power_system.sh";
+					if [ $? -ne 0 ]; then
+						handle_error_state "$BOARD_SERIAL"
+					else
+						$SCRIPT_DIR/jupiter/test_addon_system.sh
+						if [ $? -ne 0 ]; then
+							handle_error_state "$BOARD_SERIAL"
+						else
+							ssh_cmd "sudo sh -c 'echo 0 > /sys/class/gpio/gpio475/value'" #disable addon before isolation
+							ssh_cmd "sudo sh -c 'echo tx_a > /sys/bus/iio/devices/iio\:device1/out_voltage0_port_select'"
+							ssh_cmd "sudo sh -c 'echo tx_a > /sys/bus/iio/devices/iio\:device1/out_voltage1_port_select'"
+							sleep 1
+							$SCRIPT_DIR/jupiter/test_isolation.sh
+							if [ $? -ne 0 ]; then
+								handle_error_state "$BOARD_SERIAL"
+							else
+								$SCRIPT_DIR/jupiter/test_led.sh
+								if [ $? -ne 0 ]; then
+									handle_error_state "$BOARD_SERIAL"
+								fi
+							fi
+						fi
+						
+					fi
+				fi
+				if [ "$FAILED" == "0" ]; then
+					populate_label_fields_jupiter;
+					if [ $? -ne 0 ]; then
+						handle_error_state "$BOARD_SERIAL"
+					fi
+					print_label;
+				fi
+				echo_yellow "Board is now powering off!\r\n";
+				ssh_cmd "sudo sh -c 'poweroff'";
+				sleep 2;
+			fi
+			;;
 		"FMCOMMS5 Test")
                         $SCRIPT_DIR/fmcomms5/rf_test.sh $BOARD_SERIAL
                         if [ $? -ne 0 ]; then
@@ -335,23 +553,26 @@ production() {
                         fi
                         ;;
                 *) echo "invalid option $MODE" ;;
-        esac
+	esac
 
-        if [ -f "$STATSFILE" ] ; then
-                source $STATSFILE
-        fi
+	if [ -f "$STATSFILE" ] ; then
+			source $STATSFILE
+	fi
+	export BOARD_NAME="${BOARD}_${TNAME}"
 
 	if [ "$FAILED" == "0" ] ; then
 		console_ascii_passed
 		if [ $SYNCHRONIZATION -eq 0 ]; then
-			cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
+			cat "$LOGFILE" > "$LOGDIR/passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}_${TNAME}.log"
 		else
-			cat "$LOGFILE" > "$LOGDIR/no_date_passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}.log"
+			cat "$LOGFILE" > "$LOGDIR/no_date_passed_${BOARD_SERIAL}_${RUN_TIMESTAMP}_${TNAME}.log"
 		fi
 		cat /dev/null > "$LOGFILE"
 	fi
+
 	telemetry prod-logs-upload --tdir $LOGDIR > $SCRIPT_DIR/telemetry_out.txt
 	cat $SCRIPT_DIR/telemetry_out.txt | grep "Authentication failed"
+
 	if [ $? -eq 0 ]; then
 		rm -rf $SCRIPT_DIR/password.txt
 	fi

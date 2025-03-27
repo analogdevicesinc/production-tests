@@ -11,6 +11,7 @@ PATH="$SCRIPT_DIR/work/:$PATH"
 export PATH
 
 export LC_ALL="C.UTF-8"
+TIMED_LOG_SUFFIX=""
 
 #----------------------------------#
 # Functions section                #
@@ -19,6 +20,7 @@ export LC_ALL="C.UTF-8"
 echo_red()   { printf "\033[1;31m$*\033[m\n"; }
 echo_green() { printf "\033[1;32m$*\033[m\n"; }
 echo_blue()  { printf "\033[1;34m$*\033[m\n"; }
+echo_yellow()   { printf "\033[1;33m$*\033[m\n"; }
 
 __retry_common() {
 	while [ "$retries" -gt 0 ] ; do
@@ -396,7 +398,7 @@ wait_for_board_offline() {
 
 ssh_cmd() {
 	local USER=analog
-	local CLIENT=analogdut
+	local CLIENT=analogdut.local
 	local PASS=analog
 	local CMD="$1"
 
@@ -418,6 +420,40 @@ ssh_cmd() {
 	}
 
 	sshpass -p${PASS} ssh -q -t -oConnectTimeout=10 -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oCheckHostIP=no "$USER"@"$CLIENT" "$CMD"
+}
+
+function wait_enter() {
+# echo -e "\033[5mPress Enter when ready\033[25m"
+read -r -p "Press Enter when ready"
+}
+
+function date_time() {
+echo $(date --iso-8601=seconds)
+}
+
+function timed_log_no_newline() {
+
+timestamp=$(date_time)
+echo -n -e [ $timestamp ] -- $TIMED_LOG_SUFFIX - $1
+}
+
+function YES_no() {
+if [ -z "$1" ]
+then
+	str="Are you sure ?"
+else
+	str="$1"
+fi
+timed_log_no_newline "$str"
+read -r -p "[Y/n]" response
+case "$response" in
+    [nN][oO]|[nN])
+	return 1
+	;;
+    *)
+	return 0
+	;;
+esac
 }
 
 wait_for_board_online(){
