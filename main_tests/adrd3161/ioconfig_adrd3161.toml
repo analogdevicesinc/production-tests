@@ -1,0 +1,92 @@
+# TMC9660 Boot Configuration
+#
+# REV C HARDWARE CONFIGURATION:
+#   - LDOs not longer necessary (still enabled by default, though)
+#
+# GPIO config:
+#
+# GPIO0  = unused (can be configured to UART0_TX to MCU but risks bricking)
+# GPIO1  = unused (ditto,               UART0_RX                          )
+# GPIO2  = (ADC4_IN) HALL_U
+# GPIO3  = (ADC5_IN) unused (can be accessed via JP1)
+# GPIO4  = (ADC6_IN) HALL_W
+# GPIO5  = (ADC7_IN) not connected in hardware
+# GPIO6  = UART1_TX to P7
+# GPIO7  = UART1_RX to P7
+# GPIO8  = not connected in hardware
+# GPIO9  = SPI0_MISO to MCU
+# GPIO10 = SPI0_MOSI to MCU
+# GPIO11 = SPI0_SCK to MCU
+# GPIO12 = SPI0_CS0 to MCU
+# GPIO13 = not connected in hardware
+# GPIO14 = ABN1_N
+# GPIO15 = HALL_V
+# GPIO16 = LED
+# GPIO17 = ABN1_A
+# GPIO18 = ABN1_B
+#
+# Copyright (C) 2025 Analog Devices, Inc.
+#
+
+io_config_version = "v1.0"
+
+[app_settings]
+app_type = "param"
+
+[bootstrap]
+disable_selftest  = false
+fault_on_bl_ready = false
+load_rom_code     = true
+fault_on_config   = false
+fault_on_launch   = true
+
+[ldo]
+vext1_voltage     = 3.3
+vext1_slope_speed = 3.0   # 3.0, 1.5, 0.75, 0.37
+vext2_voltage     = 5.0
+vext2_slope_speed = 3.0   # 3.0, 1.5, 0.75, 0.37
+
+# UART will be kept on the default TX=GPIO6 RX=GPIO7 connected to SWD header P7.
+# If another configuration is burned in, it may brick the board, requiring some
+# hardware hacking to access the UART interface on pins GPIO0,1.
+[uart]
+enabled         = true
+pin_ic_tx       = 6        # 6, 0
+pin_ic_rx       = 7        # 7, 1
+baud_rate       = "auto16" # 9600, 19200, 38400, 57600, 115200, 1000000, "auto8", "auto16"
+chip_address    = 1        # 0 - 255
+host_address    = 255      # 0 - 255
+
+# Communication to MCU via SPI0 (MISO = GPIO9, MOSI = GPIO10, SCK = GPIO11, CS0 = GPIO12)
+[spi_slave]
+enabled      = true
+spi_block    = "SPI0"
+pin_spi0_sck = 11
+
+# ABN (for DC, BLDC, Stepper)
+[abn1]
+enabled = true
+pin_a   = 17
+pin_b   = 18
+pin_n   = 14
+
+# Hall (for BLDC)
+[hall]
+enabled = true
+pin_u   = 2
+pin_v   = 15
+pin_w   = 4
+
+[watchdog]
+enabled = true
+timeout = 2000  # 250, 500, 750, 1000, 1250, 1500, 1750, 2000
+
+[pll]
+enabled        = true
+source         = "IntOsc"
+sys_frequency  = 40000000
+
+[gpio16]
+type = "output"
+output_value = 1
+

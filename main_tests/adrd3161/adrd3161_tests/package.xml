@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>adrd3161_tests</name>
+  <version>0.0.0</version>
+  <description>Automated testing of ADRD3161 boards from ROS.</description>
+  <maintainer email="ioan.dragomir@analog.com">Ioan Dragomir</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>ament_cmake_ros</test_depend>
+  <test_depend>launch</test_depend>
+  <test_depend>launch_ros</test_depend>
+  <test_depend>launch_testing</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
+  <test_depend>rclpy</test_depend>
+  <test_depend>canopen_interfaces</test_depend>
+
+  <depend>canopen</depend>
+  <depend>canopen_402_driver</depend>
+  <depend>canopen_master_driver</depend>
+  <depend>canopen_ros2_control</depend>
+  <depend>canopen_ros2_controllers</depend>
+  <depend>canopen_interfaces</depend>
+
+  <depend>rclpy</depend>
+  <depend>xacro</depend>
+  <depend>builtin_interfaces</depend>
+  <depend>controller_manager_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>forward_command_controller</depend>
+  <depend>joint_state_broadcaster</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+
