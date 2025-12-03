@@ -76,14 +76,14 @@ __download_github_common() {
 setup_libiio() {
 	[ ! -d "work/libiio" ] || return 0
 
-	__download_github_common libiio
+	git clone https://github.com/analogdevicesinc/libiio.git -b libiio-v0 work/libiio
 	__download_github_common libad9361-iio
 
 	pushd work
 	mkdir -p libiio/build
 	pushd libiio/build
 
-	cmake ../ -DPYTHON_BINDINGS=ON
+	cmake .. -DPYTHON_BINDINGS=ON
 	make -j3
 	sudo make install
 
@@ -119,9 +119,7 @@ setup_pyadi-iio() {
 #removed the if
 
 	__download_github_common pyadi-iio
-	#Set python3 as default
-	sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
-	sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
+	sudo apt-get install -y python3
 
 	pushd work
 	pushd pyadi-iio
@@ -132,7 +130,7 @@ setup_pyadi-iio() {
 	else
 		git checkout fmcomms_scpi
 		sudo python3 -m pip install -r requirements_prod_test.txt
-		sudo apt-get install libatlas-base-dev
+		sudo apt-get install -y libatlas-base-dev
 	fi
 
 	popd
@@ -148,9 +146,9 @@ setup_telemetry() {
 	pushd work
 	pushd telemetry
 	
-	sudo python3 setup.py build
-	sudo python3 setup.py install
+	sudo python3 -m pip install --upgrade cryptography==36.0.2
 	sudo python3 -m pip install -r requirements.txt
+    	sudo python3 -m pip install .
 
 	popd
 	popd
@@ -392,8 +390,8 @@ dhcp-range=192.168.0.100,192.168.0.150,24h
 	EOF
 }
 
-
 ## Board Function Area ##
+
 setup_APARD-SPOE(){
 	:
 }
@@ -411,6 +409,7 @@ setup_GMSL716MIPI() {
 setup_ETH2GMSL() {
 	# ADD MARVEL DRIVER 
 	#SCP -R ~production-tests analog@kria-gmsl.local:/home/analog
+	:
 }
 
 setup_T1L-2-USB() {
@@ -418,8 +417,8 @@ setup_T1L-2-USB() {
 }
 
 setup_EV-CHARGER() {
-	sudo apt-get install inotify-tools
-	sudo apt install rsync 
+	sudo apt-get install -y inotify-tools
+	sudo apt-get install -y rsync 
 }
 
 
@@ -449,7 +448,6 @@ setup_FMCOMMS2-3() {
 	setup_pyadi-iio
 }
 
-
 setup_FMCOMMS4() {
 	setup_pyadi-iio
 }
@@ -457,7 +455,6 @@ setup_FMCOMMS4() {
 setup_SYNCHRONA() {
 		:
 }
-
 
 setup_ADRV9361_BOB() {
 	setup_pyadi-iio
