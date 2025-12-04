@@ -10,6 +10,9 @@ pushd $SCRIPT_DIR
 
 PORT=/dev/ttyACM0
 
+# Flush UART garbage
+timeout 1 cat <$PORT >/dev/null
+
 echo_blue "1. Checking connection to TMC9660"
 
 ublcli --port $PORT inspect chip | grep TMC9660 && echo "OK" || {
@@ -43,6 +46,7 @@ fi
 echo "3. Bootstrap"
 
 ublcli --port $PORT write config --burn-otp --boot ioconfig_adrd3161.toml && {
+	ublcli --port $PORT start
 	echo_green "Bootstrapping done!"
 	exit # Success
 } || {
