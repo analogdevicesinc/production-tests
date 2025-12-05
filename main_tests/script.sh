@@ -1,9 +1,8 @@
 #!/bin/bash
 
-echo SCRIPT_DIR="$(readlink -f $(dirname $0))"
+SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/supported_boards.sh
-#source $SCRIPT_DIR/setup_env.sh
 
 # function to create a directory and test file"
 create_board_test_file() {

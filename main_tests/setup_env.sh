@@ -37,7 +37,7 @@ setup_apt_install_prereqs() {
 		wget unzip curl cups cups-bsd intltool itstool libxml2-utils \
 		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal libiec16022-dev \
 		openssh-server gpg dnsmasq libcurl4-gnutls-dev libqrencode-dev pv \
-		python3-pytest python3-libiio python3-scapy python3-scipy
+		python3-pytest python3-libiio python3-scapy python3-scipy python3-virtualenv
 	/etc/init.d/htpdate restart
 	EOF
 }
@@ -348,7 +348,6 @@ setup_misc_profile_cleanup() {
 	EOF
 }
 
-
 setup_bashrc_update() {
 	sed -i -e "/^# --- added by setup_env.sh/,/^# --- end setup_env.sh/d" "$HOME/.bashrc"
 
@@ -366,7 +365,7 @@ setup_dhcp_config() {
 
     sudo_required
 
-    cat >> /etc/dhcpcd.conf <<-EOF
+    sudo tee -a /etc/dhcpcd.conf <<-EOF
 # --- added by setup_env.sh
 interface eth0
 static ip_address=192.168.0.1/24
@@ -390,7 +389,89 @@ dhcp-range=192.168.0.100,192.168.0.150,24h
 	EOF
 }
 
+setup_docker() {
+	which docker && {
+		echo "Docker already installed"
+		return
+	}
+
+	sudo_required
+
+	sudo apt-get install ca-certificates curl
+	sudo install -m 0755 -d /etc/apt/keyrings
+	sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+	sudo chmod a+r /etc/apt/keyrings/docker.asc
+	sudo apt install build-essential libtool pkg-config libusb-1.0-0-dev libhidapi-dev
+	echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+	sudo apt-get update
+	sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+	sudo usermod -aG docker analog
+}
+
+setup_openocd() {
+	sudo apt-get install build-essential libtool pkg-config libusb-1.0-0-dev libhidapi-dev
+        pushd work
+        if [ -d openocd ]; then
+                echo "Openocd already installed, skipping"
+                popd # work
+                return 0
+        fi
+        git clone https://github.com/analogdevicesinc/openocd -b "0.12.0-1.1.2" --depth 1 --recurse-submodules
+        pushd openocd
+        ./bootstrap
+        ./configure --enable-cmsis-dap --disable-werror
+        make -j
+        sudo make install
+        popd # openocd
+        popd # work
+}
+
+setup_zephyr_toolchain() {
+	pushd work
+        if [[ ! -e arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb ]]; then
+                ZEPHYR_SDK_VER=${1:-v0.17.2}
+                wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/$ZEPHYR_SDK_VER/toolchain_linux-aarch64_arm-zephyr-eabi.tar.xz
+                tar xvf toolchain_linux-aarch64_arm-zephyr-eabi.tar.xz arm-zephyr-eabi/bin/ arm-zephyr-eabi/arm-zephyr-eabi/bin/
+        else
+                echo "Zephyr toolchain already downloaded in arm-zephyr-eabi/"
+        fi
+
+        popd # work
+}
+
 ## Board Function Area ##
+
+setup_ADRD3161() {
+	setup_docker
+	setup_openocd
+	setup_zephyr_toolchain
+
+	# Create python venv and install UBLtools
+	pushd work
+	if [ ! -d .venv ]; then
+		python3 -m virtualenv .venv
+	fi
+
+	source .venv/bin/activate
+
+	pip install git+https://${GITHUB_TOKEN}@github.com/adi-innersource/ubltools.git
+	
+	popd # work
+
+	# Build docker testing image
+	pushd adrd3161/adrd3161_tests
+	docker buildx build . -t adrd3161_tests
+	popd # adrd3161/adrd3161_tests
+}
+
+setup_PQM() {
+	sudo apt-get install inotify-tools
+	sudo apt install rsync
+}
+
+setup_ARDUINO-HELPKIT() {
+	:
+}
 
 setup_APARD-SPOE(){
 	:
@@ -406,6 +487,7 @@ setup_APARD-PFWD() {
 setup_GMSL716MIPI() {
 	:
 }
+
 setup_ETH2GMSL() {
 	# ADD MARVEL DRIVER 
 	#SCP -R ~production-tests analog@kria-gmsl.local:/home/analog
@@ -420,7 +502,6 @@ setup_EV-CHARGER() {
 	sudo apt-get install -y inotify-tools
 	sudo apt-get install -y rsync 
 }
-
 
 setup_MAX-ARDUINO() {
 	pip install esptool==4.1
@@ -468,6 +549,7 @@ setup_ADV9009_CRR-SOM(){
 setup_FMCDAQ3(){
 	setup_pyadi-iio
 }
+
 #----------------------------------#
 # Main section                     #
 #----------------------------------#
