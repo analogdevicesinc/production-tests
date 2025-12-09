@@ -468,6 +468,12 @@ setup_ADRD3161() {
 	popd # adrd3161/adrd3161_tests
 }
 
+setup_ADRD5161() {
+	setup_openocd
+	setup_zephyr_toolchain
+	sudo pip install canopen --break-system-packages
+}
+
 setup_PQM() {
 	sudo apt-get install inotify-tools
 	sudo apt install rsync
