@@ -542,7 +542,7 @@ setup_ADRD3161() {
 setup_ADRD5161() {
 	setup_openocd
 	setup_zephyr_toolchain
-	sudo pip install canopen -y $PIP_EXTRA_ARGS
+	sudo python3 -m pip install canopen $PIP_EXTRA_ARGS
 }
 
 setup_PQM() {
