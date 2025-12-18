@@ -12,6 +12,19 @@ source $SCRIPT_DIR/supported_boards.sh
 
 INIT_PINS_SCRIPT="$SCRIPT_DIR"/init.sh
 
+DEBIAN_MAJOR=""
+PIP_EXTRA_ARGS=""
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$ID" = "debian" ] && [ -n "$VERSION_ID" ]; then
+        DEBIAN_MAJOR="${VERSION_ID%%.*}"
+        if [ "$DEBIAN_MAJOR" -ge 12 ]; then
+            PIP_EXTRA_ARGS="--break-system-packages"
+        fi
+    fi
+fi
+
 #----------------------------------#
 # Functions section                #
 #----------------------------------#
@@ -31,13 +44,13 @@ setup_apt_install_prereqs() {
 	sudo_required
 	sudo -s <<-EOF
 	apt-get -y update
-	apt-get -y install bc sshpass libfftw3-dev librsvg2-dev libgtk-3-dev \
+	apt-get -y install bc sshpass libiio-dev libfftw3-dev librsvg2-dev libgtk-3-dev \
 		cmake build-essential git libxml2 libxml2-dev bison flex \
 		expect usbutils dfu-util screen libaio-dev libglib2.0-dev picocom \
 		wget unzip curl cups cups-bsd intltool itstool libxml2-utils \
 		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal libiec16022-dev \
-		openssh-server gpg dnsmasq libcurl4-gnutls-dev libqrencode-dev pv \
-		python3-pytest python3-libiio python3-scapy python3-scipy python3-virtualenv
+		python3-pytest python3-libiio python3-scapy python3-scipy python3-virtualenv \
+		openssh-server gpg libcurl4-gnutls-dev libqrencode-dev pv
 	/etc/init.d/htpdate restart
 	EOF
 }
@@ -73,6 +86,23 @@ __download_github_common() {
 	}
 }
 
+wait_for_dns() {
+    local host="${1:-github.com}"
+    local tries="${2:-10}"
+    local delay="${3:-1}"
+
+    for i in $(seq 1 "$tries"); do
+        getent hosts "$host" >/dev/null 2>&1 && return 0
+        sleep "$delay"
+    done
+
+    echo_red "DNS not resolving '$host' after $tries tries."
+    echo_red "Debug:"
+    cat /etc/resolv.conf 2>/dev/null || true
+    ip route 2>/dev/null || true
+    return 1
+}
+
 setup_libiio() {
 	[ ! -d "work/libiio" ] || return 0
 
@@ -86,6 +116,7 @@ setup_libiio() {
 	cmake .. -DPYTHON_BINDINGS=ON
 	make -j3
 	sudo make install
+	sudo ldconfig
 
 	popd
 
@@ -129,7 +160,7 @@ setup_pyadi-iio() {
 		git checkout som-testing-fmcomms8
 	else
 		git checkout fmcomms_scpi
-		sudo python3 -m pip install -r requirements_prod_test.txt
+		sudo python3 -m pip install -r requirements_prod_test.txt $PIP_EXTRA_ARGS
 		sudo apt-get install -y libatlas-base-dev
 	fi
 
@@ -137,21 +168,24 @@ setup_pyadi-iio() {
 	popd
 }
 
-
 setup_telemetry() {
-	[ ! -d "work/telemetry" ] || return 0
+    [ ! -d "work/telemetry" ] || return 0
 
-	git clone https://github.com/sdgtt/telemetry work/telemetry
+    wait_for_dns github.com 15 1
 
-	pushd work
-	pushd telemetry
-	
-	sudo python3 -m pip install --upgrade cryptography==36.0.2
-	sudo python3 -m pip install -r requirements.txt
-    	sudo python3 -m pip install .
+    git clone https://github.com/sdgtt/telemetry work/telemetry
 
-	popd
-	popd
+    pushd work
+    pushd telemetry
+
+    wait_for_dns pypi.org 15 1
+
+    sudo python3 -m pip install --upgrade cryptography==36.0.2 $PIP_EXTRA_ARGS
+    sudo python3 -m pip install -r requirements.txt $PIP_EXTRA_ARGS
+    sudo python3 -m pip install . $PIP_EXTRA_ARGS
+
+    popd
+    popd
 }
 
 # TBD : setup_nebula/dns to be researched then added
@@ -210,7 +244,6 @@ StartupNotify=false
 Terminal=false
 Hidden=false
 	EOF
-
 }
 
 board_is_supported() {
@@ -361,32 +394,74 @@ export PATH=/usr/lib/:$PATH
 	EOF
 }
 
-setup_dhcp_config() {
-
+setup_nm_config() {
     sudo_required
 
-    sudo tee -a /etc/dhcpcd.conf <<-EOF
+    sudo apt-get update -y
+    sudo apt-get install -y network-manager
+
+    CON_NAME="eth0"
+
+    nmcli -t -f NAME con show | grep -qx "$CON_NAME" && \
+        sudo nmcli con delete "$CON_NAME"
+
+    sudo nmcli con add type ethernet \
+        ifname eth0 \
+        con-name "$CON_NAME" \
+        ipv4.method manual \
+        ipv4.addresses 192.168.0.1/24 \
+        ipv4.gateway "" \
+        ipv4.dns "" \
+        ipv6.method ignore
+
+    sudo nmcli con modify "$CON_NAME" connection.autoconnect yes
+    sudo nmcli con up "$CON_NAME"
+}
+
+setup_dhcp_config() {
+    sudo_required
+
+    sudo apt-get update -y
+    sudo apt-get install -y dhcpcd5 dnsmasq
+
+    sudo sed -i -e "/^# --- added by setup_env.sh/,/^# --- end setup_env.sh/d" /etc/dhcpcd.conf
+
+sudo tee -a /etc/dhcpcd.conf >/dev/null <<'EOF'
 # --- added by setup_env.sh
 interface eth0
 static ip_address=192.168.0.1/24
-#static routers=192.168.0.1
-#static domain_name_servers=192.168.0.1
+static domain_name_servers=1.1.1.1 8.8.8.8
 static domain_search=
 # --- end setup_env.sh
-	EOF
+EOF
 
-    sudo -s <<-EOF
-echo "# --- added by setup_env.sh
-#DHCP server active for eth0 interface
+    sudo sed -i -e "/^# --- added by setup_env.sh/,/^# --- end setup_env.sh/d" /etc/dnsmasq.conf 2>/dev/null || true
+
+    sudo tee -a /etc/dnsmasq.conf >/dev/null <<'EOF'
+# --- added by setup_env.sh
+# DHCP server active for eth0 interface
 interface=eth0
 
-#DHCP server not active for wlan0
-no-dhcp-interface = wlan0
+# DHCP server not active for wlan0
+no-dhcp-interface=wlan0
 
-# Ip range
+# IP range
 dhcp-range=192.168.0.100,192.168.0.150,24h
-# --- end setup_env.sh" > /etc/dnsmasq.conf
-	EOF
+# --- end setup_env.sh
+EOF
+
+    sudo systemctl restart dhcpcd 2>/dev/null || true
+    sudo systemctl restart dnsmasq 2>/dev/null || true
+}
+
+setup_net_config() {
+    # Kuiper 2 (Debian 12+) 
+    if [ -n "$DEBIAN_MAJOR" ] && [ "$DEBIAN_MAJOR" -ge 12 ]; then
+        setup_nm_config
+    else
+        # Kuiper 1 (Debian 11)
+        setup_dhcp_config
+    fi
 }
 
 setup_docker() {
@@ -467,12 +542,12 @@ setup_ADRD3161() {
 setup_ADRD5161() {
 	setup_openocd
 	setup_zephyr_toolchain
-	sudo pip install canopen --break-system-packages
+	sudo python3 -m pip install canopen $PIP_EXTRA_ARGS
 }
 
 setup_PQM() {
-	sudo apt-get install inotify-tools
-	sudo apt install rsync
+	sudo apt-get install -y inotify-tools
+	sudo apt-get install -y rsync
 }
 
 setup_ARDUINO-HELPKIT() {
@@ -510,8 +585,10 @@ setup_EV-CHARGER() {
 }
 
 setup_MAX-ARDUINO() {
-	pip install esptool==4.1
-	mkdir max-arduino
+	sudo apt-get install -y inotify-tools
+	sudo apt-get install -y rsync 
+	sudo python3 -m pip install esptool==4.1 $PIP_EXTRA_ARGS
+	mkdir -p max-arduino
 	cd max-arduino
 	wget https://github.com/amiclaus/linux_noos_guides/releases/download/release/ESP32-WROOM-32-AT-NINA-W102.zip
 	unzip ESP32-WROOM-32-AT-NINA-W102.zip -d  "$(basename -s .zip ESP32-WROOM-32-AT-NINA-W102.zip)"
@@ -527,7 +604,7 @@ setup_60GHZ-CONN(){
 }
 
 setup_ADV9361_CRR-SOM() {
-		:
+	:
 }
 
 setup_FMCOMMS2-3() {
@@ -539,7 +616,7 @@ setup_FMCOMMS4() {
 }
 
 setup_SYNCHRONA() {
-		:
+	:
 }
 
 setup_ADRV9361_BOB() {
@@ -581,7 +658,7 @@ STEPS="bashrc_update disable_sudo_passwd misc_profile_cleanup raspi_config xfce4
 STEPS="$STEPS thunar_volman disable_lxde_automount apt_install_prereqs"
 STEPS="$STEPS write_autostart_config libiio"
 STEPS="$STEPS pi_boot_config disable_pi_screen_blanking"
-STEPS="$STEPS dhcp_config telemetry $BOARD"
+STEPS="$STEPS net_config telemetry $BOARD"
 
 RAN_ONCE=0
 for step in $STEPS ; do
