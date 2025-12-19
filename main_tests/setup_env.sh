@@ -44,13 +44,50 @@ setup_apt_install_prereqs() {
 	sudo_required
 	sudo -s <<-EOF
 	apt-get -y update
-	apt-get -y install bc sshpass libiio-dev libfftw3-dev librsvg2-dev libgtk-3-dev \
-		cmake build-essential git libxml2 libxml2-dev bison flex \
-		expect usbutils dfu-util screen libaio-dev libglib2.0-dev picocom \
-		wget unzip curl cups cups-bsd intltool itstool libxml2-utils \
-		libusb-dev libusb-1.0-0-dev htpdate xfce4-terminal libiec16022-dev \
-		python3-pytest python3-libiio python3-scapy python3-scipy python3-virtualenv \
-		openssh-server gpg libcurl4-gnutls-dev libqrencode-dev pv
+	apt-get -y install \
+		bc \
+		bison \
+		build-essential \
+		cmake \
+		cups \
+		cups-bsd \
+		curl \
+		dfu-util \
+		expect \
+		flex \
+		git \
+		gpg \
+		htpdate \
+		intltool \
+		itstool \
+		libaio-dev \
+		libcurl4-gnutls-dev \
+		libfftw3-dev \
+		libglib2.0-dev \
+		libgtk-3-dev \
+		libiec16022-dev \
+		libqrencode-dev \
+		librsvg2-dev \
+		libusb-1.0-0-dev \
+		libusb-dev \
+		libxml2 \
+		libxml2-dev \
+		libxml2-utils \
+		openssh-server \
+		picocom \
+		pv \
+		python3-libiio \
+		python3-pip \
+		python3-pytest \
+		python3-scapy \
+		python3-scipy \
+		python3-virtualenv \
+		screen \
+		sshpass \
+		unzip \
+		usbutils \
+		wget \
+		xfce4-terminal
 	/etc/init.d/htpdate restart
 	EOF
 }
