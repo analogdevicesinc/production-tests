@@ -515,6 +515,16 @@ setup_zephyr_toolchain() {
 }
 
 ## Board Function Area ##
+setup_ADRD4161() {
+	setup openocd
+	sudo apt-get install -y gpiod can-utils
+	sudo python3 -m pip install python-can $PIP_EXTRA_ARGS
+
+	if [ ! -d "$SCRIPT_DIR/adrd4161/configs" ]; then
+  		echo "ERROR: ADRD4161 configs not found"
+  		exit 1
+	fi
+}
 
 setup_ADRD3161() {
 	setup_docker
