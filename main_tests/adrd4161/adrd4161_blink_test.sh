@@ -5,7 +5,7 @@ source $SCRIPT_DIR/../lib/utils.sh
 
 sudo $SCRIPT_DIR/firmware.sh $SCRIPT_DIR/adrd4161_blink.elf
 
-read -n 1 -p "Are the D51 and D52 LEDs currently blinking? [y/n]" answer
+read -n 1 -p "Are the DS1 and DS2 LEDs currently blinking? [y/n]" answer
 
 case "$answer" in
 	y|Y|yes|YES)
