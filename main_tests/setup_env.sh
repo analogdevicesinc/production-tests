@@ -484,7 +484,7 @@ setup_docker() {
 }
 
 setup_openocd() {
-	sudo apt-get install build-essential libtool pkg-config libusb-1.0-0-dev libhidapi-dev
+	sudo apt-get install build-essential libtool pkg-config libusb-1.0-0-dev libhidapi-dev libgpiod-dev
         pushd work
         if [ -d openocd ]; then
                 echo "Openocd already installed, skipping"
@@ -494,7 +494,7 @@ setup_openocd() {
         git clone https://github.com/analogdevicesinc/openocd -b "0.12.0-1.1.2" --depth 1 --recurse-submodules
         pushd openocd
         ./bootstrap
-        ./configure --enable-cmsis-dap --disable-werror
+        ./configure --enable-cmsis-dap --enable-linuxgpiod --disable-werror
         make -j
         sudo make install
         popd # openocd
@@ -516,13 +516,27 @@ setup_zephyr_toolchain() {
 
 ## Board Function Area ##
 setup_ADRD4161() {
-	setup openocd
+	setup_openocd
 	sudo apt-get install -y gpiod can-utils
 	sudo python3 -m pip install python-can $PIP_EXTRA_ARGS
 
 	if [ ! -d "$SCRIPT_DIR/adrd4161/configs" ]; then
   		echo "ERROR: ADRD4161 configs not found"
   		exit 1
+	fi
+
+	# Add device tree overlays to /boot/config.txt
+	if ! grep -q "ADIS16470 IMU" /boot/config.txt; then
+		sudo tee -a /boot/config.txt > /dev/null <<-EOF
+
+		[all]
+		# ADIS16470 IMU
+		dtoverlay=rpi-regulator
+		dtoverlay=adis16475,device=adis16470,drdy_pin=4,reset_pin=25,sync_mode=0
+
+		# UART0 for slcan
+		dtoverlay=uart0,ctsrts
+		EOF
 	fi
 }
 
