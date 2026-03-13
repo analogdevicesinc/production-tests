@@ -4,7 +4,7 @@ SCRIPT_DIR="$(readlink -f $(dirname $0))"
 
 source $SCRIPT_DIR/../lib/utils.sh
 
-sudo ip route add 169.254.0.0/16 dev eth1
+sudo ip route add 192.168.97.1/16 dev eth1
 export PYTHONPATH=$PYTHONPATH:/home/analog/production-tests/main_tests/work/pyadi-iio
 
 MODE="$1"
@@ -79,7 +79,7 @@ case $MODE in
                 exit 1;
             fi 
 	    
-            $SCRIPT_DIR/check_fw.sh "169.254.97.40"
+            $SCRIPT_DIR/check_fw.sh "192.168.97.40"
 	    TEST_RESULT=$?
             if [ $TEST_RESULT -ne 0 ]; then
                 handle_error_state "$BOARD_SERIAL"
