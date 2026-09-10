@@ -13,6 +13,6 @@ openocd \
         -c 'init' \
         -c 'targets' \
         -c 'reset init' \
-        -c "flash write_image erase \"$SCRIPT_DIR/max17320_ini/zephyr.hex\"" \
+        -c "flash write_image erase \"$SCRIPT_DIR/max17320_ini/zephyr.elf\"" \
         -c 'reset run' \
         -c 'shutdown'
