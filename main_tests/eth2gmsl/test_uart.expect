@@ -1,0 +1,27 @@
+#!/usr/bin/expect -f
+
+log_user 0
+
+spawn sudo picocom -b 115200 /dev/ttyUSB0
+expect "Terminal ready"
+send "\r"
+expect {
+	"kria-gmsl login: " {
+		send "analog\r"
+		expect "Password:"
+		send "analog\r"
+		exp_continue
+	}
+}
+
+send "cat /proc/device-tree/model\r"
+
+expect {
+    "ZynqMP SM-K26 Rev1/B/A" { 
+    exit 0 
+    }
+}
+
+send "\x04"
+send "\x01\x18"
+exit 1

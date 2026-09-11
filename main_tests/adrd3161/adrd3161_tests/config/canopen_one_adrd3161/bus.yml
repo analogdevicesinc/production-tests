@@ -1,0 +1,230 @@
+options:
+  dcf_path: "@BUS_CONFIG_PATH@"
+
+master:
+  node_id: 1
+  driver: "ros2_canopen::MasterDriver"
+  package: "canopen_master_driver"
+  baudrate: 500000
+  sync_period: 50000
+
+defaults:
+  dcf: "adrd3161.eds"
+  driver: "ros2_canopen::Cia402Driver"
+  package: "canopen_402_driver"
+  boot_timeout_ms: 5000 # Required for long SDO transfers listed below
+  period: 50
+  sdo:
+    - { index: 0x2000, subindex: 0, value: 2 }  # MOTOR_TYPE
+    - { index: 0x205a, subindex: 0, value: 40000 }      # ABN_1_STEPS
+    - { index: 0x205b, subindex: 0, value: 0 }  # ABN_1_DIRECTION
+    - { index: 0x205c, subindex: 0, value: 0 }  # ABN_1_INIT_METHOD
+    - { index: 0x205e, subindex: 0, value: 1000 }       # ABN_1_INIT_DELAY
+    - { index: 0x205f, subindex: 0, value: 5 }  # ABN_1_INIT_VELOCITY
+    - { index: 0x2060, subindex: 0, value: 0 }  # ABN_1_N_CHANNEL_PHI_E_OFFSET
+    - { index: 0x2061, subindex: 0, value: 0 }  # ABN_1_N_CHANNEL_INVERTED
+    - { index: 0x2062, subindex: 0, value: 0 }  # ABN_1_N_CHANNEL_FILTERING
+    - { index: 0x2001, subindex: 0, value: 50 } # MOTOR_POLE_PAIRS
+    - { index: 0x2002, subindex: 0, value: 0 }  # MOTOR_DIRECTION
+    - { index: 0x2003, subindex: 0, value: 50000 }      # MOTOR_PWM_FREQUENCY
+    - { index: 0x2005, subindex: 0, value: 20000 }      # OUTPUT_VOLTAGE_LIMIT
+    - { index: 0x2006, subindex: 0, value: 2500 }       # MAX_TORQUE
+    - { index: 0x2007, subindex: 0, value: 2500 }       # MAX_FLUX
+    - { index: 0x2008, subindex: 0, value: 1 }  # PWM_SWITCHING_SCHEME
+    - { index: 0x2009, subindex: 0, value: 1 }  # IDLE_MOTOR_PWM_BEHAVIOR
+    - { index: 0x200c, subindex: 0, value: 4 }  # ADC_SHUNT_TYPE
+    - { index: 0x2011, subindex: 0, value: 1 }  # CSA_GAIN_ADC_I0_TO_ADC_I2
+    - { index: 0x2012, subindex: 0, value: 1 }  # CSA_GAIN_ADC_I3
+    - { index: 0x2013, subindex: 0, value: 3 }  # CSA_FILTER_ADC_I0_TO_ADC_I2
+    - { index: 0x2014, subindex: 0, value: 3 }  # CSA_FILTER_ADC_I3
+    - { index: 0x2015, subindex: 0, value: 390 }        # CURRENT_SCALING_FACTOR
+    - { index: 0x2016, subindex: 0, value: 0 }  # PHASE_UX1_ADC_MAPPING
+    - { index: 0x2017, subindex: 0, value: 1 }  # PHASE_VX2_ADC_MAPPING
+    - { index: 0x2018, subindex: 0, value: 2 }  # PHASE_WY1_ADC_MAPPING
+    - { index: 0x2019, subindex: 0, value: 3 }  # PHASE_Y2_ADC_MAPPING
+    - { index: 0x201a, subindex: 0, value: 1024 }       # ADC_I0_SCALE
+    - { index: 0x201b, subindex: 0, value: 1024 }       # ADC_I1_SCALE
+    - { index: 0x201c, subindex: 0, value: 1024 }       # ADC_I2_SCALE
+    - { index: 0x201d, subindex: 0, value: 1024 }       # ADC_I3_SCALE
+    - { index: 0x201e, subindex: 0, value: 1 }  # ADC_I0_INVERTED
+    - { index: 0x201f, subindex: 0, value: 0 }  # ADC_I1_INVERTED
+    - { index: 0x2020, subindex: 0, value: 1 }  # ADC_I2_INVERTED
+    - { index: 0x2021, subindex: 0, value: 0 }  # ADC_I3_INVERTED
+    - { index: 0x2022, subindex: 0, value: -1 } # ADC_I0_OFFSET
+    - { index: 0x2023, subindex: 0, value: 11 } # ADC_I1_OFFSET
+    - { index: 0x2024, subindex: 0, value: -26 }        # ADC_I2_OFFSET
+    - { index: 0x2025, subindex: 0, value: -12 }        # ADC_I3_OFFSET
+    - { index: 0x202e, subindex: 0, value: 2000 }        # OPENLOOP_CURRENT
+    - { index: 0x202f, subindex: 0, value: 1638 }       # OPENLOOP_VOLTAGE
+    - { index: 0x2032, subindex: 0, value: 8 }  # ACCELERATION_FF_GAIN
+    - { index: 0x2033, subindex: 0, value: 4 }  # ACCELERATION_FF_SHIFT
+    - { index: 0x2034, subindex: 0, value: 1 }  # RAMP_ENABLE
+    - { index: 0x2035, subindex: 0, value: 1 }  # DIRECT_VELOCITY_MODE
+    - { index: 0x2036, subindex: 0, value: 50000 }      # RAMP_AMAX
+    - { index: 0x2037, subindex: 0, value: 50000 }      # RAMP_A1
+    - { index: 0x2038, subindex: 0, value: 50000 }      # RAMP_A2
+    - { index: 0x2039, subindex: 0, value: 50000 }      # RAMP_DMAX
+    - { index: 0x203a, subindex: 0, value: 50000 }      # RAMP_D1
+    - { index: 0x203b, subindex: 0, value: 50000 }      # RAMP_D2
+    - { index: 0x203c, subindex: 0, value: 4375000 }    # RAMP_VMAX
+    - { index: 0x203d, subindex: 0, value: 0 }  # RAMP_V1
+    - { index: 0x203e, subindex: 0, value: 0 }  # RAMP_V2
+    - { index: 0x203f, subindex: 0, value: 0 }  # RAMP_VSTART
+    - { index: 0x2040, subindex: 0, value: 1 }  # RAMP_VSTOP
+    - { index: 0x2041, subindex: 0, value: 0 }  # RAMP_TVMAX
+    - { index: 0x2042, subindex: 0, value: 0 }  # RAMP_TZEROWAIT
+    - { index: 0x2043, subindex: 0, value: 0 }  # ACCELERATION_FEEDFORWARD_ENABLE
+    - { index: 0x2044, subindex: 0, value: 1 }  # VELOCITY_FEEDFORWARD_ENABLE
+    - { index: 0x206d, subindex: 0, value: 840 }        # TORQUE_P
+    - { index: 0x206e, subindex: 0, value: 2340 }       # TORQUE_I
+    - { index: 0x206f, subindex: 0, value: 840 }        # FLUX_P
+    - { index: 0x2070, subindex: 0, value: 2340 }       # FLUX_I
+    - { index: 0x2071, subindex: 0, value: 0 }  # SEPARATE_TORQUE_FLUX_PI_PARAMTERS
+    - { index: 0x2072, subindex: 0, value: 0 }  # CURRENT_NORM_P
+    - { index: 0x2073, subindex: 0, value: 1 }  # CURRENT_NORM_I
+    - { index: 0x207b, subindex: 0, value: 0 }  # VELOCITY_SENSOR_SELECTION
+    - { index: 0x207f, subindex: 0, value: 300 }        # VELOCITY_P
+    - { index: 0x2080, subindex: 0, value: 0 }  # VELOCITY_I
+    - { index: 0x2081, subindex: 0, value: 1 }  # VELOCITY_NORM_P
+    - { index: 0x2082, subindex: 0, value: 1 }  # VELOCITY_NORM_I
+    - { index: 0x2085, subindex: 0, value: 1 }  # VELOCITY_SCALING_FACTOR
+    - { index: 0x2087, subindex: 0, value: 5 }  # VELOCITY_LOOP_DOWNSAMPLING
+    - { index: 0x2088, subindex: 0, value: 100000 }     # VELOCITY_REACHED_THRESHOLD
+    - { index: 0x2089, subindex: 0, value: 2000 }       # VELOCITY_METER_SWITCH_THRESHOLD
+    - { index: 0x208a, subindex: 0, value: 500 }        # VELOCITY_METER_SWITCH_HYSTERESIS
+    - { index: 0x208e, subindex: 0, value: 0 }  # POSITION_SENSOR_SELECTION
+    - { index: 0x2091, subindex: 0, value: 1024 }       # POSITION_SCALING_FACTOR
+    - { index: 0x2092, subindex: 0, value: 30 } # POSITION_P
+    - { index: 0x2093, subindex: 0, value: 0 }  # POSITION_I
+    - { index: 0x2094, subindex: 0, value: 0 }  # POSITION_NORM_P
+    - { index: 0x2095, subindex: 0, value: 1 }  # POSITION_NORM_I
+    - { index: 0x2098, subindex: 0, value: 0 }  # STOP_ON_POSITION_DEVIATION
+    - { index: 0x2099, subindex: 0, value: 0 }  # POSITION_LOOP_DOWNSAMPLING
+    - { index: 0x209b, subindex: 0, value: -2147483648 }        # POSITION_LIMIT_LOW
+    - { index: 0x209c, subindex: 0, value: 2147483647 } # POSITION_LIMIT_HIGH
+    - { index: 0x209d, subindex: 0, value: 0 }  # POSITION_REACHED_THRESHOLD
+    - { index: 0x20a4, subindex: 0, value: 0 }  # EVENT_STOP_SETTINGS
+    - { index: 0x20d4, subindex: 0, value: 0 }  # BRAKE_CHOPPER_ENABLE
+    - { index: 0x20d5, subindex: 0, value: 260 }        # BRAKE_CHOPPER_VOLTAGE_LIMIT
+    - { index: 0x20d6, subindex: 0, value: 5 }  # BRAKE_CHOPPER_HYSTERESIS
+    - { index: 0x20d8, subindex: 0, value: 0 }  # RELEASE_BRAKE
+    - { index: 0x20d9, subindex: 0, value: 75 } # BRAKE_RELEASING_DUTY_CYCLE
+    - { index: 0x20da, subindex: 0, value: 11 } # BRAKE_HOLDING_DUTY_CYCLE
+    - { index: 0x20db, subindex: 0, value: 80 } # BRAKE_RELEASING_DURATION
+    - { index: 0x20dd, subindex: 0, value: 0 }  # INVERT_BRAKE_OUTPUT
+    - { index: 0x20e0, subindex: 0, value: 3000 }       # THERMAL_WINDING_TIME_CONSTANT_1
+    - { index: 0x20e3, subindex: 0, value: 6000 }       # THERMAL_WINDING_TIME_CONSTANT_2
+    - { index: 0x20e9, subindex: 0, value: 0 }  # PWM_L_OUTPUT_POLARITY
+    - { index: 0x20ea, subindex: 0, value: 0 }  # PWM_H_OUTPUT_POLARITY
+    - { index: 0x20eb, subindex: 0, value: 0 }  # BREAK_BEFORE_MAKE_TIME_LOW_UVW
+    - { index: 0x20ec, subindex: 0, value: 0 }  # BREAK_BEFORE_MAKE_TIME_HIGH_UVW
+    - { index: 0x20ed, subindex: 0, value: 0 }  # BREAK_BEFORE_MAKE_TIME_LOW_Y2
+    - { index: 0x20ee, subindex: 0, value: 0 }  # BREAK_BEFORE_MAKE_TIME_HIGH_Y2
+    - { index: 0x20ef, subindex: 0, value: 1 }  # USE_ADAPTIVE_DRIVE_TIME_UVW
+    - { index: 0x20f0, subindex: 0, value: 1 }  # USE_ADAPTIVE_DRIVE_TIME_Y2
+    - { index: 0x20f1, subindex: 0, value: 40 } # DRIVE_TIME_SINK_UVW
+    - { index: 0x20f2, subindex: 0, value: 40 } # DRIVE_TIME_SOURCE_UVW
+    - { index: 0x20f3, subindex: 0, value: 40 } # DRIVE_TIME_SINK_Y2
+    - { index: 0x20f4, subindex: 0, value: 40 } # DRIVE_TIME_SOURCE_Y2
+    - { index: 0x20f9, subindex: 0, value: 7 }  # BOOTSTRAP_CURRENT_LIMIT
+    - { index: 0x20fa, subindex: 0, value: 0 }  # UNDERVOLTAGE_PROTECTION_SUPPLY_LEVEL
+    - { index: 0x20fb, subindex: 0, value: 1 }  # UNDERVOLTAGE_PROTECTION_VDRV_ENABLE
+    - { index: 0x20fc, subindex: 0, value: 0 }  # UNDERVOLTAGE_PROTECTION_BST_UVW_ENABLE
+    - { index: 0x20fd, subindex: 0, value: 0 }  # UNDERVOLTAGE_PROTECTION_BST_Y2_ENABLE
+    - { index: 0x20fe, subindex: 0, value: 1 }  # OVERCURRENT_PROTECTION_UVW_LOW_SIDE_ENABLE
+    - { index: 0x20ff, subindex: 0, value: 1 }  # OVERCURRENT_PROTECTION_UVW_HIGH_SIDE_ENABLE
+    - { index: 0x2100, subindex: 0, value: 1 }  # OVERCURRENT_PROTECTION_Y2_LOW_SIDE_ENABLE
+    - { index: 0x2101, subindex: 0, value: 1 }  # OVERCURRENT_PROTECTION_Y2_HIGH_SIDE_ENABLE
+    - { index: 0x2102, subindex: 0, value: 1 }  # OVERCURRENT_PROTECTION_UVW_LOW_SIDE_THRESHOLD
+    - { index: 0x2103, subindex: 0, value: 2 }  # OVERCURRENT_PROTECTION_UVW_HIGH_SIDE_THRESHOLD
+    - { index: 0x2104, subindex: 0, value: 1 }  # OVERCURRENT_PROTECTION_Y2_LOW_SIDE_THRESHOLD
+    - { index: 0x2105, subindex: 0, value: 2 }  # OVERCURRENT_PROTECTION_Y2_HIGH_SIDE_THRESHOLD
+    - { index: 0x2106, subindex: 0, value: 2 }  # OVERCURRENT_PROTECTION_UVW_LOW_SIDE_BLANKING
+    - { index: 0x2107, subindex: 0, value: 2 }  # OVERCURRENT_PROTECTION_UVW_HIGH_SIDE_BLANKING
+    - { index: 0x2108, subindex: 0, value: 2 }  # OVERCURRENT_PROTECTION_Y2_LOW_SIDE_BLANKING
+    - { index: 0x2109, subindex: 0, value: 2 }  # OVERCURRENT_PROTECTION_Y2_HIGH_SIDE_BLANKING
+    - { index: 0x210a, subindex: 0, value: 6 }  # OVERCURRENT_PROTECTION_UVW_LOW_SIDE_DEGLITCH
+    - { index: 0x210b, subindex: 0, value: 6 }  # OVERCURRENT_PROTECTION_UVW_HIGH_SIDE_DEGLITCH
+    - { index: 0x210c, subindex: 0, value: 6 }  # OVERCURRENT_PROTECTION_Y2_LOW_SIDE_DEGLITCH
+    - { index: 0x210d, subindex: 0, value: 6 }  # OVERCURRENT_PROTECTION_Y2_HIGH_SIDE_DEGLITCH
+    - { index: 0x210e, subindex: 0, value: 0 }  # OVERCURRENT_PROTECTION_UVW_LOW_SIDE_USE_VDS
+    - { index: 0x210f, subindex: 0, value: 0 }  # OVERCURRENT_PROTECTION_Y2_LOW_SIDE_USE_VDS
+    - { index: 0x2110, subindex: 0, value: 1 }  # VGS_SHORT_ON_PROTECTION_UVW_LOW_SIDE_ENABLE
+    - { index: 0x2111, subindex: 0, value: 1 }  # VGS_SHORT_OFF_PROTECTION_UVW_LOW_SIDE_ENABLE
+    - { index: 0x2112, subindex: 0, value: 1 }  # VGS_SHORT_ON_PROTECTION_UVW_HIGH_SIDE_ENABLE
+    - { index: 0x2113, subindex: 0, value: 1 }  # VGS_SHORT_OFF_PROTECTION_UVW_HIGH_SIDE_ENABLE
+    - { index: 0x2114, subindex: 0, value: 1 }  # VGS_SHORT_ON_PROTECTION_Y2_LOW_SIDE_ENABLE
+    - { index: 0x2115, subindex: 0, value: 1 }  # VGS_SHORT_OFF_PROTECTION_Y2_LOW_SIDE_ENABLE
+    - { index: 0x2116, subindex: 0, value: 1 }  # VGS_SHORT_ON_PROTECTION_Y2_HIGH_SIDE_ENABLE
+    - { index: 0x2117, subindex: 0, value: 1 }  # VGS_SHORT_OFF_PROTECTION_Y2_HIGH_SIDE_ENABLE
+    - { index: 0x2118, subindex: 0, value: 1 }  # VGS_SHORT_PROTECTION_UVW_BLANKING
+    - { index: 0x2119, subindex: 0, value: 1 }  # VGS_SHORT_PROTECTION_Y2_BLANKING
+    - { index: 0x211a, subindex: 0, value: 1 }  # VGS_SHORT_PROTECTION_UVW_DEGLITCH
+    - { index: 0x211b, subindex: 0, value: 1 }  # VGS_SHORT_PROTECTION_Y2_DEGLITCH
+    - { index: 0x211e, subindex: 0, value: 0 }  # GDRV_RETRY_BEHAVIOUR
+    - { index: 0x211f, subindex: 0, value: 0 }  # DRIVE_FAULT_BEHAVIOUR
+    - { index: 0x2120, subindex: 0, value: 5 }  # FAULT_HANDLER_NUMBER_OF_RETRIES
+    - { index: 0x2123, subindex: 0, value: 710 }        # SUPPLY_OVERVOLTAGE_WARNING_THRESHOLD
+    - { index: 0x2124, subindex: 0, value: 78 } # SUPPLY_UNDERVOLTAGE_WARNING_THRESHOLD
+    - { index: 0x2126, subindex: 0, value: 65535 }      # EXTERNAL_TEMPERATURE_SHUTDOWN_THRESHOLD
+    - { index: 0x2127, subindex: 0, value: 65535 }      # EXTERNAL_TEMPERATURE_WARNING_THRESHOLD
+    - { index: 0x2129, subindex: 0, value: 65535 }      # CHIP_TEMPERATURE_SHUTDOWN_THRESHOLD
+    - { index: 0x212a, subindex: 0, value: 65535 }      # CHIP_TEMPERATURE_WARNING_THRESHOLD
+    - { index: 0x2134, subindex: 0, value: 0 }  # FIELDWEAKENING_I
+    - { index: 0x2136, subindex: 0, value: 32767 }      # FIELDWEAKENING_VOLTAGE_THRESHOLD
+    - { index: 0x213e, subindex: 0, value: 0 }  # TARGET_TORQUE_BIQUAD_FILTER_ENABLE
+    - { index: 0x213f, subindex: 0, value: 0 }  # TARGET_TORQUE_BIQUAD_FILTER_ACOEFF_1
+    - { index: 0x2140, subindex: 0, value: 0 }  # TARGET_TORQUE_BIQUAD_FILTER_ACOEFF_2
+    - { index: 0x2141, subindex: 0, value: 1048576 }    # TARGET_TORQUE_BIQUAD_FILTER_BCOEFF_0
+    - { index: 0x2142, subindex: 0, value: 0 }  # TARGET_TORQUE_BIQUAD_FILTER_BCOEFF_1
+    - { index: 0x2143, subindex: 0, value: 0 }  # TARGET_TORQUE_BIQUAD_FILTER_BCOEFF_2
+    - { index: 0x2144, subindex: 0, value: 1 }  # ACTUAL_VELOCITY_BIQUAD_FILTER_ENABLE
+    - { index: 0x2145, subindex: 0, value: 1038090 }    # ACTUAL_VELOCITY_BIQUAD_FILTER_ACOEFF_1
+    - { index: 0x2146, subindex: 0, value: 0 }  # ACTUAL_VELOCITY_BIQUAD_FILTER_ACOEFF_2
+    - { index: 0x2147, subindex: 0, value: 3491 }       # ACTUAL_VELOCITY_BIQUAD_FILTER_BCOEFF_0
+    - { index: 0x2148, subindex: 0, value: 3491 }       # ACTUAL_VELOCITY_BIQUAD_FILTER_BCOEFF_1
+    - { index: 0x2149, subindex: 0, value: 3491 }       # ACTUAL_VELOCITY_BIQUAD_FILTER_BCOEFF_2
+  tpdo:
+    1:
+      enabled: true
+      cob_id: "auto"
+      transmission: 0xff
+      mapping:
+        - {index: 0x6041, sub_index: 0} # status word
+        - {index: 0x6061, sub_index: 0} # mode of operation display
+    2:
+      enabled: true
+      cob_id: "auto"
+      transmission: 0x01
+      mapping:
+        - {index: 0x6064, sub_index: 0} # position actual value
+        - {index: 0x606C, sub_index: 0} # velocity actual value
+  rpdo:
+    1:
+      enabled: true
+      cob_id: "auto"
+      transmission: 0xff
+      mapping:
+      - {index: 0x6040, sub_index: 0} # controlword
+      - {index: 0x6060, sub_index: 0} # mode of operation
+    2:
+      enabled: true
+      cob_id: "auto"
+      transmission: 0xff
+      mapping:
+      - {index: 0x607A, sub_index: 0} # target position
+    3:
+      enabled: true
+      cob_id: "auto"
+      transmission: 0xff
+      mapping:
+      - {index: 0x60FF, sub_index: 0} # target velocity
+
+nodes:
+  dut_adrd3161:
+    node_id: 0x17
+    scale_pos_to_dev: 521519.0
+    scale_vel_to_dev: 221207.0
+    scale_pos_from_dev: 1.917475982666016e-06
+    scale_vel_from_dev: 4.712388975e-06
+

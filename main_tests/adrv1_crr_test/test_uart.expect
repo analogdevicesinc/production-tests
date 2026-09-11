@@ -1,0 +1,13 @@
+#!/usr/bin/expect -f
+
+log_user 0
+
+spawn picocom -b 115200 /dev/ttyUSB0
+expect "Terminal ready"
+send "\r"
+expect -re "root@analog:~# "
+send "cat /proc/device-tree/model\r"
+expect {
+    "ADRV9361-Z7035" { exit 0 }
+}
+exit 1

@@ -1,0 +1,12 @@
+#ifndef PHYS_ADDR_H
+#define PHYS_ADDR_H
+
+#define XCVR_BADDR          0x44A60000
+
+#define FMC_GPIO_0_BADDR	0x41300000
+#define FMC_GPIO_1_BADDR	0x41310000
+#define CAM_GPIO_BADDR      0x41320000
+
+#define AXI_CLK_MONITOR_BADDR	0x41330000
+
+#endif

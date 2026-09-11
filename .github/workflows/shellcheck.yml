@@ -1,0 +1,34 @@
+name: ShellCheck
+
+on:
+  push:
+    branches: [reorganize_tests]
+  pull_request:
+    branches: [reorganize_tests]
+
+jobs:
+  check-executable:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+    
+      - name: Check shell scripts are executable
+        run: |
+          if find main_tests -name "*.sh" -type f ! -perm -u=x | read; then
+            echo "Some scripts are not executable"
+            # exit 1
+          else
+            echo "All shell scripts are executable"
+          fi
+
+      - name: Check shell scrips for carriage returns
+        run: |
+          if grep -rl $'\r' --include="*.sh" main_tests; then
+            echo "Some shell scripts contain Windows=style carriage returns (CRLF)"
+            echo "Please convert them to LF"
+            exit 1
+          else
+            echo "No CRLF found"
+          fi

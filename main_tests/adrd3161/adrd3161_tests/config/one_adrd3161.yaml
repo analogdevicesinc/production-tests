@@ -1,0 +1,23 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50  # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    vel_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    pos_controller:
+      type: forward_command_controller/ForwardCommandController
+
+vel_controller:
+  ros__parameters:
+    joints: [dut_adrd3161_joint]
+    interface_name: velocity
+
+pos_controller:
+  ros__parameters:
+    joints: [dut_adrd3161_joint]
+    interface_name: position
+
